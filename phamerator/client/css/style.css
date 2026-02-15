@@ -4,7 +4,9 @@ html {
 }
 
 body {
-    font-family: "Raleway-Light", "Roboto", "Open Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif /*rtl:prepend:"Droid Arabic Kufi","Droid Sans", */;
+    font-family: "Raleway-Light", "Roboto", "Open Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif
+        /*rtl:prepend:"Droid Arabic Kufi","Droid Sans", */
+    ;
     margin: 0px;
     /* Margin bottom by footer height*/
     margin-bottom: 70px;
@@ -15,11 +17,11 @@ body {
 }
 
 svg {
-  font-family: "Arial";
+    font-family: "Arial";
 }
 
 .switch {
-  padding: 3px;
+    padding: 3px;
 }
 
 .btn {
@@ -27,8 +29,9 @@ svg {
 }
 
 .tabs {
-  overflow-x: hidden;
+    overflow-x: hidden;
 }
+
 footer {
     position: absolute;
     bottom: 0;
@@ -36,23 +39,27 @@ footer {
     height: 70px;
 }
 
-footer > .content {
+footer>.content {
     padding-right: 15px;
     padding-left: 15px;
 }
 
-h1, h2 {
-  font-family: Raleway-Regular;
-  font-size: 3rem;
+h1,
+h2 {
+    font-family: Raleway-Regular;
+    font-size: 3rem;
 }
 
-button, a, h3, h5 {
+button,
+a,
+h3,
+h5 {
     font-family: Raleway-Regular;
     margin-left: 5px;
 }
 
 h4 {
-  font-family: Raleway-Italic;
+    font-family: Raleway-Italic;
 }
 
 h6 {
@@ -121,7 +128,7 @@ text.phagename {
 }
 
 text.horizontalAlign {
-  cursor: ew-resize;
+    cursor: ew-resize;
 }
 
 #preloader {
@@ -137,7 +144,7 @@ text.horizontalAlign {
 }
 
 #genome-map {
-  /*overflow: scroll;*/
+    /*overflow: scroll;*/
 }
 
 .thumb_profilepic {
@@ -172,11 +179,11 @@ text.horizontalAlign {
 textarea {
     resize: none;
     font-family: monospace;
-    font-size:14px;
-    border:0;
-    margin:0;
-    outline:none;
-    height:95%;
+    font-size: 14px;
+    border: 0;
+    margin: 0;
+    outline: none;
+    height: 95%;
     max-width: 100%;
     max-height: 95%;
 }
@@ -193,9 +200,9 @@ textarea {
 }
 
 .modal-collapsible {
-  overflow: auto;
-  height: 50vh;
-  max-height: 50vh;
+    overflow: auto;
+    height: 50vh;
+    max-height: 50vh;
 }
 
 
@@ -209,8 +216,8 @@ textarea {
 }
 
 #iron-router-progress {
-    background-color : cyan;
-    box-shadow       : 0 0 5px purple;
+    background-color: cyan;
+    box-shadow: 0 0 5px purple;
 }
 
 .progress {
@@ -222,70 +229,138 @@ textarea {
 }
 
 ul.clusterSelector {
-  column-count: 4;
-  column-gap: 0;
+    column-count: 4;
+    column-gap: 0;
 }
+
 li.phageSelector {
-  display: inline-block;
-  width:100%;
+    display: inline-block;
+    width: 100%;
 }
 
 @font-face {
     font-family: ParryHotter;
     src:
-            url("/fonts/ParryHotter.ttf");
+        url("/fonts/ParryHotter.ttf");
 }
 
 @font-face {
     font-family: HarryPotter;
     src:
-            url("/fonts/HARRP___.TTF");
+        url("/fonts/HARRP___.TTF");
 }
 
 @font-face {
     font-family: Raleway-Light;
     src:
-            url("/fonts/Raleway-Light.ttf");
+        url("/fonts/Raleway-Light.ttf");
 }
 
 @font-face {
     font-family: Raleway-Regular;
     src:
-            url("/fonts/Raleway-Regular.ttf");
+        url("/fonts/Raleway-Regular.ttf");
 }
 
 @font-face {
     font-family: Raleway-Italic;
     src:
-            url("/fonts/Raleway-Italic.ttf");
+        url("/fonts/Raleway-Italic.ttf");
 }
 
 @font-face {
     font-family: Raleway-Black;
     src:
-            url("/fonts/Raleway-Black.ttf");
+        url("/fonts/Raleway-Black.ttf");
 }
 
 @font-face {
     font-family: Roboto-Regular;
     src:
-            url("/fonts/Roboto-Regular.ttf");
+        url("/fonts/Roboto-Regular.ttf");
 }
 
 @font-face {
     font-family: Roboto-Light;
     src:
-            url("/fonts/Roboto-Light.ttf");
+        url("/fonts/Roboto-Light.ttf");
 }
 
 @font-face {
     font-family: Dosis-Regular;
     src:
-            url("/fonts/Dosis-Regular.ttf");
+        url("/fonts/Dosis-Regular.ttf");
 }
 
 @font-face {
     font-family: Dosis-Light;
     src:
-            url("/fonts/Dosis-Light.ttf");
+        url("/fonts/Dosis-Light.ttf");
+}
+
+/* Fix accounts-ui dropdown overflow */
+#login-dropdown-list {
+    left: auto;
+    right: 15px;
+    min-width: 250px;
+}
+
+.collapsible-header label {
+    font-size: 1rem;
+    padding-left: 30px;
+    /* Make space for the checkbox */
+    position: relative;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.phageSelector label {
+    font-size: 1.2rem;
+    padding-left: 30px;
+    /* Make space for the checkbox */
+    position: relative;
+    cursor: pointer;
+    display: inline-block;
+}
+
+/* Fix for filled-in checkboxes visibility */
+/* Materialize uses :before and :after on the label */
+[type="checkbox"].filled-in:not(:checked)+label:after {
+    content: '';
+    position: absolute;
+    border: 2px solid #5a5a5a;
+    top: 50%;
+    margin-top: -10px;
+    left: 0px;
+    width: 20px;
+    height: 20px;
+    z-index: 0;
+}
+
+[type="checkbox"].filled-in:checked+label:after {
+    content: '';
+    position: absolute;
+    border: 2px solid #26a69a;
+    background-color: #26a69a;
+    top: 50%;
+    margin-top: -10px;
+    left: 0px;
+    width: 20px;
+    height: 20px;
+    z-index: 0;
+}
+
+[type="checkbox"].filled-in:checked+label:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    margin-top: -10px;
+    left: 1px;
+    width: 8px;
+    height: 13px;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(40deg);
+    transform-origin: 100% 100%;
+    z-index: 1;
 }

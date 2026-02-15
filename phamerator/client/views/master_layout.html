@@ -2,7 +2,7 @@
 
     <div id="content">
         {{> progressbar}}
-        {{> yield region="nav"}}
-        {{> yield}}
+        {{> Template.dynamic template=nav}}
+        {{> Template.dynamic template=main}}
     </div>
 </template>

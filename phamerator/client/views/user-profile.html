@@ -18,21 +18,29 @@
 
             {{#if includeInDirectory}}
             <p>
-              <input name="directoryinfo" type="radio" id="directoryinfo-yes" checked />
-              <label for="directoryinfo-yes">Include my name and email address</label>
+              <label>
+                <input name="directoryinfo" type="radio" id="directoryinfo-yes" checked />
+                <span>Include my name and email address</span>
+              </label>
             </p>
             <p>
-              <input name="directoryinfo" type="radio" id="directoryinfo-no" />
-              <label for="directoryinfo-no">Hide my name and email address</label>
+              <label>
+                <input name="directoryinfo" type="radio" id="directoryinfo-no" />
+                <span>Hide my name and email address</span>
+              </label>
             </p>
             {{else}}
             <p>
-              <input name="directoryinfo" type="radio" id="directoryinfo-yes" />
-              <label for="directoryinfo-yes">Include my name and email address</label>
+              <label>
+                <input name="directoryinfo" type="radio" id="directoryinfo-yes" />
+                <span>Include my name and email address</span>
+              </label>
             </p>
             <p>
-              <input name="directoryinfo" type="radio" id="directoryinfo-no" checked />
-              <label for="directoryinfo-no">Hide my name and email address</label>
+              <label>
+                <input name="directoryinfo" type="radio" id="directoryinfo-no" checked />
+                <span>Hide my name and email address</span>
+              </label>
             </p>
             {{/if}}
           </form>

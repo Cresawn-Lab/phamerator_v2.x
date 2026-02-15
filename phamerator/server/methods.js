@@ -1,97 +1,101 @@
 Meteor.methods({
-  "userExists": function (username) {
-    return !!Meteor.users.findOne({
+  "userExists": async function (username) {
+    return !!await Meteor.users.findOneAsync({
       username: username
     });
   },
-  "addUserToRole": function (user, role, group) {
-    Roles.addUsersToRoles(user, role, group);
+  "addUserToRole": async function (user, role, group) {
+    await Roles.addUsersToRolesAsync(user, role, group);
     var key = "selectedData." + group;
     var projection = { key: { genomeMaps: [] } }
-    Meteor.users.update({ _id: user }, { $set: projection })
+    await Meteor.users.updateAsync({ _id: user }, { $set: projection })
   },
-  "removeUserFromRole": function (user, role, group) {
-    Roles.removeUsersFromRoles(user, role, group);
-    Meteor.users.update({ _id: user }, { $set: { "preferredDataset": "" } })
+  "removeUserFromRole": async function (user, role, group) {
+    await Roles.removeUsersFromRolesAsync(user, role, group);
+    await Meteor.users.updateAsync({ _id: user }, { $set: { "preferredDataset": "" } })
   },
-  "getDatasetsIView": function () {
-    return Roles.getGroupsForUser(Meteor.userId(), "view")
+  "getDatasetsIView": async function () {
+    return await Roles.getScopesForUserAsync(Meteor.userId(), "view")
   },
-  "getDatasetsIOwn": function () {
-    return Roles.getGroupsForUser(Meteor.userId(), "owner")
+  "getDatasetsIOwn": async function () {
+    return await Roles.getScopesForUserAsync(Meteor.userId(), "owner")
   },
-  "updatePreferredDataset": function (dataset) {
-    groups = Roles.getGroupsForUser(Meteor.userId(), "view")
+  "updatePreferredDataset": async function (dataset) {
+    groups = await Roles.getScopesForUserAsync(Meteor.userId(), "view")
     if (groups.includes(dataset)) {
-      Meteor.users.upsert({ _id: Meteor.userId() }, { $set: { "preferredDataset": dataset } });
+      await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "preferredDataset": dataset } });
       return;
     }
   },
 
-  "updateSelectedData": function (message, dataset, phagename, addGenome) {
+  "updateSelectedData": async function (message, dataset, phagename, addGenome) {
     var fields = "selectedData." + dataset + ".genomeMaps"
     var set = {}
-    selectedData = Meteor.users.findOne({ _id: Meteor.userId() }, { fields: { selectedData: 1 } }).selectedData;
+    const userDoc = await Meteor.users.findOneAsync({ _id: Meteor.userId() }, { fields: { selectedData: 1 } });
+    selectedData = userDoc.selectedData;
     if (!selectedData[dataset]) {
       selectedData[dataset] = { genomeMaps: [] }
-      Meteor.users.upsert({ _id: Meteor.userId() }, { $set: { selectedData: selectedData } });
+      await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { selectedData: selectedData } });
     }
-    genomeMaps = Meteor.users.findOne({ _id: Meteor.userId() }, { fields: { selectedData: 1 } }).selectedData[dataset].genomeMaps;
+    const userDoc2 = await Meteor.users.findOneAsync({ _id: Meteor.userId() }, { fields: { selectedData: 1 } });
+    genomeMaps = userDoc2.selectedData[dataset].genomeMaps;
 
     if (phagename === "") {
       selectedData[dataset] = { genomeMaps: [] }
-      Meteor.users.upsert({ _id: Meteor.userId() }, { $set: { selectedData: selectedData } });
+      await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { selectedData: selectedData } });
     }
 
     else if (addGenome === true && genomeMaps.indexOf(phagename) === -1) {
       genomeMaps.push(phagename);
       selectedData[dataset] = { genomeMaps: genomeMaps }
-      Meteor.users.upsert({ _id: Meteor.userId() }, { $set: { selectedData: selectedData } });
+      await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { selectedData: selectedData } });
     }
     else if (addGenome === false) {
       var index = genomeMaps.indexOf(phagename);
       if (index > -1) {
         genomeMaps.splice(index, 1);
         selectedData[dataset] = { genomeMaps: genomeMaps }
-        Meteor.users.upsert({ _id: Meteor.userId() }, { $set: { selectedData: selectedData } });
+        await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { selectedData: selectedData } });
       }
     }
   },
-  "updateSubclusterFavorites": function (dataset, subcluster, addFavorite) {
+  "updateSubclusterFavorites": async function (dataset, subcluster, addFavorite) {
 
     // initialize selectedData.subclusterFavorites if it doesn't exist
-    Meteor.users.update({ _id: Meteor.userId(), 'selectedData.dataset.subclusterFavorites': { $exists: false } }, { $set: { 'selectedData.dataset.subclusterFavorites': [] } });
-    favorites = Meteor.users.findOne({ _id: Meteor.userId() }, { fields: { "selectedData.dataset.subclusterFavorites": 1 } }).selectedData.dataset.subclusterFavorites;
+    await Meteor.users.updateAsync({ _id: Meteor.userId(), 'selectedData.dataset.subclusterFavorites': { $exists: false } }, { $set: { 'selectedData.dataset.subclusterFavorites': [] } });
+    const userDoc = await Meteor.users.findOneAsync({ _id: Meteor.userId() }, { fields: { "selectedData.dataset.subclusterFavorites": 1 } });
+    favorites = userDoc.selectedData.dataset.subclusterFavorites;
 
     if (addFavorite === true && favorites.indexOf(subcluster) === -1) {
       favorites.push(subcluster);
-      Meteor.users.upsert({ _id: Meteor.userId() }, { $set: { "selectedData.dataset.subclusterFavorites": favorites } });
+      await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "selectedData.dataset.subclusterFavorites": favorites } });
     }
     else if (addFavorite === false && favorites.indexOf(subcluster) !== -1) {
       var index = favorites.indexOf(subcluster);
       if (index > -1) {
         favorites.splice(index, 1);
-        Meteor.users.upsert({ _id: Meteor.userId() }, { $set: { "selectedData.dataset.subclusterFavorites": favorites } });
+        await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "selectedData.dataset.subclusterFavorites": favorites } });
       }
     }
   },
-  "updateFeatureDiscovery": function (featureName) {
+  "updateFeatureDiscovery": async function (featureName) {
 
     // initialize selectedData.featureDiscovery if it doesn't exist
-    Meteor.users.update({ _id: Meteor.userId(), 'featureDiscovery': { $exists: false } }, { $set: { 'featureDiscovery': [] } });
-    features = Meteor.users.findOne({ _id: Meteor.userId() }, { fields: { "featureDiscovery": 1 } }).featureDiscovery;
+    await Meteor.users.updateAsync({ _id: Meteor.userId(), 'featureDiscovery': { $exists: false } }, { $set: { 'featureDiscovery': [] } });
+    const userDoc = await Meteor.users.findOneAsync({ _id: Meteor.userId() }, { fields: { "featureDiscovery": 1 } });
+    features = userDoc.featureDiscovery;
 
     // no features left to mark as seen by the user
     if (features.length === 0) {
       return;
     }
     features.shift();
-    Meteor.users.upsert({ _id: Meteor.userId() }, { $set: { "featureDiscovery": features } });
+    await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "featureDiscovery": features } });
   },
-  "updateNewTermsAndPolicies": function () {
+  "updateNewTermsAndPolicies": async function () {
 
     // initialize selectedData.featureDiscovery if it doesn't exist
-    Meteor.users.update({ _id: Meteor.userId() }, { $set: { 'newTermsAndPolicies': false } });
+    await Meteor.users.updateAsync({ _id: Meteor.userId() }, { $set: { 'newTermsAndPolicies': false } });
   },
   sendVerificationLink() {
     let userId = Meteor.userId();
@@ -100,12 +104,19 @@ Meteor.methods({
     }
   },
 
-  "getphams": function (currentDataset) {
-    if (!Roles.getGroupsForUser(Meteor.userId(), "view").includes(currentDataset)) {
-      return [];
+  "getphams": async function (currentDataset) {
+    if (currentDataset === 'Actino_Draft') {
+      // allow
+    } else {
+      if (!Meteor.userId()) return [];
+      const scopes = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
+      if (!scopes.includes(currentDataset)) {
+        return [];
+      }
     }
 
-    phamsObj = Phams.find({ dataset: currentDataset }).fetch().reduce(function (o, currentArray) {
+    const phams = await Phams.find({ dataset: currentDataset }).fetchAsync();
+    phamsObj = phams.reduce(function (o, currentArray) {
       n = currentArray.PhamID, v = currentArray.size;
       o[n] = v;
       return o
@@ -113,18 +124,20 @@ Meteor.methods({
     return phamsObj;
   },
 
-  "get_clusters_by_pham": function (dataset, phamname) {
+  "get_clusters_by_pham": async function (dataset, phamname) {
 
     selectedClusterMembers = []; //array of objects of form {cluster: "A1", phages: ['L5', 'D29', ...]}
 
     if (typeof phamname != null) {
-      phamclusters = Genomes.find({
+      const phamclusters = await Genomes.find({
         dataset: dataset, genes: {
           $elemMatch: {
             phamName: { $eq: phamname }
           }
         }
-      }, { sort: { cluster: 1, subcluster: 1 }, fields: { _id: false, phagename: 1, cluster: 1, subcluster: 1 } }).fetch().map(function (x) {
+      }, { sort: { cluster: 1, subcluster: 1 }, fields: { _id: false, phagename: 1, cluster: 1, subcluster: 1 } }).fetchAsync();
+
+      phamclusters.map(function (x) {
         if (x.cluster === "") {
           x.cluster = "Singletons"
           x.subcluster = ""
@@ -156,101 +169,108 @@ Meteor.methods({
     }
   },
 
-  "get_genes_by_domain": function (domainID, dataset) {
-    return Domains.find({ dataset: dataset, DomainID: domainID }).fetch()
+  "get_genes_by_domain": async function (domainID, dataset) {
+    return await Domains.find({ dataset: dataset, DomainID: domainID }).fetchAsync()
   },
 
-  "get_tRNAs_by_phage": function (PhageID, dataset) {
-    let tRNAs = TRNAs.find({ dataset: dataset, PhageID: PhageID }).fetch()
+  "get_tRNAs_by_phage": async function (PhageID, dataset) {
+    let tRNAs = await TRNAs.find({ dataset: dataset, PhageID: PhageID }).fetchAsync()
     return tRNAs;
   },
 
-  "get_all_domains_by_query": function (domainDescription, dataset) {
-    return Domains.find({ description: new RegExp(domainDescription), dataset: dataset }, { sort: { geneID: 1 } }).fetch()
+  "get_all_domains_by_query": async function (domainDescription, dataset) {
+    return await Domains.find({ description: new RegExp(domainDescription), dataset: dataset }, { sort: { geneID: 1 } }).fetchAsync()
   },
 
-  "get_domains_by_query": function (domainDescription, dataset) {
+  "get_domains_by_query": async function (domainDescription, dataset) {
+    // Note: distinct is mostly async in newer drivers but via rawCollection it returns a promise usually.
+    // However, rawCollection().distinct() returns a promise directly.
 
-    result = {} // each key a domainID, each value an array of matches to the domainID
     // get all the DomainIDs whose description matches the query
-    domains = Domains.rawCollection().distinct('DomainID', { description: new RegExp(domainDescription), dataset: dataset }).then(
-      (domainIDs) => {
-        return domainIDs.map((domainID) => {
-          d = Domains.findOne({ DomainID: domainID, dataset: dataset }, { domainID: true, description: true })
-          return d
-        })
-        return domainIDs
-      }
-    ).then((domains) => {
-      return domains;
+    const domainIDs = await Domains.rawCollection().distinct('DomainID', { description: new RegExp(domainDescription), dataset: dataset });
 
-    })
+    // We can't verify 'then' usage easily with modern async/await, so let's rewrite cleanly.
+
+    const domains = await Promise.all(domainIDs.map(async (domainID) => {
+      d = await Domains.findOneAsync({ DomainID: domainID, dataset: dataset }, { domainID: true, description: true })
+      return d
+    }));
+
     return domains
   },
 
-  "get_domains_by_gene": function (geneID, dataset) {
-    domains = Domains.find({ geneID: geneID, dataset: dataset }).fetch();
+  "get_domains_by_gene": async function (geneID, dataset) {
+    domains = await Domains.find({ geneID: geneID, dataset: dataset }).fetchAsync();
     domains.forEach(function (d) {
       d.domainLink = "https://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=" + d.DomainID;
     })
     return domains;
   },
 
-  "get_tm_domains_by_gene": function (geneID, dataset) {
-    tmdomains = TMDomains.find({ geneID: geneID, dataset: dataset }).fetch();
+  "get_tm_domains_by_gene": async function (geneID, dataset) {
+    tmdomains = await TMDomains.find({ geneID: geneID, dataset: dataset }).fetchAsync();
     return tmdomains;
   },
 
-  "getlargestphamsize": function () {
-    return Phams.findOne({}, { sort: { size: -1 } }).size;
+  "getlargestphamsize": async function () {
+    const pham = await Phams.findOneAsync({}, { sort: { size: -1 } });
+    return pham ? pham.size : 0;
   },
 
-  "get_number_of_domains": function (geneID, dataset) {
-    domainsCount = Domains.find({ geneID: geneID, dataset: dataset }).count();
+  "get_number_of_domains": async function (geneID, dataset) {
+    domainsCount = await Domains.find({ geneID: geneID, dataset: dataset }).countAsync();
     return { "geneID": geneID, "domainsCount": domainsCount };
   },
 
-  "get_number_of_genomes": function () {
-    const genomeCount = Genomes.find({ dataset: "Actino_Draft" }).count();
+  "get_number_of_genomes": async function () {
+    const genomeCount = await Genomes.find({ dataset: "Actino_Draft" }).countAsync();
     console.log("get_number_of_genomes", genomeCount);
     return genomeCount;
   },
 
-  "getclusters": function (currentDataset) {
 
-    if (!Roles.getGroupsForUser(Meteor.userId(), "view").includes(currentDataset)) {
-      return [];
+  "getclusters": async function (currentDataset) {
+
+    if (currentDataset === 'Actino_Draft') {
+      // allow
+    } else {
+      if (!Meteor.userId()) return [];
+      const scopes = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
+      if (!scopes.includes(currentDataset)) {
+        return [];
+      }
     }
 
     clusters = [];
 
-    clusterNames = _.uniq(Genomes.find({ "dataset": currentDataset }, {
-      fields: { cluster: true }, reactive: false
-    }).fetch().map(function (x) {
-      return x.cluster;
-    }), false);
+    const distinctClusters = await Genomes.rawCollection().distinct('cluster', { "dataset": currentDataset });
+    // distinct returns array of values directly in promise result
+
+    let clusterNames = _.uniq(distinctClusters, false);
     clusterNames.sort();
 
     // for each cluster, get an array of unique subcluster names
-    clusterNames.forEach(function (cluster, index, array) {
-      subClusterNames = _.uniq(Genomes.find({ "dataset": currentDataset, "cluster": cluster }, {
-        fields: { subcluster: true }, reactive: false
-      }).fetch().map(function (x) {
-        return x.subcluster;
-      }), false);
+    // Because we are in async loop, we use for...of or Promise.all. 
+    // The original code was synchronous forEach. We need to await inside loop.
+
+    for (const cluster of clusterNames) {
+      const distinctSubclusters = await Genomes.rawCollection().distinct('subcluster', { "dataset": currentDataset, "cluster": cluster });
+      let subClusterNames = _.uniq(distinctSubclusters, false);
 
       subClusterNames.sort(function (a, b) {
         return a - b;
       });
-      subClusterNames.forEach(function (subcluster, index, array) {
-        phageNames = Genomes.find({
+
+      for (const subcluster of subClusterNames) {
+        const phages = await Genomes.find({
           dataset: currentDataset,
           cluster: cluster,
           subcluster: subcluster
-        }, { fields: { phagename: true }, reactive: false }).fetch().map(function (x) {
-          return x.phagename
-        });
+        }, { fields: { phagename: true }, reactive: false }).fetchAsync();
+
+        let phageNames = phages.map(x => x.phagename);
         phageNames.sort();
+
         var singletonator = function () {
           if (cluster === "") {
             return { "name": "Singletons", "cluster": "", "subcluster": "", phageNames: phageNames }
@@ -259,11 +279,10 @@ Meteor.methods({
             return { "name": cluster + subcluster, "cluster": cluster, "subcluster": subcluster, phageNames: phageNames }
           }
         };
-        singletonator();
-        var singletonated = singletonator(this);
+        var singletonated = singletonator();
         clusters.push(singletonated);
-      });
-    });
+      }
+    }
     return clusters;
   }
 });

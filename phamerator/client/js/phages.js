@@ -1,9 +1,19 @@
 import Clipboard from 'clipboard';
+import d3 from 'd3';
 
 var clipboard = new Clipboard('.btn-copy-link');
 clipboard.on('success', function (e) {
   Materialize.toast('sequence copied!', 1000);
   e.clearSelection();
+});
+
+Template.phages.onCreated(function () {
+  var self = this;
+  self.autorun(function () {
+    var dataset = Session.get('currentDataset');
+    self.subscribe('genomes', dataset);
+    self.subscribe('allUsers');
+  });
 });
 
 genomesWithSeqHandlers = [];
@@ -1079,7 +1089,14 @@ Template.phages.onCreated(function () {
   Session.set("colorByConservedDomains", false)
   Session.set("colorByTMDomains", false)
   Session.set("colorByPhams", true)
-  Session.set("currentDataset", Meteor.user().preferredDataset);
+  Tracker.autorun(() => {
+    const user = Meteor.user();
+    if (user && user.preferredDataset) {
+      Session.set("currentDataset", user.preferredDataset);
+    } else {
+      Session.set("currentDataset", "Actino_Draft");
+    }
+  });
 
   Meteor.call('getlargestphamsize', function (error, result) {
     if (typeof error !== 'undefined') {
@@ -1311,12 +1328,12 @@ Template.phages.helpers({
       .sort((a, b) => a.DomainID - b.DomainID)
   },
   newFeature: function () {
-    if (Meteor.user().featureDiscovery.length > 0) {
-      Session.set('newFeature', true);
-      return true;
+    const user = Meteor.user();
+    if (user && user.featureDiscovery) {
+      if (user.featureDiscovery.length > 0) {
+        return "pulse";
+      }
     }
-    Session.set('newFeature', false);
-    return false
   },
   geneTranslation: function () { return Session.get('geneTranslation'); },
   phamAbundanceFD: function () { return Session.get('phamAbundanceFD'); },
@@ -1328,7 +1345,7 @@ Template.phages.helpers({
   selectedClusters: function () { return Session.get('selectedClusters'); },
   schemaVersionMin11: function () {
     let dataset = Datasets.findOne({ name: Session.get('currentDataset') })
-    return dataset["schema version"] >= 11;
+    return dataset && dataset["schema version"] >= 11;
   },
   genomes_are_selected: function () {
     return selectedGenomes.find({}).fetch().length > 0;
@@ -1725,7 +1742,7 @@ Template.cluster.helpers({
 Template.mapSettingsModal.helpers({
   schemaVersionMin11: function () {
     let dataset = Datasets.findOne({ name: Session.get('currentDataset') })
-    return dataset["schema version"] >= 11;
+    return dataset && dataset["schema version"] >= 11;
   },
   'blastSwitchState': function () {
     return Session.get("showhspGroups");

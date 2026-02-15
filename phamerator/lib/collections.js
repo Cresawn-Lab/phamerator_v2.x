@@ -1,19 +1,31 @@
 import { Meteor } from 'meteor/meteor';
 import { FilesCollection } from 'meteor/ostrio:files';
+import 'meteor/aldeed:collection2'; // Patch Meteor.Collection
 
-TRNAs = new Meteor.Collection("trnas");
+import SimpleSchema from 'simpl-schema';
+SimpleSchema.extendOptions(['autoform']);
 
+// Helper to define global variables in a module system
+const _global = typeof global !== 'undefined' ? global : window;
+
+export const TRNAs = new Meteor.Collection("trnas");
+_global.TRNAs = TRNAs;
+
+export const Genomes = new Meteor.Collection("genomes");
+_global.Genomes = Genomes;
+export const Phams = new Meteor.Collection("phams");
+_global.Phams = Phams;
+export const Proteins = new Meteor.Collection("proteins");
+_global.Proteins = Proteins;
+export const Domains = new Meteor.Collection("domains");
+_global.Domains = Domains;
+export const TMDomains = new Meteor.Collection("tmdomains");
+_global.TMDomains = TMDomains;
+export const Datasets = new Meteor.Collection("datasets");
+_global.Datasets = Datasets;
 
 Meteor.startup(function () {
-
-  Genomes = new Meteor.Collection("genomes");
-  Phams = new Meteor.Collection("phams");
-  Proteins = new Meteor.Collection("proteins");
-  Domains = new Meteor.Collection("domains");
-  TMDomains = new Meteor.Collection("tmdomains");
-  Datasets = new Meteor.Collection("datasets");
-
-  if (Meteor.isCordova && navigator.connection.type == 'WIFI') { Ground.Collection(Genomes); }
+  // if (Meteor.isCordova && navigator.connection.type == 'WIFI') { Ground.Collection(Genomes); }
 
   var Schemas = {};
 
@@ -69,10 +81,10 @@ Meteor.startup(function () {
     }
   });
 
-  Genomes.attachSchema(Schemas.Genome);
+  // _global.Genomes.attachSchema(Schemas.Genome);
 });
 
-Images = new FilesCollection({
+export const Images = new FilesCollection({
   collectionName: 'Images',
   storagePath: '../data/phamerator/uploads',
   allowClientCode: false, // Disallow remove files from Client
@@ -87,3 +99,4 @@ Images = new FilesCollection({
     }
   }
 });
+_global.Images = Images;

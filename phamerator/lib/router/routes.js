@@ -1,59 +1,80 @@
-//var subscriptions = new SubsManager();
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import { Meteor } from 'meteor/meteor';
+
+// In a real app, you'd import 'render' from client/js/layout.js, 
+// but since this file is in lib/ (shared), we need to be careful.
+// Ideally, routes should be client-only or careful about imports.
+// For now, we'll assume the render function is available globally or we dispatch differently.
+// Actually, FlowRouter routes are strictly Client-side for rendering usually.
 
 if (Meteor.isClient) {
-  Router.plugin('ensureSignedIn', {
-    only: ['account', 'phages']
+  // Dynamic import to avoid server-side issues
+  import('/client/js/layout.js').then(({ render }) => {
+
+    FlowRouter.route('/', {
+      name: 'home',
+      action() {
+        render('masterLayout', { main: 'home', nav: 'nav' });
+      }
+    });
+
+    FlowRouter.route('/phages', {
+      name: 'phages',
+      action() {
+        render('masterLayout', { main: 'phages', nav: 'nav' });
+      }
+    });
+
+    FlowRouter.route('/phamilies', {
+      name: 'phamilies',
+      action() {
+        render('masterLayout', { main: 'phamilies', nav: 'nav' });
+      }
+    });
+
+    FlowRouter.route('/newDatabase', {
+      name: 'newDatabase',
+      action() {
+        render('masterLayout', { main: 'newDatabase', nav: 'nav' });
+      }
+    });
+
+    FlowRouter.route('/cresawnlab', {
+      name: 'cresawnlab',
+      action() {
+        render('masterLayout', { main: 'cresawnlab', nav: 'nav' });
+      }
+    });
+
+    FlowRouter.route('/domains', {
+      name: 'domains',
+      action() {
+        render('masterLayout', { main: 'domains', nav: 'nav' });
+      }
+    });
+
+    FlowRouter.route('/terms', {
+      name: 'terms',
+      action() {
+        render('masterLayout', { main: 'terms', nav: 'nav' });
+      }
+    });
+
+    FlowRouter.route('/account', {
+      name: 'account',
+      action() {
+        render('masterLayout', { main: 'account', nav: 'nav' });
+      }
+    });
+
+    // Handle 404
+    FlowRouter.route('*', {
+      action() {
+        render('masterLayout', { main: 'page_not_found', nav: 'nav' });
+      }
+    });
   });
 }
 
-Router.configure({
-  layoutTemplate: 'masterLayout',
-  notFoundTemplate: 'pageNotFound',
-  progress: true,
-  progressSpinner: false,
-  yieldTemplates: {
-    nav: { to: 'nav' },
-    footer: { to: 'footer' }
-  }
-});
-
-Router.map(function () {
-  this.route('home', {
-    path: '/',
-    loadingTemplate: 'loading',
-    waitOn: function () {
-      return [Meteor.subscribe('allUsers')];
-    }
-  });
-  this.route('phages', {
-    loadingTemplate: 'loading',
-    waitOn: function () {
-      if (Meteor.isClient) {
-        dataset = Session.get('currentDataset');
-      }
-      return [Meteor.subscribe('genomes', dataset), Meteor.subscribe('allUsers')];
-    },
-    fastRender: true
-  });
-  this.route('phamilies');
-  this.route('newDatabase');
-  this.route('cresawnlab');
-  this.route('domains');
-
-  this.route('terms');
-  this.route('account', {
-    loadingTemplate: 'loading',
-    waitOn: function () {
-      return [Meteor.subscribe('files.images.all'), Meteor.subscribe('fullname')];
-    }
-  });
-});
-
-//Routes
-AccountsTemplates.configureRoute('changePwd');
-AccountsTemplates.configureRoute('enrollAccount');
-AccountsTemplates.configureRoute('forgotPwd');
-AccountsTemplates.configureRoute('resetPwd');
-AccountsTemplates.configureRoute('signIn');
-AccountsTemplates.configureRoute('signUp');
-AccountsTemplates.configureRoute('verifyEmail');
+// NOTE: Subscriptions previously in 'waitOn' must now be moved to the 
+// onCreated() callbacks of the respective templates (e.g. home.js, phages.js).

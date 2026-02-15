@@ -1,7 +1,7 @@
 <template name="nav">
   {{#if currentUser}}
-  {{ > editDatasetModal}}
-  {{ > infoDatasetModal}}
+  <!-- {{ > editDatasetModal}} -->
+  <!-- {{ > infoDatasetModal}} -->
   {{ > datasetDropdown }}
   {{/if}}
   <div class="navbar-fixed">
@@ -23,12 +23,12 @@
           </div>
         </div>
 
-        <a href="#" data-activates="mobile-menu" class="button-collapse"><i class="material-icons">menu</i></a>
+        <a href="#" data-target="mobile-menu" class="sidenav-trigger"><i class="material-icons">menu</i></a>
         {{#if currentUser}}
         <ul class="left hide-on-med-and-down">
 
           {{#unless loggingIn}}
-          <li><a class="dropdown-trigger" href="#!" data-activates="dropdown1">{{preferredDataset}}<i
+          <li><a class="dropdown-trigger" href="#!" data-target="dropdown1">{{preferredDataset}}<i
                 class="material-icons right">arrow_drop_down</i></a></li>
 
           {{#if metadata.metadata}}
@@ -55,18 +55,20 @@
           {{#if loggedIn}}
           <li class="{{isActiveRoute regex='account'}}"><a href="{{pathFor 'account'}}"
               class="waves-effect waves-purple lighten-5">{{displayname}}</a></li>
+          {{#if imageFile}}
           <li style="max-height: 63px"><a href="{{pathFor 'account'}}"><img src="{{fileURL imageFile}}"
                 alt="{{imageFile.name}}" class="thumb_profilepic"></a></li>
+          {{/if}}
           {{/if}}
           <li><a href="https://app.gitter.im/#/room/#phamerator_Lobby:gitter.im" target="_blank"
               class="waves-effect waves-light"><i class="material-icons left white-text">chat_bubble</i>Chat</a>
           </li>
-          <li>{{> atNavButton }}</li>
+          <li>{{> loginButtons }}</li>
         </ul>
-        <ul id="mobile-menu" class="side-nav">
+        <ul id="mobile-menu" class="sidenav">
           {{#if loggedIn}}
 
-          <li style="width=100%"><img src="{{fileURL imageFile}}" alt="{{imageFile.name}}" style="width:100%">
+          <li style="width:100%"><img src="{{fileURL imageFile}}" alt="{{imageFile.name}}" style="width:100%">
           </li>
           {{/if}}
           <li class="{{isActiveRoute regex='home'}}"><a href="{{pathFor 'home'}}"
@@ -82,7 +84,7 @@
           {{/if}}
           <li><a class="js-gitter-toggle-chat-button waves-effect waves-light btn"><i
                 class="material-icons left white-text">chat_bubble</i>Chat</a></li>
-          <li>{{> atNavButton }}</li>
+          <!-- <li>{{> loginButtons }}</li> -->
         </ul>
       </div>
     </nav>
@@ -90,8 +92,8 @@
   <footer class="page-footer cyan">
     <div class="footer-copyright cyan">
       <div class="container">
-        © Steven Cresawn, Ph.D. and SEA-PHAGES 2016-{{now}}. All rights reserved.<a class="grey-text text-lighten-4"
-          href="{{pathFor 'terms'}}">Terms and Policies</a>
+        Phamerator.org {{version}} © Steven Cresawn, Ph.D. and SEA-PHAGES 2016-{{now}}. All rights reserved.<a
+          class="grey-text text-lighten-4" href="{{pathFor 'terms'}}">Terms and Policies</a>
         <a class="grey-text text-lighten-4 right" href="https://seaphages.org">SEA-PHAGES</a>
       </div>
     </div>

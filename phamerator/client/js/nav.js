@@ -1,3 +1,5 @@
+import { Datasets, Genomes, Images } from '/lib/collections.js';
+
 switch_dataset = function (dataset) {
   selectedGenomes.remove({});
   if (typeof genomesWithSeqHandle !== 'undefined') {
@@ -41,19 +43,21 @@ switch_dataset = function (dataset) {
   genomesWithSeqHandlers = [];
 
   //all the subscriptions that have been subscribed.
-  var subs = Meteor.default_connection._subscriptions;
-  var subSummary = {};
+  if (Meteor.default_connection && Meteor.default_connection._subscriptions) {
+    var subs = Meteor.default_connection._subscriptions;
+    var subSummary = {};
 
-  // organize them by name so that you can see multiple occurrences
-  Object.keys(subs).forEach(function (key) {
-    var sub = subs[key];
-    // you could filter out subs by the 'active' property if you need to
-    if (subSummary[sub.name] && subSummary[sub.name].length > 0) {
-      subSummary[sub.name].push(sub);
-    } else {
-      subSummary[sub.name] = [sub];
-    }
-  });
+    // organize them by name so that you can see multiple occurrences
+    Object.keys(subs).forEach(function (key) {
+      var sub = subs[key];
+      // you could filter out subs by the 'active' property if you need to
+      if (subSummary[sub.name] && subSummary[sub.name].length > 0) {
+        subSummary[sub.name].push(sub);
+      } else {
+        subSummary[sub.name] = [sub];
+      }
+    });
+  }
 }
 
 Meteor.startup(function () {
@@ -63,58 +67,33 @@ Meteor.startup(function () {
 
   Meteor.subscribe('fullname');
   Meteor.subscribe('featureDiscovery', function () {
-    if (Meteor.user()) {
-      if (Meteor.user().profile.includeInDirectory == null) {
-        Materialize.toast('Please review your<a href="account">account settings</a>', 5000);
-      }
-      if (Meteor.user().featureDiscovery == null) {
-        Session.set("geneTranslation", true);
-      }
-      else if (Meteor.user().featureDiscovery.geneTranslation == null) {
-        Session.set("geneTranslation", true);
-      }
-      else {
-        geneTranslation = Meteor.user().featureDiscovery.geneTranslation;
-        Session.set("geneTranslation", geneTranslation);
-      }
+    const user = Meteor.user();
+    if (user && user.profile && user.profile.includeInDirectory == null) {
+      M.toast({ html: 'Please review your<a href="account">account settings</a>', displayLength: 5000 });
+    }
+    if (user && user.featureDiscovery == null) {
+      Session.set("geneTranslation", true);
+    }
+    else if (user && user.featureDiscovery && user.featureDiscovery.geneTranslation == null) {
+      Session.set("geneTranslation", true);
+    }
+    else if (user && user.featureDiscovery) {
+      geneTranslation = user.featureDiscovery.geneTranslation;
+      Session.set("geneTranslation", geneTranslation);
     }
   });
-
-
-  if (Meteor.isCordova) {
-    if (navigator.connection.type !== 'wifi') {
-      $('#connectionWarning').openModal();
-    }
-  }
-  else {
-    import MobileDetect from 'mobile-detect';
-    var md = new MobileDetect(window.navigator.userAgent);
-    if (md.mobile() != null) {
-      $('#mobileWarning').modal();
-    }
-  }
-
-  document.addEventListener("online", onOnline, false);
-
-  function onOnline() {
-    // Handle the online event
-    if (Meteor.isCordova) {
-      if (navigator.connection.type !== 'wifi') {
-        $('#connectionWarning').modal();
-      }
-    }
-  }
 });
 
 Template.nav.helpers({
   displayname: function () {
-    if (!Meteor.user()) {
+    const user = Meteor.user();
+    if (!user) {
       return null;
     }
-    else if (!Meteor.user().name) {
-      return Meteor.user().username;
-    }
-    return Meteor.user().name;
+    if (user.name) return user.name;
+    if (user.username) return user.username;
+    // if (user.emails && user.emails.length > 0) return user.emails[0].address;
+    return "My Account";
   },
   loggedIn: function () {
     return Meteor.user() != null;
@@ -168,11 +147,17 @@ Template.nav.onRendered(function () {
   Meteor.subscribe('files.images.all');
   Meteor.subscribe('fullname');
 
-  $(".button-collapse").sideNav();
+  var sidenavs = document.querySelectorAll('.sidenav');
+  M.Sidenav.init(sidenavs, {
+    edge: 'left',
+    draggable: true
+  });
 
-  $(".sidenav-icon").sideNav({
-    closeOnClick: true
-  }); // http://materializecss.com/side-nav.html
+  var dropdowns = document.querySelectorAll('.dropdown-trigger');
+  M.Dropdown.init(dropdowns, {
+    constrainWidth: false,
+    coverTrigger: false
+  });
 
 });
 

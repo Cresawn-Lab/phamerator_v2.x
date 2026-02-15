@@ -1,7 +1,15 @@
+import { ReactiveVar } from 'meteor/reactive-var';
+import { Images } from '/lib/collections.js';
+
+Template.account.onCreated(function () {
+  this.subscribe('files.images.all');
+  this.subscribe('fullname');
+});
+
 Template.account.onRendered(function () {
   $("html, body").animate({ scrollTop: 0 }, "slow");
 
-  Materialize.fadeInImage('#profilepic');
+  $('#profilepic').hide().fadeIn('slow');
 });
 
 Template.account.helpers({
@@ -69,15 +77,15 @@ Template.uploadForm.events({
 Template.file.helpers({
 
   imageFile: function () {
-    user = Meteor.user();
+    const user = Meteor.user();
+    let profilePic = "";
     if (user && user.hasOwnProperty('profile') && user.profile.hasOwnProperty('profilePic')) {
-      profile = user.profile;
       profilePic = user.profile.profilePic;
     }
     return Images.collection.findOne({ userId: user._id, _id: profilePic })
 
   },
-  videoFile: function () {
-    return Videos.collection.findOne({});
-  }
+  // videoFile: function () {
+  //   return Videos.collection.findOne({});
+  // }
 });

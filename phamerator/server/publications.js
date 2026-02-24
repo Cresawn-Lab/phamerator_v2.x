@@ -74,7 +74,13 @@ Meteor.publish("selected_tRNAs", async function (dataset, selectedGenomes) {
 Meteor.publish("genomesWithSeq", async function (dataset, selectedGenomes) {
   if (dataset) {
     if (dataset === 'Actino_Draft') {
-      return Genomes.find({ "phagename": { $in: selectedGenomes }, dataset: dataset });
+      const genomeCursor = Genomes.find({ "phagename": { $in: selectedGenomes }, dataset: dataset });
+      const genomes = await genomeCursor.fetchAsync();
+      const genomeIds = genomes.map(g => g._id);
+      return [
+        genomeCursor,
+        Genes.find({ genome: { $in: genomeIds } })
+      ];
     }
 
     if (!this.userId) return [];
@@ -82,7 +88,13 @@ Meteor.publish("genomesWithSeq", async function (dataset, selectedGenomes) {
     var datasets = await Roles.getScopesForUserAsync(this.userId, "view")
     if (!datasets.includes(dataset)) { return [] }
 
-    return Genomes.find({ "phagename": { $in: selectedGenomes }, dataset: dataset });
+    const genomeCursor = Genomes.find({ "phagename": { $in: selectedGenomes }, dataset: dataset }, { fields: { genes: 1, sequence: 1, phageID: 1, phagename: 1, genomelength: 1, cluster: 1, subcluster: 1, dataset: 1, clusterSubcluster: 1 } });
+    const genomes = await genomeCursor.fetchAsync();
+    const genomeIds = genomes.map(g => g._id);
+    return [
+      genomeCursor,
+      Genes.find({ genome: { $in: genomeIds } })
+    ];
   }
   else {
     return this.stop();

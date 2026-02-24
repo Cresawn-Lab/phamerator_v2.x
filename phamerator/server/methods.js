@@ -115,7 +115,21 @@ Meteor.methods({
       }
     }
 
-    const phams = await Phams.find({ dataset: currentDataset }).fetchAsync();
+    let phams = await Phams.find({ dataset: currentDataset }).fetchAsync();
+
+    // Fallback: If no phams found in Phams collection, compute them from Genomes
+    if (!phams || phams.length === 0) {
+      console.log("Phams collection empty for", currentDataset, "- computing from Genomes...");
+      const stats = await Genomes.rawCollection().aggregate([
+        { $match: { dataset: currentDataset } },
+        { $unwind: "$genes" },
+        { $group: { _id: "$genes.phamName", size: { $sum: 1 } } }
+      ]).toArray();
+
+      // Transform aggregation result to expected format: { PhamID: "123", size: 10 }
+      phams = stats.map(s => ({ PhamID: s._id, size: s.size }));
+    }
+
     phamsObj = phams.reduce(function (o, currentArray) {
       n = currentArray.PhamID, v = currentArray.size;
       o[n] = v;
@@ -266,7 +280,7 @@ Meteor.methods({
           dataset: currentDataset,
           cluster: cluster,
           subcluster: subcluster
-        }, { fields: { phagename: true }, reactive: false }).fetchAsync();
+        }, { fields: { phagename: true, clusterSubcluster: true }, reactive: false }).fetchAsync();
 
         let phageNames = phages.map(x => x.phagename);
         phageNames.sort();
@@ -276,7 +290,12 @@ Meteor.methods({
             return { "name": "Singletons", "cluster": "", "subcluster": "", phageNames: phageNames }
           }
           else {
-            return { "name": cluster + subcluster, "cluster": cluster, "subcluster": subcluster, phageNames: phageNames }
+            let clusterDisplayName = cluster + subcluster;
+            // Use clusterSubcluster field if available to avoid redundant prefixes (e.g., "AA1")
+            if (phages.length > 0 && phages[0].clusterSubcluster) {
+              clusterDisplayName = phages[0].clusterSubcluster;
+            }
+            return { "name": clusterDisplayName, "cluster": cluster, "subcluster": subcluster, phageNames: phageNames }
           }
         };
         var singletonated = singletonator();

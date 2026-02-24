@@ -23,6 +23,8 @@ export const TMDomains = new Meteor.Collection("tmdomains");
 _global.TMDomains = TMDomains;
 export const Datasets = new Meteor.Collection("datasets");
 _global.Datasets = Datasets;
+export const Genes = new Meteor.Collection("genes");
+_global.Genes = Genes;
 
 Meteor.startup(function () {
   // if (Meteor.isCordova && navigator.connection.type == 'WIFI') { Ground.Collection(Genomes); }

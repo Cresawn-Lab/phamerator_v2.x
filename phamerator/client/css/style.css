@@ -131,12 +131,19 @@ text.horizontalAlign {
     cursor: ew-resize;
 }
 
+
 #preloader {
     position: fixed;
     top: 50%;
     left: 50%;
     display: none;
     transform: translateY(10%);
+}
+
+.navbar-fixed nav {
+    position: fixed !important;
+    top: 0 !important;
+    z-index: 1001 !important;
 }
 
 #profilepic {

@@ -1,27 +1,15 @@
 <template name="nav">
   {{#if currentUser}}
-  <!-- {{ > editDatasetModal}} -->
-  <!-- {{ > infoDatasetModal}} -->
+  {{ > editDatasetModal}}
+  {{ > infoDatasetModal}}
   {{ > datasetDropdown }}
   {{/if}}
+
+
   <div class="navbar-fixed">
     <nav class="purple">
       <div class="nav-wrapper">
-        <div id="preloader">
-          <div class="preloader-wrapper big active">
-            <div class="spinner-layer spinner-yellow-only">
-              <div class="circle-clipper left">
-                <div class="circle"></div>
-              </div>
-              <div class="gap-patch">
-                <div class="circle"></div>
-              </div>
-              <div class="circle-clipper right">
-                <div class="circle"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+
 
         <a href="#" data-target="mobile-menu" class="sidenav-trigger"><i class="material-icons">menu</i></a>
         {{#if currentUser}}
@@ -95,7 +83,23 @@
         Phamerator.org {{version}} © Steven Cresawn, Ph.D. and SEA-PHAGES 2016-{{now}}. All rights reserved.<a
           class="grey-text text-lighten-4" href="{{pathFor 'terms'}}">Terms and Policies</a>
         <a class="grey-text text-lighten-4 right" href="https://seaphages.org">SEA-PHAGES</a>
+        <div id="preloader">
+          <div class="preloader-wrapper big active">
+            <div class="spinner-layer spinner-yellow-only">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div>
+              <div class="gap-patch">
+                <div class="circle"></div>
+              </div>
+              <div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
   </footer>
 </template>

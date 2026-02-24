@@ -19,6 +19,25 @@ Template.datasetDropdown.onRendered(function () {
     Session.set("datasetsView", Datasets.find({}, { fields: { name: 1 } }).fetch())
   }
   else { }
+
+  waitForEl("#editDataset", function () {
+    M.Modal.init(document.getElementById('editDataset'), {
+      onOpenStart: function (modal, trigger) {
+        $('#editDataset .modal-content').animate({ scrollTop: 0 }, "fast");
+      },
+      onCloseEnd: function () {
+        $('input#autocomplete-input.autocomplete')[0].value = "";
+      }
+    });
+  });
+
+  waitForEl("#infoDataset", function () {
+    M.Modal.init(document.getElementById('infoDataset'), {
+      onOpenStart: function (modal, trigger) {
+        $('#infoDataset .modal-content').animate({ scrollTop: 0 }, "fast");
+      }
+    });
+  });
 });
 
 Template.datasetDropdown.onDestroyed(function () {
@@ -29,21 +48,6 @@ Template.datasetDropdown.helpers({
   datasets: function () {
     waitForEl(".dropdown-trigger", function () {
       $(".dropdown-trigger").dropdown({ hover: false, constrainWidth: false })
-      $('#editDataset').modal({
-        ready: function (modal, trigger) { // Callback for Modal open. Modal and trigger parameters available.
-          $('#editDataset .modal-content').animate({ scrollTop: 0 }, "fast")
-        },
-        complete: function () {
-          $('input#autocomplete-input.autocomplete')[0].value = "";
-        }
-      });
-      $('#infoDataset').modal({
-        ready: function (modal, trigger) { // Callback for Modal open. Modal and trigger parameters available.
-          $('#infoDataset .modal-content').animate({ scrollTop: 0 }, "fast")
-        },
-        complete: function () {
-        }
-      });
     })
     if (Datasets.find().fetch().length === 0) {
       Session.set("preferredDataset", "No data sets available")

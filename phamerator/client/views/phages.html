@@ -159,7 +159,7 @@
 
   <div class="row">
     <div class="col s12">
-      <ul class="tabs yellow lighten-3">
+      <ul class="tabs yellow lighten-3" style="overflow-x: hidden !important;">
         <li class="tab col s6 m6 l6"><a class="active black-text" href="#phages-list">Select Phages</a></li>
         <li class="tab col s6 m6 l6"><a id="viewMapTab" class="black-text" href="#genome-map">View Map</a></li>
       </ul>
@@ -180,20 +180,17 @@
           <li><a id="scroll_top" class="waves-effect waves-purple btn-floating orange ">
               <i class="material-icons left">arrow_upward</i>up
             </a></li>
-          {{#if clusters_expanded}}
-          <li><a id="collapse_all" class="waves-effect waves-yellow btn-floating light-blue darken-1">
+          <li><a id="collapse_all"
+              class="waves-effect waves-yellow btn-floating light-blue darken-1 {{class_if_clusters_open}}">
               <i class="material-icons left">remove</i>remove
             </a></li>
-          {{else}}
-          <li><a id="expand_all" class="waves-effect waves-yellow btn-floating light-blue ">
+          <li><a id="expand_all" class="waves-effect waves-yellow btn-floating light-blue {{class_if_clusters_closed}}">
               <i class="material-icons left">add</i>search
             </a></li>
-          {{/if}}
-          {{#if genomes_are_selected}}
-          <li><a id="clearSelection" class="waves-effect waves-yellow btn-floating purple">
+          <li><a id="clearSelection"
+              class="waves-effect waves-yellow btn-floating purple {{class_if_genomes_selected}}">
               <i class="material-icons left">clear</i>Clear Selection
             </a></li>
-          {{/if}}
         </ul>
       </div>
     </div>

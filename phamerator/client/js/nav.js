@@ -135,17 +135,25 @@ Template.nav.onRendered(function () {
   // reload the nav template when a new user signs in
   // cleanup data upon new user logging in
 
-  // get only the datasets for which this user has owner and/or view permission
-  Meteor.call("getDatasetsIView", (error, result) => {
-    Session.set("datasetsView", result);
-  });
+  Tracker.autorun(() => {
+    // Only run this if we are actually logged in, else clear the session variables
+    if (Meteor.userId()) {
+      Meteor.call("getDatasetsIView", (error, result) => {
+        if (!error) Session.set("datasetsView", result);
+      });
 
-  Meteor.call("getDatasetsIOwn", (error, result) => {
-    Session.set("datasetsOwn", result);
+      Meteor.call("getDatasetsIOwn", (error, result) => {
+        if (!error) Session.set("datasetsOwn", result);
+      });
+    } else {
+      Session.set("datasetsView", []);
+      Session.set("datasetsOwn", []);
+    }
   });
 
   Meteor.subscribe('files.images.all');
   Meteor.subscribe('fullname');
+  Meteor.subscribe('allUsers');
 
   var sidenavs = document.querySelectorAll('.sidenav');
   M.Sidenav.init(sidenavs, {
@@ -162,7 +170,7 @@ Template.nav.onRendered(function () {
 });
 
 Template.nav.events({
-  "click #dropdown1": function (event, template) {
-    switch_dataset(event.target.firstChild.data)
+  "click #dropdown1 a": function (event, template) {
+    switch_dataset(event.currentTarget.id)
   },
 })

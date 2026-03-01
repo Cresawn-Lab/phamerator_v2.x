@@ -5,14 +5,30 @@ Meteor.methods({
     });
   },
   "addUserToRole": async function (user, role, group) {
+    if (!this.userId) throw new Meteor.Error('401', 'Not logged in');
+    const isOwner = await Roles.userIsInRoleAsync(this.userId, 'owner', group);
+    if (!isOwner) throw new Meteor.Error('403', 'Not authorized: You must be an owner of this dataset.');
+
     await Roles.addUsersToRolesAsync(user, role, group);
     var key = "selectedData." + group;
     var projection = { key: { genomeMaps: [] } }
     await Meteor.users.updateAsync({ _id: user }, { $set: projection })
   },
   "removeUserFromRole": async function (user, role, group) {
+    if (!this.userId) throw new Meteor.Error('401', 'Not logged in');
+    const isOwner = await Roles.userIsInRoleAsync(this.userId, 'owner', group);
+    if (!isOwner) throw new Meteor.Error('403', 'Not authorized: You must be an owner of this dataset.');
+
     await Roles.removeUsersFromRolesAsync(user, role, group);
     await Meteor.users.updateAsync({ _id: user }, { $set: { "preferredDataset": "" } })
+  },
+  "getUsersInRole": async function (role, group) {
+    if (!this.userId) throw new Meteor.Error('401', 'Not logged in');
+    const isOwner = await Roles.userIsInRoleAsync(this.userId, 'owner', group);
+    if (!isOwner) throw new Meteor.Error('403', 'Not authorized: You must be an owner of this dataset.');
+
+    var cursor = await Roles.getUsersInRoleAsync(role, group);
+    return await cursor.fetchAsync();
   },
   "getDatasetsIView": async function () {
     return await Roles.getScopesForUserAsync(Meteor.userId(), "view")

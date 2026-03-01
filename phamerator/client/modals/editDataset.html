@@ -1,34 +1,35 @@
 <template name="editDatasetModal">
-    <div id="editDataset" class="modal modal-fixed-footer">
-        <div class="modal-content">
-            <h4>{{currentDataset}} settings</h4>
-            <p>You're the owner of this data set, so you can share it with whomever you like! Any users that you add below can view (but not edit or share) your data.</p>
-                <div class="row">
-                  <div class="col s12 m12 l12">
-                    <div class="card-panel white grey-text text-darken-1">
-                    <ul>
-                      <li>
-                        <div class="input-field">
-                          <input type="text" id="autocomplete-input" class="autocomplete" autocomplete="off">
-                          <label for="autocomplete-input">search by name or email</label>
-                        </div>
-                      </li>
-                      <li>
-                        <div class="chip teal white-text">{{owner.name}}</div>
-                      </li>
-                      {{#each user in usersThatCanView}}
-                      <li>
-                        <div class="chip">{{user.name}}<i class="close material-icons">close</i>
-                        </div>
-                      </li>
-                      {{/each}}
-                    </ul>
-                  </div>
+  <div id="editDataset" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h4>{{currentDataset}} settings</h4>
+      <p>You're the owner of this data set, so you can share it with whomever you like! Any users that you add below can
+        view (but not edit or share) your data.</p>
+      <div class="row">
+        <div class="col s12 m12 l12">
+          <div class="card-panel white grey-text text-darken-1">
+            <ul>
+              <li>
+                <div class="input-field">
+                  <input type="text" id="autocomplete-input" class="autocomplete" autocomplete="off">
+                  <label for="autocomplete-input">search by name or email</label>
                 </div>
-              </div>
+              </li>
+              <li>
+                <div class="chip teal white-text">{{owner.name}}</div>
+              </li>
+              {{#each user in usersThatCanView}}
+              <li>
+                <div class="chip" data-id="{{user._id}}">{{user.name}}<i class="close material-icons">close</i>
+                </div>
+              </li>
+              {{/each}}
+            </ul>
           </div>
-        <div class="modal-footer">
-            <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
         </div>
+      </div>
     </div>
+    <div class="modal-footer">
+      <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+    </div>
+  </div>
 </template>

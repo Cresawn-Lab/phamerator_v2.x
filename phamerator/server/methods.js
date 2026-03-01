@@ -277,7 +277,19 @@ Meteor.methods({
     // distinct returns array of values directly in promise result
 
     let clusterNames = _.uniq(distinctClusters, false);
-    clusterNames.sort();
+    clusterNames.sort(function (a, b) {
+      // 1. Singletons (empty string) always first
+      if (a === "") return -1;
+      if (b === "") return 1;
+
+      // 2. Single letter strings come before multi-letter strings
+      if (a.length !== b.length) {
+        return a.length - b.length;
+      }
+
+      // 3. Alphabetical sort for strings of the same length
+      return a.localeCompare(b);
+    });
 
     // for each cluster, get an array of unique subcluster names
     // Because we are in async loop, we use for...of or Promise.all. 
@@ -288,7 +300,17 @@ Meteor.methods({
       let subClusterNames = _.uniq(distinctSubclusters, false);
 
       subClusterNames.sort(function (a, b) {
-        return a - b;
+        let numA = parseInt(a.toString().replace(/[^0-9]/g, ''), 10);
+        let numB = parseInt(b.toString().replace(/[^0-9]/g, ''), 10);
+
+        let isNumA = !isNaN(numA);
+        let isNumB = !isNaN(numB);
+
+        if (isNumA && isNumB) {
+          if (numA !== numB) return numA - numB;
+        }
+
+        return a.toString().localeCompare(b.toString());
       });
 
       for (const subcluster of subClusterNames) {

@@ -784,6 +784,7 @@ function update_phages() {
   gene.append("rect")
     .classed("generect", true)
     .on("click", function (d, i) {
+      var dataset = Session.get("currentDataset");
       // Initialize the dialog to empty strings and arrays, rather than showing old data while waiting for new
       selectedDomains = [];
       Session.set("selectedDomains", selectedDomains);

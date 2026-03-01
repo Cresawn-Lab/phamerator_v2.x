@@ -120,7 +120,11 @@ Meteor.startup(async () => {
                     roleName = key;
                     // values are scopes
                     if (Array.isArray(values)) {
-                        await Roles.createRoleAsync(roleName, { unlessExists: true });
+                        try {
+                            await Roles.createRoleAsync(roleName, { unlessExists: true });
+                        } catch (err) {
+                            if (err.code !== 11000) console.warn("Role creation warning:", err.message);
+                        }
                         for (const scope of values) {
                             try {
                                 await Roles.addUsersToRolesAsync(user._id, roleName, scope);
@@ -139,7 +143,12 @@ Meteor.startup(async () => {
                         for (const role of values) {
                             try {
                                 // Ensure the role exists
-                                await Roles.createRoleAsync(role, { unlessExists: true });
+                                try {
+                                    await Roles.createRoleAsync(role, { unlessExists: true });
+                                } catch (err) {
+                                    // Ignore duplicate key errors from Roles package if it already exists
+                                    if (err.code !== 11000) console.warn("Role creation warning:", err.message);
+                                }
                                 await Roles.addUsersToRolesAsync(user._id, role, scopeName);
                             } catch (e) {
                                 console.error(`Failed to add role ${role} in scope ${scopeName} for ${user.username}`, e);

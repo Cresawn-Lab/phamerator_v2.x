@@ -53,12 +53,15 @@ var blastAlignmentsOutstanding = 0;
 function viewMapTabClicked() {
 
   Meteor.subscribe('featureDiscovery', function () {
-    var featureKey = Meteor.user().featureDiscovery[0];
+    var user = Meteor.user();
+    if (user && user.featureDiscovery && user.featureDiscovery.length > 0) {
+      var featureKey = user.featureDiscovery[0];
 
-    if (features[featureKey] != null) {
-      Session.set("newFeatureTitle", features[featureKey].title);
-      Session.set("newFeatureBody", features[featureKey].body);
-      Session.set("newFeatureDismiss", features.dismiss);
+      if (typeof features !== 'undefined' && features[featureKey] != null) {
+        Session.set("newFeatureTitle", features[featureKey].title);
+        Session.set("newFeatureBody", features[featureKey].body);
+        Session.set("newFeatureDismiss", features.dismiss);
+      }
     }
   });
 
@@ -282,7 +285,8 @@ function update_phages() {
         phamName: g.phamName,
         translation: g.translation,
         geneID: g.geneID,
-        phamColor: g.phamColor
+        phamColor: g.phamColor,
+        genefunction: g.genefunction || g.Notes || g.function || g.product || ""
       };
     });
   })
@@ -601,8 +605,11 @@ function update_phages() {
     .attr("position", "fixed")
     .attr("transform", "translate(0,-120)")
     .text(function (d) {
-      if (d.cluster === "") {
+      if (d.cluster === "" || d.cluster === "Singleton") {
         return d.phagename + " (Singleton)";
+      }
+      if (d.clusterSubcluster) {
+        return d.phagename + " (" + d.clusterSubcluster + ")";
       }
       return d.phagename + " (" + d.cluster + d.subcluster + ")";
     })
@@ -1120,23 +1127,26 @@ Template.phages.onCreated(function () {
     }
   });
 
-  Meteor.call('getclusters', Session.get("currentDataset"), function (error, result) {
+  Tracker.autorun(() => {
+    const dataset = Session.get("currentDataset");
+    if (!dataset) return; // Wait until it's set
 
-    if (typeof error !== 'undefined') {
-    }
-    else {
-      Session.set('clusters', result);
-    }
-  });
+    Meteor.call('getclusters', dataset, function (error, result) {
+      if (typeof error !== 'undefined') {
+        console.error('Error getting clusters:', error);
+      } else {
+        Session.set('clusters', result);
+      }
+    });
 
-  Meteor.call('getphams', Session.get("currentDataset"), function (error, result) {
-    if (typeof error !== 'undefined') {
-      alert('error getting phams:', error)
-    }
-    else {
-      Session.set('phamsObj', result);
-      phamsObj = result;
-    }
+    Meteor.call('getphams', dataset, function (error, result) {
+      if (typeof error !== 'undefined') {
+        alert('error getting phams:', error)
+      } else {
+        Session.set('phamsObj', result);
+        phamsObj = result;
+      }
+    });
   });
 
 

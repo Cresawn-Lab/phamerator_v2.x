@@ -4,44 +4,51 @@
   {{> featureDiscovery}}
   {{/if}}
 
-  <div id="geneData" class="modal">
-    <h5>{{selectedGeneTitle}}</h5>
-    <ul class="tabs">
-      <li class="tab col s3"><a href="#dna-seq">DNA</a></li>
-      <li class="tab col s3"><a href="#protein-seq">Protein</a></li>
-      <li class="tab col s3"><a href="#domains">Conserved Domains</a></li>
-      {{#if schemaVersionMin11}}
-      <li class="tab col s3"><a href="#transmembrane-domains">Transmembrane Domains</a></li>
-      {{/if}}
-      <li class="tab col s3"><a href="#pham-clusters">Clusters</a></li>
-      <li class="tab col s3"><a href="#notes">Function</a></li>
-    </ul>
+  <div id="geneData" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h5>{{selectedGeneTitle}}</h5>
+      <ul class="tabs" style="overflow-x: hidden !important; display: flex;">
+        <li class="tab" style="flex-grow: 1;"><a href="#dna-seq" style="padding: 0 5px; font-size: 12px;">DNA</a></li>
+        <li class="tab" style="flex-grow: 1;"><a href="#protein-seq"
+            style="padding: 0 5px; font-size: 12px;">Protein</a></li>
+        <li class="tab" style="flex-grow: 1;"><a href="#domains" style="padding: 0 5px; font-size: 12px;">Domains</a>
+        </li>
+        {{#if schemaVersionMin11}}
+        <li class="tab" style="flex-grow: 1;"><a href="#transmembrane-domains"
+            style="padding: 0 5px; font-size: 12px;">TM Domains</a></li>
+        {{/if}}
+        <li class="tab" style="flex-grow: 1;"><a href="#pham-clusters"
+            style="padding: 0 5px; font-size: 12px;">Clusters</a></li>
+        <li class="tab" style="flex-grow: 1;"><a href="#notes" style="padding: 0 5px; font-size: 12px;">Function</a>
+        </li>
+      </ul>
 
-    <div id="dna-seq">
-      <div class="modal-content">
-        <textarea readonly id="gene_dna_seq">{{selectedGene}}</textarea>
+      <div id="dna-seq">
+        <div
+          style="position: absolute; top: 115px; bottom: 24px; left: 24px; right: 24px; display: flex; flex-direction: column;">
+          <textarea readonly id="gene_dna_seq"
+            style="flex-grow: 1; resize: none; margin-bottom: 10px; border: 1px solid #ccc; padding: 10px;">{{selectedGene}}</textarea>
+          <div>
+            <button id="copy-dna-button" class="waves-effect waves-green btn btn-copy-link"
+              data-clipboard-target="#gene_dna_seq">Copy to Clipboard</button>
+          </div>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button id="copy-dna-button" class="waves-effect waves-green btn-flat btn-copy-link"
-          data-clipboard-target="#gene_dna_seq">Copy to Clipboard</button>
-        <a href="phages" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
-      </div>
-    </div>
 
-    <div id="protein-seq">
-      <div class="modal-content">
-        <textarea readonly id="gene_protein_seq">{{selectedProtein}}</textarea>
+      <div id="protein-seq">
+        <div
+          style="position: absolute; top: 115px; bottom: 24px; left: 24px; right: 24px; display: flex; flex-direction: column;">
+          <textarea readonly id="gene_protein_seq"
+            style="flex-grow: 1; resize: none; margin-bottom: 10px; border: 1px solid #ccc; padding: 10px;">{{selectedProtein}}</textarea>
+          <div>
+            <button id="copy-protein-button" class="waves-effect waves-green btn btn-copy-link"
+              data-clipboard-target="#gene_protein_seq">Copy to Clipboard</button>
+          </div>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button id="copy-protein-button" class="waves-effect waves-green btn-flat btn-copy-link"
-          data-clipboard-target="#gene_protein_seq">Copy to Clipboard</button>
-        <a href="phages" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
-      </div>
-    </div>
 
-    <div id="domains">
-      <div class="modal-content">
-        <p>These domains were detected in NCBI's Conserved Domain Database (CDD) using<a
+      <div id="domains">
+        <p>These domains were detected in NCBI's Conserved Domain Database (CDD) using <a
             href="https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd_help.shtml#RPSBWhat" target="_blank">RPS-BLAST</a>.</p>
         <svg id="svgDomain"></svg>
         <ul class="collapsible" data-collapsible="expandable">
@@ -76,18 +83,14 @@
           {{/each}}
         </ul>
       </div>
-      <div class="modal-footer">
-        <a href="phages" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
-      </div>
-    </div>
 
-
-    {{#if schemaVersionMin11}}
-    <div id="transmembrane-domains">
-      <div class="modal-content">
-        <p>These domains were detected using<a href="https://biolib.com/DTU/DeepTMHMM/" target="_blank">DeepTMHMM</a>.
+      {{#if schemaVersionMin11}}
+      <div id="transmembrane-domains">
+        <p>These domains were detected using <a href="https://biolib.com/DTU/DeepTMHMM/" target="_blank">DeepTMHMM</a>.
           Click the blue rectangles in the diagram or the <em>domain match</em> labels below to learn more.
         </p>
+
+        {{#if selectedTMDomains.length}}
         <svg id="svgTMDomain"></svg>
         <ul class="collapsible" data-collapsible="expandable">
           {{ #each domain in selectedTMDomains}}
@@ -114,15 +117,18 @@
           </li>
           {{/each}}
         </ul>
+        {{else}}
+        <div class="row" style="margin-top: 20px;">
+          <div class="col s12 center-align grey-text">
+            <i class="material-icons" style="font-size: 3rem;">info_outline</i>
+            <p>No transmembrane domains were detected for this gene.</p>
+          </div>
+        </div>
+        {{/if}}
       </div>
-      <div class="modal-footer">
-        <a href="phages" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
-      </div>
-    </div>
-    {{/if}}
+      {{/if}}
 
-    <div id="pham-clusters">
-      <div class="modal-content">
+      <div id="pham-clusters">
         <p>These clusters each contain a phage whose genome encodes a member of pham {{selectedPham}}. Select a
           cluster to
           see these phages.</p>
@@ -142,17 +148,13 @@
           {{/each}}
         </ul>
       </div>
-      <div class="modal-footer">
-        <a href="phages" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
-      </div>
-    </div>
-    <div id="notes">
-      <div class="modal-content">
+      <div id="notes">
         <p id="notes">{{selectedGeneNotes}}</p>
       </div>
-      <div class="modal-footer">
-        <a href="phages" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
-      </div>
+    </div>
+
+    <div class="modal-footer">
+      <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
     </div>
   </div>
 

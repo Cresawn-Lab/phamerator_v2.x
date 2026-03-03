@@ -805,6 +805,8 @@ function update_phages() {
       var phamHeight = 100;
       var phamAALength = Math.abs(d.stop - d.start) / 3.0;
 
+      svgDomain.selectAll("*").remove();
+
       svgDomain
         .append("g")
         .attr("class", "domainVis")
@@ -858,6 +860,7 @@ function update_phages() {
       });
 
       // TM Domains
+      svgTMDomain.selectAll("*").remove();
 
       svgTMDomain
         .append("g")
@@ -934,9 +937,9 @@ function update_phages() {
 
       var onModalClose = function () {
         d3.selectAll("g.domainVis").remove();
-      }
-        ;
+      };
 
+      $('ul.tabs').tabs();
       $('#geneData').modal('open');
       $('#geneData')[0].M_Modal.options.complete = onModalClose;
 
@@ -1397,6 +1400,7 @@ Template.phages.helpers({
   phamAbundanceFD: function () { return Session.get('phamAbundanceFD'); },
   selectedGenomes: selectedGenomes,
   selectedGeneTitle: function () { return Session.get('selectedGeneTitle') },
+  selectedPham: function () { return Session.get('selectedPham'); },
   selectedGene: function () { return Session.get('selectedGene'); },
   selectedGeneNotes: function () { return Session.get('selectedGeneNotes'); },
   selectedProtein: function () { return Session.get('selectedProtein'); },

@@ -14,16 +14,16 @@ Template.account.onRendered(function () {
 
 Template.account.helpers({
   email: function () {
-    return Meteor.user() ? Meteor.user().emails[0].address : null;
+    return Meteor.user()?.emails?.[0]?.address || null;
   },
   username: function () {
-    return Meteor.user() ? Meteor.user().username : null;
+    return Meteor.user()?.username || null;
   },
   name: function () {
-    return Meteor.user() ? Meteor.user().name : null;
+    return Meteor.user()?.name || null;
   },
   includeInDirectory: function () {
-    return Meteor.user() ? Meteor.user().profile.includeInDirectory : null;
+    return Meteor.user()?.profile?.includeInDirectory || false;
   }
 });
 

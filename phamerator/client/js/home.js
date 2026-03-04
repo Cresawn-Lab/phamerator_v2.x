@@ -1,6 +1,4 @@
 Template.home.onCreated(function () {
-  Meteor.subscribe('allUsers');
-
   this.genomeCount = new ReactiveVar(null);
 
   Meteor.call('get_number_of_genomes', (error, result) => {

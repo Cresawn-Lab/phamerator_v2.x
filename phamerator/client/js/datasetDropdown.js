@@ -5,20 +5,28 @@ Template.datasetDropdown.onCreated(function () {
 Template.datasetDropdown.onRendered(function () {
   var self = this;
 
-  Meteor.subscribe('allUsers');
   this.subscribe('datasets');
 
-  this.subscribe("preferredDataset", function () {
-    if (Meteor.user() && Meteor.user().preferredDataset) {
-      switch_dataset(Meteor.user().preferredDataset)
-    }
-  })
+  this.subscribe("preferredDataset");
 
-  if (self.subscriptionsReady()) {
-    Session.set("preferredDataset", preferredDataset)
-    Session.set("datasetsView", Datasets.find({}, { fields: { name: 1 } }).fetch())
-  }
-  else { }
+  let loggedInUser = null;
+  Tracker.autorun(() => {
+    const user = Meteor.user();
+    const isNewLogin = !loggedInUser && user;
+    loggedInUser = user;
+
+    if (isNewLogin && user.preferredDataset) {
+      switch_dataset(user.preferredDataset);
+    } else if (!user && Session.get("preferredDataset") !== "Choose a Data Set" && Datasets.find().count() > 0) {
+      Session.set("preferredDataset", "Choose a Data Set");
+    }
+  });
+
+  Tracker.autorun(() => {
+    if (self.subscriptionsReady()) {
+      Session.set("datasetsView", Datasets.find({}, { fields: { name: 1 } }).fetch());
+    }
+  });
 
   waitForEl("#editDataset", function () {
     M.Modal.init(document.getElementById('editDataset'), {
@@ -49,16 +57,11 @@ Template.datasetDropdown.helpers({
     waitForEl(".dropdown-trigger", function () {
       $(".dropdown-trigger").dropdown({ hover: false, constrainWidth: false })
     })
-    if (Datasets.find().fetch().length === 0) {
+
+    if (Datasets.find().count() === 0) {
       Session.set("preferredDataset", "No data sets available")
-    }
-    else {
-      if (Meteor.user().preferredDataset != "") {
-        Session.set("preferredDataset", Meteor.user().preferredDataset)
-      }
-      else {
-        Session.set("preferredDataset", "Choose a Data Set")
-      }
+    } else if (!Session.get("preferredDataset") || Session.get("preferredDataset") === "No data sets available") {
+      Session.set("preferredDataset", "Choose a Data Set")
     }
     return Datasets.find().fetch();
   },

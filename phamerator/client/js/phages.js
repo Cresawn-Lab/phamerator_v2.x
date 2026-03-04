@@ -133,6 +133,10 @@ function update_hsps(hspData) {
     .data(hspData, function (d) {
       return d.queryName + "___" + d.subjectName;
     });
+
+  // Synchronously and immediately remove exiting nodes
+  // Do NOT add a transition here! Subsquent lines apply d3.selectAll(".hspGroup").transition()
+  // which will accidentally cancel any scheduled removal transitions on exiting nodes.
   hspGroup.exit().remove();
 
   d3.selectAll(".hsp")
@@ -399,10 +403,17 @@ function update_phages() {
     .attr("x", function (d) { return minX });
   svgMap.selectAll(".phages")
     .sort(function (a, b) {
-      let aSelector = a.selector.replace(/\./g, '_dot_').replace(/ /g, '_space_')
-      let bSelector = b.selector.replace(/\./g, '_dot_').replace(/ /g, '_space_')
-      var ay = d3.transform(d3.select('g#phage_' + aSelector).attr("transform")).translate[1];
-      var by = d3.transform(d3.select('g#phage_' + bSelector).attr("transform")).translate[1];
+      if (!a || !b) return 0;
+      let aSelector = 'g#phage_' + a.selector.replace(/\./g, '_dot_').replace(/ /g, '_space_');
+      let bSelector = 'g#phage_' + b.selector.replace(/\./g, '_dot_').replace(/ /g, '_space_');
+
+      let aNode = d3.select(aSelector).node();
+      let bNode = d3.select(bSelector).node();
+
+      if (!aNode || !bNode) return 0;
+
+      var ay = d3.transform(d3.select(aSelector).attr("transform")).translate[1];
+      var by = d3.transform(d3.select(bSelector).attr("transform")).translate[1];
 
       // if both are old, sort by position (new genomes will be at position 0)
       if (ay > 0 && by > 0) {
@@ -428,13 +439,23 @@ function update_phages() {
     })
 
     .attr("transform", function (d, i) {
-      return "translate(" + d3.transform(d3.select('g#phage_' + d.selector.replace(/\./g, '_dot_').replace(/ /g, '_space_')).attr("transform")).translate[0]
+      if (!d) return "";
+      let selector = 'g#phage_' + d.selector.replace(/\./g, '_dot_').replace(/ /g, '_space_');
+      let node = d3.select(selector).node();
+      if (!node) return "";
+
+      return "translate(" + d3.transform(d3.select(selector).attr("transform")).translate[0]
         + "," + ((i * 300) + 150) + ")";
     });
 
   adjust_skew = function (genome) {
-    if (typeof d3.transform(d3.select(genome).attr("transform")).translate[0] == undefined) {
-      d3.select(genome).attr("transform", "translate(0," + d3.transform(d3.select(genome).attr("transform")).translate[1] + ")")
+    if (!genome) return;
+
+    var genomeSelection = d3.select(genome);
+    if (!genomeSelection || !genomeSelection.node()) return;
+
+    if (typeof d3.transform(genomeSelection.attr("transform")).translate[0] == undefined) {
+      genomeSelection.attr("transform", "translate(0," + d3.transform(genomeSelection.attr("transform")).translate[1] + ")")
     }
     queryForThisSubjectName = null;
     subjectForThisQueryName = null;
@@ -458,7 +479,11 @@ function update_phages() {
       queryForThisSubjectName = hspGroupSubject[0][0].id.split("___")[0].replace(/\./g, '_dot_').replace(/ /g, '_space_');
       queryForThisSubjectSelection = d3.select("g#" + queryForThisSubjectName);
       // get the offset of the genome above
-      queryForThisSubjectX = d3.transform(queryForThisSubjectSelection.attr("transform")).translate[0];
+      if (queryForThisSubjectSelection && queryForThisSubjectSelection.node()) {
+        queryForThisSubjectX = d3.transform(queryForThisSubjectSelection.attr("transform")).translate[0];
+      } else {
+        queryForThisSubjectName = null;
+      }
     }
 
     // get the hspGroup whose query is this genome
@@ -473,7 +498,11 @@ function update_phages() {
       // get the subject of that query (genome below this one)
       subjectForThisQueryName = hspGroupQuery[0][0].id.split("___")[1].replace(/\./g, '_dot_').replace(/ /g, '_space_');
       subjectForThisQuerySelection = d3.select("g#" + subjectForThisQueryName);
-      subjectForThisQueryX = d3.transform(subjectForThisQuerySelection.attr("transform")).translate[0];
+      if (subjectForThisQuerySelection && subjectForThisQuerySelection.node()) {
+        subjectForThisQueryX = d3.transform(subjectForThisQuerySelection.attr("transform")).translate[0];
+      } else {
+        subjectForThisQueryName = null;
+      }
     }
     if (d3.event && d3.event.x != undefined) {
       if ((d3.event.x < svgMap.attr("x")) && d3.event.x < 0) {
@@ -1207,6 +1236,12 @@ drawBlastAlignments = function (blastAlignmentsOutstanding, json) {
   var parseBlastResult = function (queryName, subjectName, hspsArray) {
     if (queryName === "" || subjectName === "") { return; }
 
+    // If the user deselected either genome while the BLAST alignment was fetching,
+    // abort adding the stale alignment data to the map.
+    if (alignedGenomes.find({ query: queryName, subject: subjectName }).count() === 0) {
+      return;
+    }
+
     var genome_pair_hsps = [];
     hspsArray.forEach(function (value, index, myArray) {
       var hspCoordinates = Array();
@@ -1494,6 +1529,9 @@ Template.phages.events({
               hspData = hspData.filter(function (e, i, a) {
                 return !((e.queryName === element.phagename) || (e.subjectName === element.phagename));
               });
+              window.requestAnimationFrame(function () {
+                update_hsps(hspData);
+              });
               selectedGenomes.remove({ phagename: element.phagename }, function () {
                 alignedGenomes.remove({ query: element.phagename }, function () {
                   alignedGenomes.remove({ subject: element.phagename }, function () {
@@ -1510,9 +1548,6 @@ Template.phages.events({
                     session_tRNAsHandler = new_session_tRNAsHandler;
 
                     Meteor.call('updateSelectedData', 'cluster unchecked', dataset, element.phagename, false);
-                    window.requestAnimationFrame(function () {
-                      update_hsps(hspData);
-                    });
                   });
                 });
               });
@@ -1563,6 +1598,9 @@ Template.phages.events({
             hspData = hspData.filter(function (e, i, a) {
               return !((e.queryName === phagename) || (e.subjectName === phagename));
             });
+            window.requestAnimationFrame(function () {
+              update_hsps(hspData);
+            });
             selectedGenomes.remove({ "phagename": phagename }, function () {
               alignedGenomes.remove({ query: phagename }, function () {
                 alignedGenomes.remove({ subject: phagename }, function () {
@@ -1581,9 +1619,6 @@ Template.phages.events({
 
                   session_tRNAsHandler = new_session_tRNAsHandler;
                   Meteor.call('updateSelectedData', 'phage unchecked', dataset, phagename, false);
-                  window.requestAnimationFrame(function () {
-                    update_hsps(hspData);
-                  });
                 });
               });
             });

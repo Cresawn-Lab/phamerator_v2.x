@@ -1,12 +1,6 @@
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Meteor } from 'meteor/meteor';
 
-// In a real app, you'd import 'render' from client/js/layout.js, 
-// but since this file is in lib/ (shared), we need to be careful.
-// Ideally, routes should be client-only or careful about imports.
-// For now, we'll assume the render function is available globally or we dispatch differently.
-// Actually, FlowRouter routes are strictly Client-side for rendering usually.
-
 if (Meteor.isClient) {
   // Dynamic import to avoid server-side issues
   import('/client/js/layout.js').then(({ render }) => {
@@ -20,6 +14,11 @@ if (Meteor.isClient) {
 
     FlowRouter.route('/phages', {
       name: 'phages',
+      triggersEnter: [function (context, redirect) {
+        if (!Meteor.userId()) {
+          redirect('/');
+        }
+      }],
       action() {
         render('masterLayout', { main: 'phages', nav: 'nav' });
       }

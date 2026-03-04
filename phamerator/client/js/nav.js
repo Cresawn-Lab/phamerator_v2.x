@@ -6,17 +6,12 @@ switch_dataset = function (dataset) {
     genomesWithSeqHandle.stop()
   }
   genomesWithSeqHandle = Meteor.subscribe("genomesWithSeq");
-  preferredDataset = dataset;
   Session.set("currentDataset", dataset);
-  Session.set("currentDataset", dataset);
+  Session.set("preferredDataset", dataset);
 
-  var preferredDataset = "Choose a Data Set";
-  Meteor.call("updatePreferredDataset", dataset, function (error, result) {
-    if (Meteor.user().preferredDataset) {
-      preferredDataset = Meteor.user().preferredDataset;
-    }
-    Session.set("preferredDataset", preferredDataset)
-  })
+  if (Meteor.userId()) {
+    Meteor.call("updatePreferredDataset", dataset);
+  }
   usersThatCanView = getUsersThatCanView()
   Tracker.autorun(() => {
     autoCompleteUsers = getAutocompleteUsers()
@@ -64,24 +59,6 @@ Meteor.startup(function () {
   // Here we can be sure the plugin has been initialized
   Session.set("datasetsOwn", []);
   Session.set("datasetsView", []);
-
-  Meteor.subscribe('fullname');
-  Meteor.subscribe('featureDiscovery', function () {
-    const user = Meteor.user();
-    if (user && user.profile && user.profile.includeInDirectory == null) {
-      M.toast({ html: 'Please review your<a href="account">account settings</a>', displayLength: 5000 });
-    }
-    if (user && user.featureDiscovery == null) {
-      Session.set("geneTranslation", true);
-    }
-    else if (user && user.featureDiscovery && user.featureDiscovery.geneTranslation == null) {
-      Session.set("geneTranslation", true);
-    }
-    else if (user && user.featureDiscovery) {
-      geneTranslation = user.featureDiscovery.geneTranslation;
-      Session.set("geneTranslation", geneTranslation);
-    }
-  });
 });
 
 Template.nav.helpers({
@@ -150,10 +127,6 @@ Template.nav.onRendered(function () {
       Session.set("datasetsOwn", []);
     }
   });
-
-  Meteor.subscribe('files.images.all');
-  Meteor.subscribe('fullname');
-  Meteor.subscribe('allUsers');
 
   var sidenavs = document.querySelectorAll('.sidenav');
   M.Sidenav.init(sidenavs, {

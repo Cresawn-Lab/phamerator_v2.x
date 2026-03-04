@@ -22,6 +22,74 @@ Template.registerHelper('nav', () => LayoutState.nav.get());
 Template.registerHelper('currentLayout', () => LayoutState.layout.get());
 
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import { Meteor } from 'meteor/meteor';
+import { Tracker } from 'meteor/tracker';
+
+let globalSubscriptionHandles = [];
+
+// Add an autorun to handle logging out while on protected routes, and clean up global subscriptions
+Meteor.startup(() => {
+  Tracker.autorun(() => {
+    const currentRoute = FlowRouter.getRouteName();
+    const isLoggingIn = Meteor.loggingIn();
+    const userId = Meteor.userId();
+
+    if (userId) {
+      // User is logged in, start global subscriptions if not already started
+      if (globalSubscriptionHandles.length === 0) {
+        globalSubscriptionHandles.push(Meteor.subscribe('allUsers'));
+        globalSubscriptionHandles.push(Meteor.subscribe('fullname'));
+        globalSubscriptionHandles.push(Meteor.subscribe('files.images.all'));
+        globalSubscriptionHandles.push(Meteor.subscribe('featureDiscovery', function () {
+          const user = Meteor.user();
+          if (user && user.profile && user.profile.includeInDirectory == null) {
+            M.toast({ html: 'Please review your<a href="account">account settings</a>', displayLength: 5000 });
+          }
+          if (user && user.featureDiscovery == null) {
+            Session.set("geneTranslation", true);
+          }
+          else if (user && user.featureDiscovery && user.featureDiscovery.geneTranslation == null) {
+            Session.set("geneTranslation", true);
+          }
+          else if (user && user.featureDiscovery) {
+            geneTranslation = user.featureDiscovery.geneTranslation;
+            Session.set("geneTranslation", geneTranslation);
+          }
+        }));
+      }
+    } else if (!isLoggingIn) {
+      // User is logged out
+      if (currentRoute === 'phages') {
+        FlowRouter.go('/');
+      }
+
+      // Stop all global subscriptions
+      globalSubscriptionHandles.forEach(handle => {
+        if (handle && handle.stop) handle.stop();
+      });
+      globalSubscriptionHandles = [];
+
+      // Stop any active genome handlers gracefully using standard global var syntax
+      if (typeof genomesWithSeqHandle !== 'undefined' && genomesWithSeqHandle && genomesWithSeqHandle.stop) {
+        genomesWithSeqHandle.stop();
+      }
+      if (typeof genomesWithSeqHandlers !== 'undefined' && Array.isArray(genomesWithSeqHandlers)) {
+        genomesWithSeqHandlers.forEach(handler => {
+          if (handler && handler.stop) handler.stop();
+        });
+        genomesWithSeqHandlers = [];
+      }
+
+      // Clear out locally cached client map sessions
+      if (typeof selectedGenomes !== 'undefined') {
+        selectedGenomes.remove({});
+      }
+      if (typeof alignedGenomes !== 'undefined') {
+        alignedGenomes.remove({});
+      }
+    }
+  });
+});
 
 Template.registerHelper('pathFor', (routeName, params) => {
   // Handle both {{pathFor 'name'}} and {{pathFor route='name'}} if applicable, 
@@ -37,9 +105,10 @@ Template.registerHelper('isActiveRoute', (kwargs) => {
   const pattern = kwargs && kwargs.hash && kwargs.hash.regex;
   if (!pattern) return '';
   FlowRouter.watchPathChange();
+
   const current = FlowRouter.getRouteName();
-  // Simple check: exact match or simple regex if needed. 
-  // The old code used 'regex', implying it could be a pattern.
+
+
   // For now, assume it matches route name substring or exact.
   if (current && current === pattern) return 'active';
   return '';

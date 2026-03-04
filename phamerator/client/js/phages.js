@@ -290,6 +290,8 @@ function update_phages() {
         translation: g.translation,
         geneID: g.geneID,
         phamColor: g.phamColor,
+        domainCount: g.domainCount,
+        tmDomainCount: g.tmDomainCount,
         genefunction: g.genefunction || g.Notes || g.function || g.product || ""
       };
     });

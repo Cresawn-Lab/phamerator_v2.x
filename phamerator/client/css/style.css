@@ -151,7 +151,43 @@ text.horizontalAlign {
 }
 
 #genome-map {
-    /*overflow: scroll;*/
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+}
+
+#genome-map-tabs {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 64px;
+    z-index: 998;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#genome-map-tabs .tabs {
+    background-color: transparent;
+}
+
+#genome-map-tabs .tab a {
+    color: #5e35b1 !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: background-color 0.2s;
+}
+
+#genome-map-tabs .tab a:hover {
+    background-color: rgba(94, 53, 177, 0.05);
+}
+
+#genome-map-tabs .tab a.active {
+    color: #311b92 !important;
+    background-color: rgba(94, 53, 177, 0.1);
+}
+
+#genome-map-tabs .indicator {
+    background-color: #311b92 !important;
+    height: 3px;
 }
 
 .thumb_profilepic {

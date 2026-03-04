@@ -37,7 +37,12 @@ Meteor.methods({
     return await Roles.getScopesForUserAsync(Meteor.userId(), "owner")
   },
   "updatePreferredDataset": async function (dataset) {
-    groups = await Roles.getScopesForUserAsync(Meteor.userId(), "view")
+    if (dataset === 'Actino_Draft') {
+      await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "preferredDataset": dataset } });
+      return;
+    }
+
+    let groups = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
     if (groups.includes(dataset)) {
       await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "preferredDataset": dataset } });
       return;

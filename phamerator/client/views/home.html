@@ -20,7 +20,11 @@
             </p>
             <div class="cta-section"
                 style="margin-top: 4rem; display: flex; justify-content: space-evenly; flex-wrap: wrap;">
+                {{#if currentUser}}
                 <a href="/phages" class="waves-effect waves-light btn-large teal">Get Started</a>
+                {{else}}
+                <a id="trigger-login" class="waves-effect waves-light btn-large teal">Sign In to Get Started</a>
+                {{/if}}
                 <a href="/cresawnlab" class="waves-effect waves btn-large white black-text">Learn More</a>
                 <a href="mailto:info@phamerator.org" class="waves-effect waves btn-large purple white-text">Contact
                     Us</a>

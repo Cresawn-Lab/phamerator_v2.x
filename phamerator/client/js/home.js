@@ -54,3 +54,14 @@ Template.home.helpers({
     return genomeCount ? genomeCount.toLocaleString() : "";
   }
 });
+
+Template.home.events({
+  "click #trigger-login": function (event, template) {
+    event.preventDefault();
+    // Programmatically open the Meteor login buttons dropdown located in the nav bar
+    let loginLink = document.getElementById("login-sign-in-link");
+    if (loginLink) {
+      loginLink.click();
+    }
+  }
+});

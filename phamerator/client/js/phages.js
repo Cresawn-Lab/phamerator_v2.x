@@ -1471,16 +1471,17 @@ Template.phages.events({
     }
 
     $("#preloader").show(function () {
+      let clusterGenomes;
       if (event.target.id !== "Singletons") {
         clusterGenomes = Genomes.find({ cluster: event.target.getAttribute("data-cluster"), subcluster: sc }).fetch();
       }
       else {
         clusterGenomes = Genomes.find({ cluster: "", subcluster: "" }).fetch();
       }
-      clusterPhageNames = clusterGenomes.map(function (obj) { return obj.phagename });
+      let clusterPhageNames = clusterGenomes.map(function (obj) { return obj.phagename });
       let handler = Meteor.subscribe("genomesWithSeq", Session.get("currentDataset"), clusterPhageNames, {
         onReady: function () {
-          clusterGenomes = Genomes.find({ cluster: event.target.getAttribute("data-cluster"), subcluster: sc })
+          let updatedClusterGenomes = Genomes.find({ cluster: event.target.getAttribute("data-cluster"), subcluster: sc })
             .fetch()
             .map(g => {
               g.subcluster = g.subcluster.toString()
@@ -1489,7 +1490,7 @@ Template.phages.events({
 
 
           if (event.target.checked) {
-            clusterGenomes.forEach(function (element, index, array) {
+            updatedClusterGenomes.forEach(function (element, index, array) {
 
               selectedGenomes.upsert({ phagename: element.phagename }, {
                 phageID: element.phageID,
@@ -1517,7 +1518,7 @@ Template.phages.events({
           }
           else {
 
-            clusterGenomes.forEach(function (element, index, array) {
+            updatedClusterGenomes.forEach(function (element, index, array) {
 
               hspData = hspData.filter(function (e, i, a) {
                 return !((e.queryName === element.phagename) || (e.subjectName === element.phagename));
@@ -1555,12 +1556,12 @@ Template.phages.events({
   "change .phageCheckbox": function (event, template) {
     $("#preloader").show(function () {
       // get a list of all phagenames on the client
-      phagename = event.target.id;
+      let phagename = event.target.id;
 
       let handler = Meteor.subscribe("genomesWithSeq", Session.get("currentDataset"), [phagename], {
         onReady: function () {
           if (event.target.checked) {
-            p = Genomes.findOne({ phagename: phagename });
+            let p = Genomes.findOne({ phagename: phagename });
             selectedGenomes.upsert({ phagename: p.phagename }, {
               phagename: p.phagename,
               genomelength: p.genomelength,

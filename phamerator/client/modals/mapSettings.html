@@ -37,23 +37,32 @@
             <h5>Gene color coding</h5>
 
             <div class="col s12 m6 l6">
-              <input name="colorswitch" type="radio" id="phamColorRadioButton" value="{{phamColorState}}"
-                checked="checked" />
-              <label for="phamColorRadioButton">Phamily color</label>
+              <label>
+                <input name="colorswitch" type="radio" id="phamColorRadioButton" value="{{phamColorState}}"
+                  checked="checked" />
+                <span>Phamily color</span>
+              </label>
             </div>
 
             <div class="col s12 m6 l6">
-              <input name="colorswitch" type="radio" id="phamAbundanceRadioButton" value="{{phamAbundanceState}}" />
-              <label for="phamAbundanceRadioButton">Phamily abundance</label>
+              <label>
+                <input name="colorswitch" type="radio" id="phamAbundanceRadioButton" value="{{phamAbundanceState}}" />
+                <span>Phamily abundance</span>
+              </label>
             </div>
             <div class="col s12 m6 l6">
-              <input name="colorswitch" type="radio" id="conservedDomainRadioButton" value="{{conservedDomainState}}" />
-              <label for="conservedDomainRadioButton">Conserved domain display</label>
+              <label>
+                <input name="colorswitch" type="radio" id="conservedDomainRadioButton"
+                  value="{{conservedDomainState}}" />
+                <span>Conserved domain display</span>
+              </label>
             </div>
             {{#if schemaVersionMin11}}
             <div class="col s12 m6 l6">
-              <input name="colorswitch" type="radio" id="TMDomainRadioButton" value="{{TMDomainState}}" />
-              <label for="TMDomainRadioButton">Transmembrane domain display</label>
+              <label>
+                <input name="colorswitch" type="radio" id="TMDomainRadioButton" value="{{TMDomainState}}" />
+                <span>Transmembrane domain display</span>
+              </label>
             </div>
             {{/if}}
           </div>

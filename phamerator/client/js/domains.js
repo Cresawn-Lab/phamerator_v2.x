@@ -36,7 +36,7 @@ Template.domains.helpers({
     return Session.get('genesByDomain');
   },
   currentDataset: function () {
-    return Session.get(currentDataset)
+    return Session.get("currentDataset");
   },
   domainMatches: function () {
     return Session.get('domainMatches')

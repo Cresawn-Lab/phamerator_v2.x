@@ -66,6 +66,11 @@ if (Meteor.isClient) {
 
     FlowRouter.route('/account', {
       name: 'account',
+      triggersEnter: [function (context, redirect) {
+        if (!Meteor.userId()) {
+          redirect('/');
+        }
+      }],
       action() {
         render('masterLayout', { main: 'account', nav: 'nav' });
       }

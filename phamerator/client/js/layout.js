@@ -67,7 +67,7 @@ Meteor.startup(() => {
       // User is logged out
       Session.set("currentDataset", undefined);
 
-      if (currentRoute === 'phages' || currentRoute === 'domains') {
+      if (currentRoute === 'phages' || currentRoute === 'domains' || currentRoute === 'account') {
         FlowRouter.go('/');
       }
 

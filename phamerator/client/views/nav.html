@@ -36,9 +36,9 @@
         <ul class="right hide-on-med-and-down">
           <li class="{{isActiveRoute regex='home'}}"><a href="{{pathFor 'home'}}"
               class="waves-effect waves-purple lighten-5">Home</a></li>
+          {{#if currentUser}}
           <li class="{{isActiveRoute regex='domains'}}"><a href="{{pathFor 'domains'}}"
               class="waves-effect waves-purple lighten-5">Domains</a></li>
-          {{#if currentUser}}
           <li class="{{isActiveRoute regex='phages'}}"><a href="{{pathFor 'phages'}}"
               class="waves-effect waves-purple lighten-5">Genome Maps</a></li>
           {{/if}}
@@ -65,6 +65,8 @@
               class="waves-effect waves-purple lighten-5">Home</a></li>
 
           {{#if loggedIn}}
+          <li class="{{isActiveRoute regex='domains'}}"><a href="{{pathFor 'domains'}}"
+              class="waves-effect waves-purple lighten-5">Domains</a></li>
           <li class="{{isActiveRoute regex='phages'}}"><a href="{{pathFor 'phages'}}"
               class="waves-effect waves-purple lighten-5">Genome Maps</a></li>
           <li class="{{isActiveRoute regex='account'}}"><a href="{{pathFor 'account'}}"

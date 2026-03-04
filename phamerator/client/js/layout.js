@@ -59,7 +59,7 @@ Meteor.startup(() => {
       }
     } else if (!isLoggingIn) {
       // User is logged out
-      if (currentRoute === 'phages') {
+      if (currentRoute === 'phages' || currentRoute === 'domains') {
         FlowRouter.go('/');
       }
 

@@ -329,10 +329,10 @@ function update_phages() {
         return d.phamColor;
       }
       else if (Session.get("colorByConservedDomains") === true) {
-        return (d.domainCount === 0) ? "white" : "orange"
+        return (d.domainCount > 0) ? "orange" : "white"
       }
       else if (Session.get("colorByTMDomains") === true) {
-        return (d.tmDomainCount === 0) ? "white" : "dodgerblue"
+        return (d.tmDomainCount > 0) ? "dodgerblue" : "white"
       }
     })
     .attr("opacity", function (d) {
@@ -992,10 +992,10 @@ function update_phages() {
 
       }
       else if (Session.get("colorByConservedDomains") === true) {
-        return (d.domainCount === 0) ? "white" : "orange"
+        return (d.domainCount > 0) ? "orange" : "white"
       }
       else if (Session.get("colorByTMDomains") === true) {
-        return (d.tmDomainCount === 0) ? "white" : "dodgerblue"
+        return (d.tmDomainCount > 0) ? "dodgerblue" : "white"
       }
     })
     .attr("width", 0)

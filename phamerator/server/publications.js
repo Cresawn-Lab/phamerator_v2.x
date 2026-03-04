@@ -11,12 +11,12 @@ Meteor.publish("allUsers", function () {
 Meteor.publishComposite("genomes", function (dataset) {
   return {
     find: async function () {
-      if (dataset === 'Actino_Draft') {
-        const d = await Datasets.findOneAsync({ name: 'Actino_Draft' });
-        return Datasets.find({ name: 'Actino_Draft' });
-      }
-
       if (!this.userId) return;
+
+      const d = await Datasets.findOneAsync({ name: dataset, public: true });
+      if (d) {
+        return Datasets.find({ name: dataset });
+      }
 
       const user = await Meteor.users.findOneAsync(this.userId);
       console.log('Legacy User Roles:', JSON.stringify(user.roles));
@@ -28,11 +28,12 @@ Meteor.publishComposite("genomes", function (dataset) {
     },
     children: [{
       find: async function () {
-        if (dataset === 'Actino_Draft') {
+        if (!this.userId) return;
+
+        const d = await Datasets.findOneAsync({ name: dataset, public: true });
+        if (d) {
           return Genomes.find({ dataset: dataset }, { fields: { phageID: 1, phagename: 1, genomelength: 1, cluster: 1, subcluster: 1, dataset: 1 } });
         }
-
-        if (!this.userId) return;
 
         const scopes = await Roles.getScopesForUserAsync(this.userId, "view");
         if (!scopes.includes(dataset)) {
@@ -55,11 +56,12 @@ Meteor.publish("domains", function (dataset) {
 
 Meteor.publish("selected_tRNAs", async function (dataset, selectedGenomes) {
   if (dataset) {
-    if (dataset === 'Actino_Draft') {
+    if (!this.userId) return;
+
+    const d = await Datasets.findOneAsync({ name: dataset, public: true });
+    if (d) {
       return TRNAs.find({ "PhageID": { $in: selectedGenomes }, dataset: dataset });
     }
-
-    if (!this.userId) return;
 
     var datasets = await Roles.getScopesForUserAsync(this.userId, "view")
     if (!datasets.includes(dataset)) { return [] }
@@ -73,8 +75,11 @@ Meteor.publish("selected_tRNAs", async function (dataset, selectedGenomes) {
 
 Meteor.publish("genomesWithSeq", async function (dataset, selectedGenomes) {
   if (dataset) {
-    if (dataset === 'Actino_Draft') {
-      const genomeCursor = Genomes.find({ "phagename": { $in: selectedGenomes }, dataset: dataset });
+    if (!this.userId) return [];
+
+    const d = await Datasets.findOneAsync({ name: dataset, public: true });
+    if (d) {
+      const genomeCursor = Genomes.find({ "phagename": { $in: selectedGenomes }, dataset: dataset }, { fields: { genes: 1, sequence: 1, phageID: 1, phagename: 1, genomelength: 1, cluster: 1, subcluster: 1, dataset: 1, clusterSubcluster: 1 } });
       const genomes = await genomeCursor.fetchAsync();
       const genomeIds = genomes.map(g => g._id);
       return [
@@ -82,8 +87,6 @@ Meteor.publish("genomesWithSeq", async function (dataset, selectedGenomes) {
         Genes.find({ genome: { $in: genomeIds } })
       ];
     }
-
-    if (!this.userId) return [];
 
     var datasets = await Roles.getScopesForUserAsync(this.userId, "view")
     if (!datasets.includes(dataset)) { return [] }
@@ -112,12 +115,14 @@ Meteor.publishComposite("datasets", {
   children: [{
     find: async function () {
       if (!this.userId) {
-        return Datasets.find({ "name": "Actino_Draft" });
+        return this.ready();
       }
+
+      const scopes = await Roles.getScopesForUserAsync(this.userId, "view");
       return Datasets.find({
         $or: [
-          { "name": "Actino_Draft" },
-          { "name": { $in: await Roles.getScopesForUserAsync(this.userId, "view") } }
+          { public: true },
+          { name: { $in: scopes } }
         ]
       });
     }

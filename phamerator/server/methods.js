@@ -31,19 +31,32 @@ Meteor.methods({
     return await cursor.fetchAsync();
   },
   "getDatasetsIView": async function () {
-    return await Roles.getScopesForUserAsync(Meteor.userId(), "view")
+    if (!Meteor.userId()) return [];
+    const scopes = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
+
+    // Fetch all public datasets
+    const publicDatasets = await Datasets.find({ public: true }, { fields: { name: 1 } }).fetchAsync();
+    const publicNames = publicDatasets.map(d => d.name);
+
+    // Combine scopes with public datasets and return unique set
+    return [...new Set([...scopes, ...publicNames])];
   },
   "getDatasetsIOwn": async function () {
     return await Roles.getScopesForUserAsync(Meteor.userId(), "owner")
   },
   "updatePreferredDataset": async function (dataset) {
-    if (dataset === 'Actino_Draft') {
+    if (!Meteor.userId()) return;
+
+    // Is the dataset explicitly in their view scopes?
+    let groups = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
+    if (groups.includes(dataset)) {
       await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "preferredDataset": dataset } });
       return;
     }
 
-    let groups = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
-    if (groups.includes(dataset)) {
+    // Is the dataset marked as globally public?
+    const d = await Datasets.findOneAsync({ name: dataset, public: true });
+    if (d) {
       await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "preferredDataset": dataset } });
       return;
     }
@@ -126,15 +139,18 @@ Meteor.methods({
   },
 
   "getphams": async function (currentDataset) {
-    if (currentDataset === 'Actino_Draft') {
-      // allow
+    if (!Meteor.userId()) return [];
+
+    let allowed = false;
+    const scopes = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
+    if (scopes.includes(currentDataset)) {
+      allowed = true;
     } else {
-      if (!Meteor.userId()) return [];
-      const scopes = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
-      if (!scopes.includes(currentDataset)) {
-        return [];
-      }
+      const d = await Datasets.findOneAsync({ name: currentDataset, public: true });
+      if (d) allowed = true;
     }
+
+    if (!allowed) return [];
 
     let phams = await Phams.find({ dataset: currentDataset }).fetchAsync();
 
@@ -265,16 +281,18 @@ Meteor.methods({
 
 
   "getclusters": async function (currentDataset) {
+    if (!Meteor.userId()) return [];
 
-    if (currentDataset === 'Actino_Draft') {
-      // allow
+    let allowed = false;
+    const scopes = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
+    if (scopes.includes(currentDataset)) {
+      allowed = true;
     } else {
-      if (!Meteor.userId()) return [];
-      const scopes = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
-      if (!scopes.includes(currentDataset)) {
-        return [];
-      }
+      const d = await Datasets.findOneAsync({ name: currentDataset, public: true });
+      if (d) allowed = true;
     }
+
+    if (!allowed) return [];
 
     clusters = [];
 

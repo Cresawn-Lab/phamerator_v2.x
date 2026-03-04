@@ -1,4 +1,4 @@
-import { Datasets, Genomes, Images } from '/lib/collections.js';
+import { Datasets } from '/imports/api/collections.js';
 
 switch_dataset = function (dataset) {
   selectedGenomes.remove({});
@@ -74,15 +74,6 @@ Template.nav.helpers({
   },
   loggedIn: function () {
     return Meteor.user() != null;
-  },
-  imageFile: function () {
-    user = Images.collection.findOne({ _id: Meteor.user() })
-    if (user && user.hasOwnProperty('profile') && user.profile.hasOwnProperty('profilePic')) {
-      profile = user.profile;
-      profilePic = user.profile.profilePic;
-    }
-    else profilePic = "";
-    return profilePic;
   },
   preferredDataset: function () {
     return Session.get("currentDataset") || "Choose a data set";

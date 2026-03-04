@@ -1,3 +1,10 @@
+import { Datasets } from "/imports/api/collections";
+import { TRNAs } from "/imports/api/collections";
+import { Genes } from "/imports/api/collections";
+import { Genomes } from "/imports/api/collections";
+import { Phams } from "/imports/api/collections";
+import { Proteins } from "/imports/api/collections";
+import { Domains } from "/imports/api/collections";
 import Clipboard from 'clipboard';
 import d3 from 'd3';
 
@@ -1169,6 +1176,7 @@ Template.phages.onCreated(function () {
 
     Meteor.call('getphams', dataset, function (error, result) {
       if (typeof error !== 'undefined') {
+        console.error('Error getting phams:', error);
         alert('error getting phams:', error)
       } else {
         Session.set('phamsObj', result);
@@ -1879,7 +1887,7 @@ Template.mapSettingsModal.helpers({
     return Session.get("colorByConservedDomains");
   },
   'TMDomainState': function () {
-    return Session.get("colorbByTMDomains")
+    return Session.get("colorByTMDomains")
   },
   'phamColorState': function () {
     return Session.get("colorByPhams");

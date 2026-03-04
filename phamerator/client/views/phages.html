@@ -90,14 +90,13 @@
           Click the blue rectangles in the diagram or the <em>domain match</em> labels below to learn more.
         </p>
 
-        {{#if selectedTMDomains.length}}
         <svg id="svgTMDomain"></svg>
         <ul class="collapsible" data-collapsible="expandable">
           {{ #each domain in selectedTMDomains}}
-          <li id={{domain.id}}>
-            <div class="collapsible-header" id={{domain.id}}>
+          <li id="tm-domain-{{domain._id._str}}">
+            <div class="collapsible-header" id="tm-domain-{{domain._id._str}}">
               domain match</div>
-            <div class="collapsible-body" id={{domain.id}}>
+            <div class="collapsible-body" id="tm-domain-{{domain._id._str}}">
               <ul>
                 <br />
                 <li><u>
@@ -117,14 +116,15 @@
           </li>
           {{/each}}
         </ul>
-        {{else}}
+
+        {{#unless selectedTMDomains.length}}
         <div class="row" style="margin-top: 20px;">
           <div class="col s12 center-align grey-text">
             <i class="material-icons" style="font-size: 3rem;">info_outline</i>
             <p>No transmembrane domains were detected for this gene.</p>
           </div>
         </div>
-        {{/if}}
+        {{/unless}}
       </div>
       {{/if}}
 

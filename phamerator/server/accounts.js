@@ -1,4 +1,6 @@
 // ensure that all accounts have all needed fields
+import { Datasets } from "../imports/api/collections";
+
 Meteor.startup(async function () {
   Accounts.onLogout(function () {
   })

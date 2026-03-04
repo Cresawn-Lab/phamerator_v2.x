@@ -1,3 +1,5 @@
+import { Datasets } from "/imports/api/collections";
+
 Template.infoDatasetModal.onRendered(function () {
 });
 

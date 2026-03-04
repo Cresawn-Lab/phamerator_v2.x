@@ -1,3 +1,12 @@
+import { TMDomains } from "/imports/api/collections";
+import { TRNAs } from "/imports/api/collections";
+import { Datasets } from "/imports/api/collections";
+import { Genomes } from "/imports/api/collections";
+import { Phams } from "/imports/api/collections";
+import { Domains } from "/imports/api/collections";
+import { Genes } from "/imports/api/collections";
+import { Proteins } from "/imports/api/collections";
+
 Meteor.methods({
   "userExists": async function (username) {
     return !!await Meteor.users.findOneAsync({
@@ -167,8 +176,9 @@ Meteor.methods({
       phams = stats.map(s => ({ PhamID: s._id, size: s.size }));
     }
 
-    phamsObj = phams.reduce(function (o, currentArray) {
-      n = currentArray.PhamID, v = currentArray.size;
+    let phamsObj = phams.reduce(function (o, currentArray) {
+      let n = currentArray.PhamID;
+      let v = currentArray.size;
       o[n] = v;
       return o
     }, {});
@@ -177,7 +187,7 @@ Meteor.methods({
 
   "get_clusters_by_pham": async function (dataset, phamname) {
 
-    selectedClusterMembers = []; //array of objects of form {cluster: "A1", phages: ['L5', 'D29', ...]}
+    let selectedClusterMembers = []; //array of objects of form {cluster: "A1", phages: ['L5', 'D29', ...]}
 
     if (typeof phamname != null) {
       const phamclusters = await Genomes.find({
@@ -234,13 +244,8 @@ Meteor.methods({
   },
 
   "get_domains_by_query": async function (domainDescription, dataset) {
-    // Note: distinct is mostly async in newer drivers but via rawCollection it returns a promise usually.
-    // However, rawCollection().distinct() returns a promise directly.
-
     // get all the DomainIDs whose description matches the query
     const domainIDs = await Domains.rawCollection().distinct('DomainID', { description: new RegExp(domainDescription), dataset: dataset });
-
-    // We can't verify 'then' usage easily with modern async/await, so let's rewrite cleanly.
 
     const domains = await Promise.all(domainIDs.map(async (domainID) => {
       d = await Domains.findOneAsync({ DomainID: domainID, dataset: dataset }, { domainID: true, description: true })
@@ -251,7 +256,7 @@ Meteor.methods({
   },
 
   "get_domains_by_gene": async function (geneID, dataset) {
-    domains = await Domains.find({ geneID: geneID, dataset: dataset }).fetchAsync();
+    let domains = await Domains.find({ geneID: geneID, dataset: dataset }).fetchAsync();
     domains.forEach(function (d) {
       d.domainLink = "https://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=" + d.DomainID;
     })
@@ -259,7 +264,7 @@ Meteor.methods({
   },
 
   "get_tm_domains_by_gene": async function (geneID, dataset) {
-    tmdomains = await TMDomains.find({ geneID: geneID, dataset: dataset }).fetchAsync();
+    let tmdomains = await TMDomains.find({ geneID: geneID, dataset: dataset }).fetchAsync();
     return tmdomains;
   },
 
@@ -294,7 +299,7 @@ Meteor.methods({
 
     if (!allowed) return [];
 
-    clusters = [];
+    let clusters = [];
 
     const distinctClusters = await Genomes.rawCollection().distinct('cluster', { "dataset": currentDataset });
     // distinct returns array of values directly in promise result

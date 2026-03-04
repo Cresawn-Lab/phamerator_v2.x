@@ -45,10 +45,6 @@
           {{#if loggedIn}}
           <li class="{{isActiveRoute regex='account'}}"><a href="{{pathFor 'account'}}"
               class="waves-effect waves-purple lighten-5">{{displayname}}</a></li>
-          {{#if imageFile}}
-          <li style="max-height: 63px"><a href="{{pathFor 'account'}}"><img src="{{fileURL imageFile}}"
-                alt="{{imageFile.name}}" class="thumb_profilepic"></a></li>
-          {{/if}}
           {{/if}}
           <li><a href="https://app.gitter.im/#/room/#phamerator_Lobby:gitter.im" target="_blank"
               class="waves-effect waves-light"><i class="material-icons left white-text">chat_bubble</i>Chat</a>
@@ -56,11 +52,6 @@
           <li>{{> loginButtons }}</li>
         </ul>
         <ul id="mobile-menu" class="sidenav">
-          {{#if loggedIn}}
-
-          <li style="width:100%"><img src="{{fileURL imageFile}}" alt="{{imageFile.name}}" style="width:100%">
-          </li>
-          {{/if}}
           <li class="{{isActiveRoute regex='home'}}"><a href="{{pathFor 'home'}}"
               class="waves-effect waves-purple lighten-5">Home</a></li>
 
@@ -71,8 +62,6 @@
               class="waves-effect waves-purple lighten-5">Genome Maps</a></li>
           <li class="{{isActiveRoute regex='account'}}"><a href="{{pathFor 'account'}}"
               class="waves-effect waves-purple lighten-5">{{displayname}}</a></li>
-          {{else}}
-
           {{/if}}
           <li><a class="js-gitter-toggle-chat-button waves-effect waves-light btn"><i
                 class="material-icons left white-text">chat_bubble</i>Chat</a></li>

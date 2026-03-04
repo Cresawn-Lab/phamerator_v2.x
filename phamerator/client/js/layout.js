@@ -45,7 +45,6 @@ Meteor.startup(() => {
       if (globalSubscriptionHandles.length === 0) {
         globalSubscriptionHandles.push(Meteor.subscribe('allUsers'));
         globalSubscriptionHandles.push(Meteor.subscribe('fullname'));
-        globalSubscriptionHandles.push(Meteor.subscribe('files.images.all'));
         globalSubscriptionHandles.push(Meteor.subscribe('featureDiscovery', function () {
           const user = Meteor.user();
           if (user && user.profile && user.profile.includeInDirectory == null) {

@@ -1,4 +1,10 @@
 import { Roles } from 'meteor/alanning:roles';
+import { Datasets } from "../imports/api/collections";
+import { Genomes } from "../imports/api/collections";
+import { Domains } from "../imports/api/collections";
+import { TRNAs } from "../imports/api/collections";
+import { Genes } from "../imports/api/collections";
+import { Proteins } from "../imports/api/collections";
 
 // set up Genomes collection
 // publish just genome names and clusters
@@ -45,14 +51,14 @@ Meteor.publishComposite("genomes", function (dataset) {
   }
 });
 
-Meteor.publish("domains", function (dataset) {
-  if (dataset) {
-    return Domains.find({ dataset: dataset })
-  }
-  else {
-    return this.stop()
-  }
-})
+// Meteor.publish("domains", function (dataset) {
+//   if (dataset) {
+//     return Domains.find({ dataset: dataset })
+//   }
+//   else {
+//     return this.stop()
+//   }
+// })
 
 Meteor.publish("selected_tRNAs", async function (dataset, selectedGenomes) {
   if (dataset) {
@@ -131,10 +137,6 @@ Meteor.publishComposite("datasets", {
 
 Meteor.publish('preferredDataset', function () {
   return Meteor.users.find({ _id: this.userId }, { fields: { preferredDataset: 1 } });
-});
-
-Meteor.publish('files.images.all', function () {
-  return Images.find().cursor;
 });
 
 Meteor.publish('selectedData', function () {

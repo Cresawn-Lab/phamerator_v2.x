@@ -1143,14 +1143,7 @@ Template.phages.onCreated(function () {
   Session.set("colorByConservedDomains", false)
   Session.set("colorByTMDomains", false)
   Session.set("colorByPhams", true)
-  Tracker.autorun(() => {
-    const user = Meteor.user();
-    if (user && user.preferredDataset) {
-      Session.set("currentDataset", user.preferredDataset);
-    } else {
-      Session.set("currentDataset", "Actino_Draft");
-    }
-  });
+  // Centralized currentDataset initialization was moved to layout.js to prevent "Actino_Draft" silent overwrites
 
   Meteor.call('getlargestphamsize', function (error, result) {
     if (typeof error !== 'undefined') {

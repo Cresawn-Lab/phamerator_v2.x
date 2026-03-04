@@ -33,6 +33,12 @@ Meteor.startup(() => {
     const currentRoute = FlowRouter.getRouteName();
     const isLoggingIn = Meteor.loggingIn();
     const userId = Meteor.userId();
+    const user = Meteor.user();
+
+    // Initialize preferred dataset globally on login if one is saved and none is active
+    if (user && user.preferredDataset && !Session.get("currentDataset")) {
+      Session.set("currentDataset", user.preferredDataset);
+    }
 
     if (userId) {
       // User is logged in, start global subscriptions if not already started
@@ -59,6 +65,8 @@ Meteor.startup(() => {
       }
     } else if (!isLoggingIn) {
       // User is logged out
+      Session.set("currentDataset", undefined);
+
       if (currentRoute === 'phages' || currentRoute === 'domains') {
         FlowRouter.go('/');
       }

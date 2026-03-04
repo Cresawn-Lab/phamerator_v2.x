@@ -85,7 +85,7 @@ Template.nav.helpers({
     return profilePic;
   },
   preferredDataset: function () {
-    return Session.get("preferredDataset");
+    return Session.get("currentDataset") || "Choose a data set";
   },
   iAmOwner: function () {
     var own = Session.get("datasetsOwn");

@@ -160,7 +160,7 @@ text.horizontalAlign {
     position: -webkit-sticky;
     position: sticky;
     top: 64px;
-    z-index: 998;
+    z-index: 99;
     background-color: #ffffff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }

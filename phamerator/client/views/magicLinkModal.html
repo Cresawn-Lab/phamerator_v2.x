@@ -1,0 +1,30 @@
+<template name="magicLinkModal">
+  <div id="magicLinkModal" class="modal">
+    <div class="modal-content">
+      <h4>Sign In / Register</h4>
+      <p>Enter your email address to receive a magic sign-in link. No password required!</p>
+      <div class="row">
+        <form class="col s12" id="magic-link-form">
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">email</i>
+              <input id="magic_email" type="email" class="validate" required>
+              <label for="magic_email">Email</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col s12 center-align">
+              <button class="btn waves-effect waves-light purple" type="submit" name="action">
+                Send Magic Link
+                <i class="material-icons right">send</i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+    </div>
+  </div>
+</template>

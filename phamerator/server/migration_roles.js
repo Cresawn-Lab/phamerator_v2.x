@@ -69,7 +69,7 @@ Meteor.startup(async () => {
 
     console.log("Starting Role Migration...");
 
-    const users = await Meteor.users.find({ roles: { $exists: true }, 'roles_migrated_v2': { $ne: true } }).fetchAsync();
+    const users = await Meteor.users.find({ roles: { $exists: true }, 'roles_migrated_v3': { $ne: true } }).fetchAsync();
 
     if (users.length === 0) {
         console.log("No legacy roles found to migrate.");
@@ -80,11 +80,12 @@ Meteor.startup(async () => {
 
     for (const user of users) {
         const legacyRoles = user.roles;
+        const userIdStr = (user._id && user._id._str) ? user._id._str : user._id;
 
         // Handle if it's just an array (global roles, no groups)
         if (Array.isArray(legacyRoles)) {
             // Assume these are global roles
-            await Roles.addUsersToRolesAsync(user._id, legacyRoles, null);
+            await Roles.addUsersToRolesAsync(userIdStr, legacyRoles, null);
             console.log(`Migrated global roles for ${user.username}:`, legacyRoles);
         }
         else if (typeof legacyRoles === 'object') {
@@ -94,7 +95,7 @@ Meteor.startup(async () => {
 
             for (const [key, values] of Object.entries(legacyRoles)) {
                 if (key === '__global_roles__') {
-                    await Roles.addUsersToRolesAsync(user._id, values, null);
+                    await Roles.addUsersToRolesAsync(userIdStr, values, null);
                     console.log(`Migrated global roles for ${user.username}:`, values);
                     continue;
                 }
@@ -127,7 +128,7 @@ Meteor.startup(async () => {
                         }
                         for (const scope of values) {
                             try {
-                                await Roles.addUsersToRolesAsync(user._id, roleName, scope);
+                                await Roles.addUsersToRolesAsync(userIdStr, roleName, scope);
                             } catch (e) {
                                 console.error(`Failed to add role ${roleName} in scope ${scope} for ${user.username}`, e);
                             }
@@ -149,7 +150,7 @@ Meteor.startup(async () => {
                                     // Ignore duplicate key errors from Roles package if it already exists
                                     if (err.code !== 11000) console.warn("Role creation warning:", err.message);
                                 }
-                                await Roles.addUsersToRolesAsync(user._id, role, scopeName);
+                                await Roles.addUsersToRolesAsync(userIdStr, role, scopeName);
                             } catch (e) {
                                 console.error(`Failed to add role ${role} in scope ${scopeName} for ${user.username}`, e);
                             }
@@ -160,8 +161,8 @@ Meteor.startup(async () => {
             }
         }
 
-        // Mark as migrated with v2 flag to ensure re-run
-        await Meteor.users.updateAsync(user._id, { $set: { 'roles_migrated_v2': true } });
+        // Mark as migrated with v3 flag to ensure re-run
+        await Meteor.users.updateAsync(user._id, { $set: { 'roles_migrated_v3': true } });
     }
 
     console.log("Role Migration Complete.");

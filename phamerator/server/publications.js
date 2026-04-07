@@ -155,6 +155,10 @@ Meteor.publish('fullname', function () {
   return Meteor.users.find({ _id: this.userId }, { fields: { name: 1 } });
 });
 
+Meteor.publish('apiKeys', function () {
+  return Meteor.users.find({ _id: this.userId }, { fields: { "apiKeys.name": 1, "apiKeys.lastUsed": 1 } });
+});
+
 Meteor.publish('phameratorVersion', function () {
   return PhameratorVersion.find({}, { fields: { version: 1 } });
 });

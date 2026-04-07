@@ -3,7 +3,6 @@
   <div class="row">
     <div class="col s12 m8 l6 offset-m2 offset-l3">
       <div class="card-panel white">
-        {{>file}}
         <span>
           <h4>{{name}}</h4>
           <p>{{username}} ({{email}})</p>
@@ -45,6 +44,35 @@
             {{/if}}
           </form>
         </span>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col s12 m8 l6 offset-m2 offset-l3">
+      <div class="card-panel white">
+        <h4>API Access</h4>
+        <p>Use an API key to access your Phamerator data programmatically.</p>
+        {{#if apiKey}}
+        <div class="card-panel grey lighten-4">
+          <p><strong>Your Current API Key:</strong></p>
+          {{#if newApiKey}}
+          <code style="word-break: break-all; font-size: 1.1em; padding: 10px; display: block; background: #e0e0e0; border-radius: 4px;">{{newApiKey}}</code>
+          <br>
+          <p class="red-text"><small><i class="material-icons left" style="font-size: 1rem;">warning</i> This key will only be displayed once. Please copy your API key and store it securely.</small></p>
+          {{else}}
+          <code style="word-break: break-all; font-size: 1.1em; padding: 10px; display: block; background: #e0e0e0; border-radius: 4px;">••••••••••••••••••••••••••••••</code>
+          <br>
+          <p><small>For security reasons, your API key is hidden. If you lost it, you must revoke and generate a new one.</small></p>
+          {{/if}}
+          {{#if apiKey.lastUsed}}
+          <p><small>Last Used: {{apiKey.lastUsed}}</small></p>
+          {{/if}}
+          <br>
+          <a class="waves-effect waves-light btn red" id="delete-api-key">Revoke API Key</a>
+        </div>
+        {{else}}
+        <a class="waves-effect waves-light btn" id="generate-api-key">Generate New API Key</a>
+        {{/if}}
       </div>
     </div>
   </div>

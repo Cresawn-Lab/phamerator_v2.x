@@ -56,9 +56,6 @@ Template.datasetDropdown.onDestroyed(function () {
 
 Template.datasetDropdown.helpers({
   datasets: function () {
-    waitForEl(".dropdown-trigger", function () {
-      $(".dropdown-trigger").dropdown({ hover: false, constrainWidth: false })
-    })
 
     if (Datasets.find().count() === 0) {
       Session.set("preferredDataset", "No data sets available")

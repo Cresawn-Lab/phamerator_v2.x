@@ -7,7 +7,37 @@ import { Domains } from "/imports/api/collections";
 import { Genes } from "/imports/api/collections";
 import { Proteins } from "/imports/api/collections";
 
+import crypto from 'crypto';
+
 Meteor.methods({
+  "generateApiKey": async function () {
+    if (!this.userId) throw new Meteor.Error('401', 'Not logged in');
+    
+    // Create a base-36 string that contains 30 chars in a-z,0-9
+    const apiKey = [...Array(30)]
+      .map((e) => ((Math.random() * 36) | 0).toString(36))
+      .join('');
+      
+    // Hash the key for secure storage
+    const hashedKey = crypto.createHash('sha256').update(apiKey).digest('hex');
+
+    // Set the apikey array. Note: replacing existing keys since only 1 key is supported.
+    await Meteor.users.updateAsync(
+      { _id: this.userId },
+      { $set: { "apiKeys": [{ name: "default", key: hashedKey, lastUsed: new Date() }] } }
+    );
+    
+    // Return the plaintext key only once to the user
+    return apiKey;
+  },
+  "deleteApiKey": async function () {
+    if (!this.userId) throw new Meteor.Error('401', 'Not logged in');
+    
+    await Meteor.users.updateAsync(
+      { _id: this.userId },
+      { $unset: { "apiKeys": "" } }
+    );
+  },
   "userExists": async function (username) {
     return !!await Meteor.users.findOneAsync({
       username: username

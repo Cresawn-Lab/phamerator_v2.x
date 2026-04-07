@@ -49,7 +49,11 @@
           <li><a href="https://app.gitter.im/#/room/#phamerator_Lobby:gitter.im" target="_blank"
               class="waves-effect waves-light"><i class="material-icons left white-text">chat_bubble</i>Chat</a>
           </li>
-          <li>{{> loginButtons }}</li>
+          {{#if currentUser}}
+          <li><a href="#" class="waves-effect waves-light logout-btn"><i class="material-icons left white-text">exit_to_app</i>Logout</a></li>
+          {{else}}
+          <li><a href="#magicLinkModal" class="waves-effect waves-light modal-trigger"><i class="material-icons left white-text">login</i>Sign In</a></li>
+          {{/if}}
         </ul>
         <ul id="mobile-menu" class="sidenav">
           <li class="{{isActiveRoute regex='home'}}"><a href="{{pathFor 'home'}}"
@@ -65,11 +69,16 @@
           {{/if}}
           <li><a class="js-gitter-toggle-chat-button waves-effect waves-light btn"><i
                 class="material-icons left white-text">chat_bubble</i>Chat</a></li>
-          <!-- <li>{{> loginButtons }}</li> -->
+          {{#if currentUser}}
+          <li><a href="#" class="waves-effect waves-light logout-btn"><i class="material-icons left white-text">exit_to_app</i>Logout</a></li>
+          {{else}}
+          <li><a href="#magicLinkModal" class="waves-effect waves-light modal-trigger"><i class="material-icons left white-text">login</i>Sign In</a></li>
+          {{/if}}
         </ul>
       </div>
     </nav>
   </div>
+  {{> magicLinkModal }}
   <footer class="page-footer cyan">
     <div class="footer-copyright cyan">
       <div class="container">

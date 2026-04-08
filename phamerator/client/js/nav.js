@@ -105,7 +105,13 @@ Template.nav.onRendered(function () {
 
   Tracker.autorun(() => {
     // Only run this if we are actually logged in, else clear the session variables
-    if (Meteor.userId()) {
+    const userId = Meteor.userId();
+    // Depend on dataset count to ensure we init once data arrives
+    const datasetCount = Datasets.find().count();
+    // Depend on current dataset text to re-bind if Blaze re-renders the trigger
+    const currentDataset = Session.get("currentDataset");
+
+    if (userId && datasetCount > 0) {
       Meteor.call("getDatasetsIView", (error, result) => {
         if (!error) Session.set("datasetsView", result);
       });
@@ -113,24 +119,30 @@ Template.nav.onRendered(function () {
       Meteor.call("getDatasetsIOwn", (error, result) => {
         if (!error) Session.set("datasetsOwn", result);
       });
-    } else {
+
+      // Defer initialization to ensure Blaze has rendered the new DOM elements
+      Meteor.defer(() => {
+        const dropdowns = document.querySelectorAll('.dropdown-trigger');
+        if (dropdowns.length > 0) {
+          M.Dropdown.init(dropdowns, {
+            constrainWidth: false,
+            coverTrigger: false
+          });
+        }
+
+        const sidenavs = document.querySelectorAll('.sidenav');
+        if (sidenavs.length > 0) {
+          M.Sidenav.init(sidenavs, {
+            edge: 'left',
+            draggable: true
+          });
+        }
+      });
+    } else if (!userId) {
       Session.set("datasetsView", []);
       Session.set("datasetsOwn", []);
     }
   });
-
-  var sidenavs = document.querySelectorAll('.sidenav');
-  M.Sidenav.init(sidenavs, {
-    edge: 'left',
-    draggable: true
-  });
-
-  var dropdowns = document.querySelectorAll('.dropdown-trigger');
-  M.Dropdown.init(dropdowns, {
-    constrainWidth: false,
-    coverTrigger: false
-  });
-
 });
 
 Template.nav.events({

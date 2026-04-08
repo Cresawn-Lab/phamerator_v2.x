@@ -38,7 +38,7 @@ Accounts.onCreateUser(async function (options, user) {
   }
 
   // Assign default roles using V4 API
-  await Roles.addUsersToRolesAsync(user._id, ['owner', 'view'], 'Actino_Draft');
+  await Roles.addUsersToRolesAsync(user._id, ['view'], 'Actino_Draft');
 
   user.preferredDataset = 'Actino_Draft'
   user.profile = options.profile || {};

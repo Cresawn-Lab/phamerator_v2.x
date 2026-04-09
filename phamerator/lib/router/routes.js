@@ -15,17 +15,7 @@ if (Meteor.isClient) {
     FlowRouter.route('/login/:email/:token', {
       name: 'magicLinkLogin',
       action(params) {
-        // Use timeout to make sure Meteor is fully loaded
-        setTimeout(() => {
-          Meteor.passwordlessLoginWithToken(params.email, params.token, (err) => {
-            if (err) {
-              M.toast({ html: 'Failed to sign in: ' + (err.reason || 'Invalid link'), classes: 'red' });
-            } else {
-              M.toast({ html: 'Successfully signed in!', classes: 'green' });
-            }
-            FlowRouter.go('/');
-          });
-        }, 100);
+        render('masterLayout', { main: 'confirmLogin', nav: 'nav' });
       }
     });
 

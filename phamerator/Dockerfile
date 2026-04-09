@@ -37,11 +37,11 @@ WORKDIR /app
 # Switch to the non-root "node" user (built into the official Node images)
 USER node
 
-# Expose the default Meteor port
-EXPOSE 3000
+# Expose the default port
+EXPOSE 9000
 
 # Set default environment variables
-ENV PORT=3000
+ENV PORT=9000
 # NOTE: You MUST provide MONGO_URL and ROOT_URL at runtime.
 
 # Start the application

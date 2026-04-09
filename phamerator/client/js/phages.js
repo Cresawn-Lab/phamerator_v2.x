@@ -1213,7 +1213,7 @@ blast = function (q, d) {
   var s1 = query.sequence;
   var s2 = subject.sequence;
 
-  myURL = "https://phamerator.org/blastalign";
+  myURL = process.env.BLAST_URL;
   //myURL = "http://localhost:8080";
 
   $.ajax({

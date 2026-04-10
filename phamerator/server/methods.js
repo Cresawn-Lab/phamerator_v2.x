@@ -12,12 +12,12 @@ import crypto from 'crypto';
 Meteor.methods({
   "generateApiKey": async function () {
     if (!this.userId) throw new Meteor.Error('401', 'Not logged in');
-    
+
     // Create a base-36 string that contains 30 chars in a-z,0-9
     const apiKey = [...Array(30)]
       .map((e) => ((Math.random() * 36) | 0).toString(36))
       .join('');
-      
+
     // Hash the key for secure storage
     const hashedKey = crypto.createHash('sha256').update(apiKey).digest('hex');
 
@@ -26,13 +26,13 @@ Meteor.methods({
       { _id: this.userId },
       { $set: { "apiKeys": [{ name: "default", key: hashedKey, lastUsed: new Date() }] } }
     );
-    
+
     // Return the plaintext key only once to the user
     return apiKey;
   },
   "deleteApiKey": async function () {
     if (!this.userId) throw new Meteor.Error('401', 'Not logged in');
-    
+
     await Meteor.users.updateAsync(
       { _id: this.userId },
       { $unset: { "apiKeys": "" } }
@@ -219,45 +219,119 @@ Meteor.methods({
 
     let selectedClusterMembers = []; //array of objects of form {cluster: "A1", phages: ['L5', 'D29', ...]}
 
-    if (typeof phamname != null) {
+    console.log(`[get_clusters_by_pham] Called with dataset: '${dataset}', phamname: '${phamname}'`);
+
+    if (phamname) {
+      const numericPhamName = !isNaN(Number(phamname)) ? Number(phamname) : phamname;
+      const phamNameStr = String(phamname);
+
+      const matchingGenes = await Genes.find({
+        dataset: dataset,
+        $or: [
+          { phamName: phamname },
+          { phamName: numericPhamName },
+          { phamName: phamNameStr }
+        ]
+      }, { fields: { phageID: 1, phagename: 1 } }).fetchAsync(); // asking for all variants to be safe in logs
+
+      // the user had g.PhageID in the map, so we'll check multiple properties to be safe
+      const phageNames = [...new Set(matchingGenes.map(g => g.phageID))].filter(Boolean);
+
+      console.log(`[get_clusters_by_pham] Extracted unique Phage/Genome Identifiers:`, phageNames);
+
+      if (phageNames.length === 0) {
+        console.log(`[get_clusters_by_pham] Returning empty array because no underlying phage identifiers were found.`);
+        return [];
+      }
+
       const phamclusters = await Genomes.find({
-        dataset: dataset, genes: {
-          $elemMatch: {
-            phamName: { $eq: phamname }
-          }
-        }
-      }, { sort: { cluster: 1, subcluster: 1 }, fields: { _id: false, phagename: 1, cluster: 1, subcluster: 1 } }).fetchAsync();
+        dataset: dataset,
+        // Using $or to try matching the id against phagename, name, or phageID just in case!
+        $or: [
+            { phagename: { $in: phageNames } },
+            { phageID: { $in: phageNames } },
+            { name: { $in: phageNames } }
+        ]
+      }, { sort: { cluster: 1, subcluster: 1 }, fields: { _id: false, phagename: 1, name: 1, phageID: 1, cluster: 1, subcluster: 1, clusterSubcluster: 1 } }).fetchAsync();
 
-      phamclusters.map(function (x) {
-        if (x.cluster === "") {
-          x.cluster = "Singletons"
-          x.subcluster = ""
+      console.log(`[get_clusters_by_pham] Genomes found matching those identifiers: ${phamclusters.length}`);
+      if (phamclusters.length > 0) {
+          console.log(`[get_clusters_by_pham] Example matched Genome structure:`, phamclusters[0]);
+      }
+
+      phamclusters.forEach(function (x) {
+        // Find whichever name property it actually possesses
+        const actualPhageName = x.phagename || x.name || x.phageID || "Unknown_Phage";
+
+        // Use clusterSubcluster field if available, otherwise intelligently combine cluster + subcluster
+        // while avoiding appending subcluster if it already contains the cluster prefix (e.g. A + A1 -> AA1)
+        let clusterName = x.clusterSubcluster;
+        if (!clusterName) {
+            let cl = x.cluster || "";
+            let sub = x.subcluster || "";
+            if (sub && String(sub).startsWith(cl)) {
+                clusterName = String(sub);
+            } else {
+                clusterName = cl + String(sub);
+            }
         }
-        if (x.cluster === "Singletons") {
-          var thiscluster = selectedClusterMembers.find(y => y.cluster === "Singletons"); // find singletons
-        }
-        else {
-          var thiscluster = selectedClusterMembers.find(y => y.cluster === (x.cluster + x.subcluster));
+        
+        if (!x.cluster || x.cluster === "") {
+            clusterName = "Singletons";
         }
 
-        if (thiscluster == undefined) {
+        let thiscluster = selectedClusterMembers.find(y => y.cluster === clusterName);
+
+        if (thiscluster === undefined) {
           thiscluster = {};
-          thiscluster.cluster = x.cluster + x.subcluster;
+          thiscluster.cluster = clusterName;
+          thiscluster.rawCluster = x.cluster || "";
+          thiscluster.rawSubcluster = x.subcluster || "";
           thiscluster.phages = [];
-          thiscluster.phages.push(x.phagename);
+          thiscluster.phages.push(actualPhageName);
           thiscluster.phages.sort();
           selectedClusterMembers.push(thiscluster);
         }
         else {
-          thiscluster.phages.push(x.phagename);
+          thiscluster.phages.push(actualPhageName);
           thiscluster.phages.sort();
           selectedClusterMembers[selectedClusterMembers.indexOf(thiscluster)] = thiscluster;
         }
       });
+      
+      // Apply Phamerator's custom sorting algorithm
+      selectedClusterMembers.sort(function (a, b) {
+        // 1. Singletons (empty string or matching name) always first
+        if (a.rawCluster === "" || a.cluster === "Singletons") return -1;
+        if (b.rawCluster === "" || b.cluster === "Singletons") return 1;
+
+        // 2. Single letter strings come before multi-letter strings
+        if (a.rawCluster.length !== b.rawCluster.length) {
+          return a.rawCluster.length - b.rawCluster.length;
+        }
+
+        // 3. Alphabetical sort for strings of the same length
+        let clusterCmp = a.rawCluster.localeCompare(b.rawCluster);
+        if (clusterCmp !== 0) return clusterCmp; // Only use alphabetical tie-breaker if they are different
+        
+        // 4. Numerical sort for subclusters
+        let numA = parseInt(a.rawSubcluster.toString().replace(/[^0-9]/g, ''), 10);
+        let numB = parseInt(b.rawSubcluster.toString().replace(/[^0-9]/g, ''), 10);
+
+        let isNumA = !isNaN(numA);
+        let isNumB = !isNaN(numB);
+
+        if (isNumA && isNumB) {
+          if (numA !== numB) return numA - numB;
+        }
+
+        return a.rawSubcluster.toString().localeCompare(b.rawSubcluster.toString());
+      });
+
+      console.log(`[get_clusters_by_pham] Final Selected Cluster array length: ${selectedClusterMembers.length}`);
       return selectedClusterMembers;
     }
-    else {
-    }
+    return [];
   },
 
   "get_genes_by_domain": async function (domainID, dataset) {

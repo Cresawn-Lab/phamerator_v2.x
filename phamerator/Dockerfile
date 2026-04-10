@@ -20,8 +20,8 @@ RUN meteor npm install
 # Copy the rest of the app source code ensuring correct ownership
 COPY --chown=node:node . .
 
-# Build the Meteor app into a directory called "/built-app"
-RUN meteor build --directory /built-app --architecture os.linux.aarch64
+# Build the Meteor app into a local directory that the node user can write to
+RUN meteor build --directory /app/build --architecture os.linux.aarch64
 
 # Stage 2: Create the production image
 FROM node:20-alpine
@@ -30,7 +30,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Copy the built app "bundle" from the builder stage maintaining permissions
-COPY --chown=node:node --from=builder /built-app/bundle ./
+COPY --chown=node:node --from=builder /app/build/bundle ./
 
 # Install server-specific dependencies for the built Meteor app securely
 WORKDIR /app/programs/server

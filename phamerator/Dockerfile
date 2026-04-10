@@ -25,8 +25,8 @@ FROM node:20-alpine
 # Set the working directory to where the built app will live
 WORKDIR /app
 
-# Copy the built app "bundle" from the builder stage
-COPY --from=builder /built-app/bundle ./
+# Copy the built app "bundle" from the builder stage maintaining permissions
+COPY --chown=node:node --from=builder /built-app/bundle ./
 
 # Install server-specific dependencies for the built Meteor app
 WORKDIR /app/programs/server

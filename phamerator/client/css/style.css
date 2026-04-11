@@ -283,60 +283,70 @@ li.phageSelector {
 
 @font-face {
     font-family: ParryHotter;
+    font-display: block;
     src:
         url("/fonts/ParryHotter.ttf");
 }
 
 @font-face {
     font-family: HarryPotter;
+    font-display: block;
     src:
         url("/fonts/HARRP___.TTF");
 }
 
 @font-face {
     font-family: Raleway-Light;
+    font-display: block;
     src:
         url("/fonts/Raleway-Light.ttf");
 }
 
 @font-face {
     font-family: Raleway-Regular;
+    font-display: block;
     src:
         url("/fonts/Raleway-Regular.ttf");
 }
 
 @font-face {
     font-family: Raleway-Italic;
+    font-display: block;
     src:
         url("/fonts/Raleway-Italic.ttf");
 }
 
 @font-face {
     font-family: Raleway-Black;
+    font-display: block;
     src:
         url("/fonts/Raleway-Black.ttf");
 }
 
 @font-face {
     font-family: Roboto-Regular;
+    font-display: block;
     src:
         url("/fonts/Roboto-Regular.ttf");
 }
 
 @font-face {
     font-family: Roboto-Light;
+    font-display: block;
     src:
         url("/fonts/Roboto-Light.ttf");
 }
 
 @font-face {
     font-family: Dosis-Regular;
+    font-display: block;
     src:
         url("/fonts/Dosis-Regular.ttf");
 }
 
 @font-face {
     font-family: Dosis-Light;
+    font-display: block;
     src:
         url("/fonts/Dosis-Light.ttf");
 }

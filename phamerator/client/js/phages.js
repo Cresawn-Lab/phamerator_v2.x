@@ -1,4 +1,5 @@
 import { Datasets } from "/imports/api/collections";
+import { ReactiveVar } from 'meteor/reactive-var';
 import { TRNAs } from "/imports/api/collections";
 import { Genes } from "/imports/api/collections";
 import { Genomes } from "/imports/api/collections";
@@ -1302,6 +1303,7 @@ drawBlastAlignments = function (blastAlignmentsOutstanding, json) {
 };
 
 Template.phages.onDestroyed(function () {
+  Session.set('expandAllClusters', false);
   $(document).ready(function () {
     $('#mapSettings').remove();
     $('#geneData').remove();
@@ -1770,6 +1772,8 @@ Template.phages.events({
     var instance = M.FloatingActionButton.getInstance($('.fixed-action-btn')[0]);
     if (instance) instance.close();
 
+    Session.set('expandAllClusters', true);
+
     $("#cluster-list > li").addClass("active");
     $("#cluster-list .collapsible-header").addClass("active");
     $("#cluster-list .collapsible-body").show();
@@ -1791,6 +1795,8 @@ Template.phages.events({
   "click #collapse_all": function (event, template) {
     var instance = M.FloatingActionButton.getInstance($('.fixed-action-btn')[0]);
     if (instance) instance.close();
+
+    Session.set('expandAllClusters', false);
 
     $("#cluster-list > li").removeClass("active");
     $("#cluster-list .collapsible-header").removeClass("active");
@@ -1825,7 +1831,20 @@ Template.registerHelper('phageIsChecked', function (input) {
   return selectedGenomes.find({ "phagename": input }).count() > 0;
 });
 
+Template.cluster.onCreated(function() {
+  this.renderPhages = new ReactiveVar(false);
+});
+
+Template.cluster.events({
+  'click .collapsible-header': function(event, template) {
+    template.renderPhages.set(true);
+  }
+});
+
 Template.cluster.helpers({
+  renderPhages: function() {
+    return Template.instance().renderPhages.get() || Session.get('expandAllClusters');
+  },
   selectedCount: function (cluster, subcluster) {
     count = selectedGenomes.find({ cluster: cluster, subcluster: subcluster }).count();
     if (count === 0) {

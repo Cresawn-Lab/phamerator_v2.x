@@ -14,42 +14,7 @@ Meteor.publish("allUsers", function () {
 })
 
 
-Meteor.publishComposite("genomes", function (dataset) {
-  return {
-    find: async function () {
-      if (!this.userId) return;
 
-      const d = await Datasets.findOneAsync({ name: dataset, public: true });
-      if (d) {
-        return Datasets.find({ name: dataset });
-      }
-
-      const user = await Meteor.users.findOneAsync(this.userId);
-      console.log('Legacy User Roles:', JSON.stringify(user.roles));
-
-      console.log('Publishing genomes for user:', this.userId);
-      const scopes = await Roles.getScopesForUserAsync(this.userId, "view");
-      console.log('Scopes (Datasets) for user:', scopes);
-      return Datasets.find({ 'name': { $in: scopes } });
-    },
-    children: [{
-      find: async function () {
-        if (!this.userId) return;
-
-        const d = await Datasets.findOneAsync({ name: dataset, public: true });
-        if (d) {
-          return Genomes.find({ dataset: dataset }, { fields: { phageID: 1, phagename: 1, genomelength: 1, cluster: 1, subcluster: 1, dataset: 1 } });
-        }
-
-        const scopes = await Roles.getScopesForUserAsync(this.userId, "view");
-        if (!scopes.includes(dataset)) {
-          return;
-        }
-        return Genomes.find({ dataset: dataset }, { fields: { phageID: 1, phagename: 1, genomelength: 1, cluster: 1, subcluster: 1, dataset: 1 } });
-      }
-    }]
-  }
-});
 
 // Meteor.publish("domains", function (dataset) {
 //   if (dataset) {

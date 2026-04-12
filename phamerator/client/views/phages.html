@@ -239,10 +239,10 @@
     <div class="collapsible-body">
       <ul class="clusterSelector">
         {{#if renderPhages}}
-        {{#each p in phageNames}}
+        {{#each p in phages}}
         <li class="phageSelector">
-          <input type="checkbox" id="{{p}}" class="filled-in phageCheckbox" checked="{{phageIsChecked p}}" />
-          <label for="{{p}}">{{p}}</label>
+          <input type="checkbox" id="{{p.phagename}}" class="filled-in phageCheckbox" checked="{{phageIsChecked p.phagename}}" />
+          <label for="{{p.phagename}}">{{p.phagename}}</label>
         </li>
         {{/each}}
         {{/if}}

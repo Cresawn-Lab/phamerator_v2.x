@@ -419,10 +419,10 @@ Meteor.methods({
       if (!clustersMap[c][sc]) {
         clustersMap[c][sc] = {
           clusterDisplayName: p.clusterSubcluster || (c === "" ? "Singletons" : c + sc),
-          phageNames: []
+          phages: []
         };
       }
-      clustersMap[c][sc].phageNames.push(p.phagename);
+      clustersMap[c][sc].phages.push(p);
     }
 
     let clusters = [];
@@ -448,14 +448,14 @@ Meteor.methods({
       });
 
       for (const sc of subClusterNames) {
-        let phageNames = clustersMap[c][sc].phageNames;
-        phageNames.sort();
+        let phages = clustersMap[c][sc].phages;
+        phages.sort((a,b) => a.phagename.localeCompare(b.phagename));
 
         clusters.push({
           name: clustersMap[c][sc].clusterDisplayName,
           cluster: c,
           subcluster: sc,
-          phageNames: phageNames
+          phages: phages
         });
       }
     }

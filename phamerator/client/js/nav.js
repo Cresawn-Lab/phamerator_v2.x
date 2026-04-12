@@ -5,7 +5,6 @@ switch_dataset = function (dataset) {
   if (typeof genomesWithSeqHandle !== 'undefined') {
     genomesWithSeqHandle.stop()
   }
-  genomesWithSeqHandle = Meteor.subscribe("genomesWithSeq");
   Session.set("currentDataset", dataset);
   Session.set("preferredDataset", dataset);
 

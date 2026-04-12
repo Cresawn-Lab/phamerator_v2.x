@@ -26,8 +26,7 @@
       <div id="dna-seq">
         <div
           style="position: absolute; top: 115px; bottom: 24px; left: 24px; right: 24px; display: flex; flex-direction: column;">
-          <textarea readonly id="gene_dna_seq"
-            style="flex-grow: 1; resize: none; margin-bottom: 10px; border: 1px solid #ccc; padding: 10px;">{{selectedGene}}</textarea>
+          <textarea readonly id="gene_dna_seq" class="sequence-view">{{selectedGene}}</textarea>
           <div>
             <button id="copy-dna-button" class="waves-effect waves-green btn btn-copy-link"
               data-clipboard-target="#gene_dna_seq">Copy to Clipboard</button>
@@ -38,8 +37,7 @@
       <div id="protein-seq">
         <div
           style="position: absolute; top: 115px; bottom: 24px; left: 24px; right: 24px; display: flex; flex-direction: column;">
-          <textarea readonly id="gene_protein_seq"
-            style="flex-grow: 1; resize: none; margin-bottom: 10px; border: 1px solid #ccc; padding: 10px;">{{selectedProtein}}</textarea>
+          <textarea readonly id="gene_protein_seq" class="sequence-view">{{selectedProtein}}</textarea>
           <div>
             <button id="copy-protein-button" class="waves-effect waves-green btn btn-copy-link"
               data-clipboard-target="#gene_protein_seq">Copy to Clipboard</button>

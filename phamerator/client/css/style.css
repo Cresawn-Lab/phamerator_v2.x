@@ -231,6 +231,22 @@ textarea {
     max-height: 95%;
 }
 
+.sequence-view {
+    flex-grow: 1;
+    resize: none;
+    margin-bottom: 10px;
+    border: 1px solid #eee !important;
+    padding: 15px !important;
+    background-color: #fafafa;
+    color: #333;
+    border-radius: 4px;
+    font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace !important;
+    font-size: 13px !important;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
 .modal {
     overflow: visible;
 }

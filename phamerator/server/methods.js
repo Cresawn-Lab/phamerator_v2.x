@@ -406,7 +406,7 @@ Meteor.methods({
     // Optimize: Single query to retrieve all required phage metadata instantly
     const allPhages = await Genomes.find(
       { dataset: currentDataset },
-      { fields: { phagename: 1, cluster: 1, subcluster: 1, clusterSubcluster: 1 } }
+      { fields: { phagename: 1, cluster: 1, subcluster: 1, clusterSubcluster: 1, genomelength: 1, phageID: 1 } }
     ).fetchAsync();
 
     // Grouping by cluster -> subcluster natively

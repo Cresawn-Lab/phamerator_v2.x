@@ -1512,14 +1512,18 @@ Template.phages.events({
 
           if (event.target.checked) {
             updatedClusterGenomes.forEach(function (element, index, array) {
+              // Priority: real database record from subscription > static metadata from Session
+              const dbRecord = Genomes.findOne({ phagename: element.phagename });
+              const p = dbRecord || element;
 
-              selectedGenomes.upsert({ phagename: element.phagename }, {
-                phageID: element.phageID,
-                phagename: element.phagename,
-                genomelength: element.genomelength,
-                sequence: element.sequence,
-                cluster: element.cluster,
-                subcluster: element.subcluster
+              selectedGenomes.upsert({ phagename: p.phagename }, {
+                _id: p._id, // Critical for gene matching
+                phageID: p.phageID,
+                phagename: p.phagename,
+                genomelength: p.genomelength,
+                sequence: p.sequence,
+                cluster: p.cluster,
+                subcluster: p.subcluster
               }, function () {
                 var dataset = Session.get('currentDataset');
 
@@ -1595,6 +1599,7 @@ Template.phages.events({
             if (withSeq) p = withSeq;
 
             selectedGenomes.upsert({ phagename: p.phagename }, {
+              _id: p._id, // Critical for gene matching
               phageID: p.phageID,
               phagename: p.phagename,
               genomelength: p.genomelength,

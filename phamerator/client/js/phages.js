@@ -19,7 +19,6 @@ Template.phages.onCreated(function () {
   var self = this;
   self.autorun(function () {
     var dataset = Session.get('currentDataset');
-    self.subscribe('genomes', dataset);
     self.subscribe('allUsers');
   });
 });
@@ -1167,6 +1166,15 @@ Template.phages.onCreated(function () {
     const dataset = Session.get("currentDataset");
     if (!dataset) return; // Wait until it's set
 
+    // Clear local collections when dataset changes to prevent stale data
+    genomesWithSeqHandlers.forEach(h => h.stop());
+    genomesWithSeqHandlers = [];
+    selectedGenomes.remove({});
+    alignedGenomes.remove({});
+    hspData = [];
+    if (typeof update_phages === 'function') update_phages();
+    if (typeof update_hsps === 'function') update_hsps([]);
+
     Meteor.call('getclusters', dataset, function (error, result) {
       if (typeof error !== 'undefined') {
         console.error('Error getting clusters:', error);
@@ -1483,21 +1491,20 @@ Template.phages.events({
     }
 
     $("#preloader").show(function () {
-      let clusterGenomes;
-      if (event.target.id !== "Singletons") {
-        clusterGenomes = Genomes.find({ cluster: event.target.getAttribute("data-cluster"), subcluster: sc }).fetch();
+      let clusterPhages = [];
+      const clusters = Session.get('clusters');
+      if (clusters) {
+        const found = clusters.find(c => c.cluster === clusterAttr && c.subcluster === sc);
+        if (found) clusterPhages = found.phages;
       }
-      else {
-        clusterGenomes = Genomes.find({ cluster: "", subcluster: "" }).fetch();
-      }
-      let clusterPhageNames = clusterGenomes.map(function (obj) { return obj.phagename });
+      
+      let clusterPhageNames = clusterPhages.map(function (obj) { return obj.phagename });
       let handler = Meteor.subscribe("genomesWithSeq", Session.get("currentDataset"), clusterPhageNames, {
         onReady: function () {
-          let updatedClusterGenomes = Genomes.find({ cluster: event.target.getAttribute("data-cluster"), subcluster: sc })
-            .fetch()
-            .map(g => {
-              g.subcluster = g.subcluster.toString()
-              return g;
+          let updatedClusterGenomes = clusterPhages.map(g => {
+              // Ensure we merge any sequence data received from the subscription
+              const withSeq = Genomes.findOne({ phagename: g.phagename });
+              return withSeq ? withSeq : g;
             });
 
 
@@ -1573,8 +1580,20 @@ Template.phages.events({
       let handler = Meteor.subscribe("genomesWithSeq", Session.get("currentDataset"), [phagename], {
         onReady: function () {
           if (event.target.checked) {
-            let p = Genomes.findOne({ phagename: phagename });
+            let p;
+            const clusters = Session.get('clusters');
+            if (clusters) {
+              for (const c of clusters) {
+                p = c.phages.find(ph => ph.phagename === phagename);
+                if (p) break;
+              }
+            }
+            // Merge sequence data if available from the subscription
+            const withSeq = Genomes.findOne({ phagename: phagename });
+            if (withSeq) p = withSeq;
+
             selectedGenomes.upsert({ phagename: p.phagename }, {
+              phageID: p.phageID,
               phagename: p.phagename,
               genomelength: p.genomelength,
               sequence: p.sequence,
@@ -1815,11 +1834,11 @@ Template.phages.events({
   }
 });
 
-Template.registerHelper('clusterIsChecked', function (cluster, subcluster) {
-
-  phagesInCluster = Genomes.find({ cluster: cluster, subcluster: subcluster }, { fields: { "phagename": 1 } }).fetch();
-  r = true;
-  phagesInCluster.forEach(function (phage, phageIndex, myPhageArray) {
+Template.registerHelper('clusterIsChecked', function (phagesByHelper) {
+  if (!phagesByHelper || !Array.isArray(phagesByHelper)) return false;
+  
+  let r = true;
+  phagesByHelper.forEach(function (phage) {
     if (selectedGenomes.find({ "phagename": phage.phagename }).count() == 0) {
       r = false;
     }
@@ -1845,29 +1864,25 @@ Template.cluster.helpers({
   renderPhages: function() {
     return Template.instance().renderPhages.get() || Session.get('expandAllClusters');
   },
-  selectedCount: function (cluster, subcluster) {
-    count = selectedGenomes.find({ cluster: cluster, subcluster: subcluster }).count();
-    if (count === 0) {
-      return "";
-    }
-    return count;
+  selectedCount: function () {
+    // 'this' is the cluster object from the #each loop
+    const cluster = this.cluster;
+    const subcluster = this.subcluster;
+    const count = selectedGenomes.find({ cluster: cluster, subcluster: subcluster }).count();
+    return count === 0 ? "" : count;
   },
-  selectedClass: function (cluster, subcluster) {
-    count = selectedGenomes.find({ cluster: cluster, subcluster: subcluster }).count();
-    if (count === 0) {
-      return "badge";
-    }
-    return "purple new badge";
+  selectedClass: function () {
+    const cluster = this.cluster;
+    const subcluster = this.subcluster;
+    const count = selectedGenomes.find({ cluster: cluster, subcluster: subcluster }).count();
+    return count === 0 ? "badge" : "purple new badge";
   },
-  dataBadgeCaption: function (cluster, subcluster) {
-    count = selectedGenomes.find({ cluster: cluster, subcluster: subcluster }).count();
-    if (count === 0) {
-      return "";
-    }
-    else if (count === 1) {
-      return "selected genome";
-    }
-    return "selected genomes";
+  dataBadgeCaption: function () {
+    const cluster = this.cluster;
+    const subcluster = this.subcluster;
+    const count = selectedGenomes.find({ cluster: cluster, subcluster: subcluster }).count();
+    if (count === 0) return "";
+    return count === 1 ? "selected genome" : "selected genomes";
   },
   favoriteSubcluster: function (cluster, subcluster) {
     if (Meteor.user() && Meteor.user().selectedData && Meteor.user().selectedData[Session.get('currentDataset')] && Meteor.user().selectedData[Session.get('currentDataset')].subclusterFavorites) {

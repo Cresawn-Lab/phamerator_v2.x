@@ -228,13 +228,13 @@
   <li>
     <div class="collapsible-header">
       <input type="checkbox" id="cluster-{{name}}" data-cluster="{{cluster}}" data-subcluster="{{subcluster}}"
-        class="filled-in clusterCheckbox" checked="{{clusterIsChecked cluster subcluster}}" />
+        class="filled-in clusterCheckbox" checked="{{clusterIsChecked phages}}" />
       <label for="cluster-{{name}}">
         {{name}}
       </label>
 
-      <span class="{{selectedClass cluster subcluster}}"
-        data-badge-caption="{{dataBadgeCaption cluster subcluster}}">{{selectedCount cluster subcluster}}</span>
+      <span class="{{selectedClass}}"
+        data-badge-caption="{{dataBadgeCaption}}">{{selectedCount}}</span>
     </div>
     <div class="collapsible-body">
       <ul class="clusterSelector">

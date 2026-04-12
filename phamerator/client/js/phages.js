@@ -1172,8 +1172,10 @@ Template.phages.onCreated(function () {
     selectedGenomes.remove({});
     alignedGenomes.remove({});
     hspData = [];
-    if (typeof update_phages === 'function') update_phages();
-    if (typeof update_hsps === 'function') update_hsps([]);
+    if (typeof mapGroup !== 'undefined') {
+      if (typeof update_phages === 'function') update_phages();
+      if (typeof update_hsps === 'function') update_hsps([]);
+    }
 
     Meteor.call('getclusters', dataset, function (error, result) {
       if (typeof error !== 'undefined') {

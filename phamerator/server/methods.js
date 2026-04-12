@@ -403,75 +403,63 @@ Meteor.methods({
 
     if (!allowed) return [];
 
+    // Optimize: Single query to retrieve all required phage metadata instantly
+    const allPhages = await Genomes.find(
+      { dataset: currentDataset },
+      { fields: { phagename: 1, cluster: 1, subcluster: 1, clusterSubcluster: 1 } }
+    ).fetchAsync();
+
+    // Grouping by cluster -> subcluster natively
+    let clustersMap = {};
+    for (const p of allPhages) {
+      const c = p.cluster || "";
+      const sc = p.subcluster || "";
+
+      if (!clustersMap[c]) clustersMap[c] = {};
+      if (!clustersMap[c][sc]) {
+        clustersMap[c][sc] = {
+          clusterDisplayName: p.clusterSubcluster || (c === "" ? "Singletons" : c + sc),
+          phageNames: []
+        };
+      }
+      clustersMap[c][sc].phageNames.push(p.phagename);
+    }
+
     let clusters = [];
 
-    const distinctClusters = await Genomes.rawCollection().distinct('cluster', { "dataset": currentDataset });
-    // distinct returns array of values directly in promise result
-
-    let clusterNames = _.uniq(distinctClusters, false);
-    clusterNames.sort(function (a, b) {
-      // 1. Singletons (empty string) always first
+    let clusterNames = Object.keys(clustersMap).sort(function (a, b) {
       if (a === "") return -1;
       if (b === "") return 1;
-
-      // 2. Single letter strings come before multi-letter strings
-      if (a.length !== b.length) {
-        return a.length - b.length;
-      }
-
-      // 3. Alphabetical sort for strings of the same length
+      if (a.length !== b.length) return a.length - b.length;
       return a.localeCompare(b);
     });
 
-    // for each cluster, get an array of unique subcluster names
-    // Because we are in async loop, we use for...of or Promise.all. 
-    // The original code was synchronous forEach. We need to await inside loop.
-
-    for (const cluster of clusterNames) {
-      const distinctSubclusters = await Genomes.rawCollection().distinct('subcluster', { "dataset": currentDataset, "cluster": cluster });
-      let subClusterNames = _.uniq(distinctSubclusters, false);
-
-      subClusterNames.sort(function (a, b) {
-        let numA = parseInt(a.toString().replace(/[^0-9]/g, ''), 10);
-        let numB = parseInt(b.toString().replace(/[^0-9]/g, ''), 10);
-
+    for (const c of clusterNames) {
+      let subClusterNames = Object.keys(clustersMap[c]).sort(function (a, b) {
+        let numA = parseInt(a.replace(/[^0-9]/g, ''), 10);
+        let numB = parseInt(b.replace(/[^0-9]/g, ''), 10);
         let isNumA = !isNaN(numA);
         let isNumB = !isNaN(numB);
 
         if (isNumA && isNumB) {
           if (numA !== numB) return numA - numB;
         }
-
-        return a.toString().localeCompare(b.toString());
+        return a.localeCompare(b);
       });
 
-      for (const subcluster of subClusterNames) {
-        const phages = await Genomes.find({
-          dataset: currentDataset,
-          cluster: cluster,
-          subcluster: subcluster
-        }, { fields: { phagename: true, clusterSubcluster: true }, reactive: false }).fetchAsync();
-
-        let phageNames = phages.map(x => x.phagename);
+      for (const sc of subClusterNames) {
+        let phageNames = clustersMap[c][sc].phageNames;
         phageNames.sort();
 
-        var singletonator = function () {
-          if (cluster === "") {
-            return { "name": "Singletons", "cluster": "", "subcluster": "", phageNames: phageNames }
-          }
-          else {
-            let clusterDisplayName = cluster + subcluster;
-            // Use clusterSubcluster field if available to avoid redundant prefixes (e.g., "AA1")
-            if (phages.length > 0 && phages[0].clusterSubcluster) {
-              clusterDisplayName = phages[0].clusterSubcluster;
-            }
-            return { "name": clusterDisplayName, "cluster": cluster, "subcluster": subcluster, phageNames: phageNames }
-          }
-        };
-        var singletonated = singletonator();
-        clusters.push(singletonated);
+        clusters.push({
+          name: clustersMap[c][sc].clusterDisplayName,
+          cluster: c,
+          subcluster: sc,
+          phageNames: phageNames
+        });
       }
     }
+
     return clusters;
   }
 });

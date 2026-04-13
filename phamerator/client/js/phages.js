@@ -607,7 +607,7 @@ function update_phages() {
           var c = phagesdata[i - 1];
           if (c && d) {
             genome_pairs.push({ query: c.phagename, subject: d.phagename });
-            if (alignedGenomes.find({ query: c.phagename, subject: d.phagename }).count() === 0) {
+            if (c.sequence && d.sequence && alignedGenomes.find({ query: c.phagename, subject: d.phagename }).count() === 0) {
               blast(c, d);
             }
             else {
@@ -1130,7 +1130,7 @@ function update_phages() {
     var c = phagesdata[i - 1];
     if (c && d) {
       genome_pairs.push({ query: c.phagename, subject: d.phagename });
-      if (alignedGenomes.find({ query: c.phagename, subject: d.phagename }).count() === 0) {
+      if (c.sequence && d.sequence && alignedGenomes.find({ query: c.phagename, subject: d.phagename }).count() === 0) {
         blast(c, d);
       }
       else {
@@ -1234,8 +1234,21 @@ blast = function (q, d) {
   var s1 = query.sequence;
   var s2 = subject.sequence;
 
-  myURL = "/blastalign";
-  //myURL = "http://localhost:8080";
+  if (!s1 || !s2) {
+    console.error("BLAST error: missing sequence for " + (s1 ? "" : query.phagename) + (s1 || s2 ? "" : " and ") + (s2 ? "" : subject.phagename));
+    blastAlignmentsOutstanding = blastAlignmentsOutstanding - 1;
+    alignedGenomes.remove({ "query": query.phagename, "subject": subject.phagename });
+    return;
+  }
+
+  // Use local blast-wrapper on port 8080 if running on localhost, otherwise use production proxy path
+  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    myURL = "http://localhost:8080";
+  } else {
+    myURL = "/blastalign";
+  }
+
+  console.log("Attempting BLAST alignment between " + query.phagename + " and " + subject.phagename);
 
   $.ajax({
     type: "POST",
@@ -1249,6 +1262,7 @@ blast = function (q, d) {
       drawBlastAlignments(blastAlignmentsOutstanding, data);
     },
     error: function (jqXHR, textStatus, errorThrown) {
+      console.error("BLAST failure for " + query.phagename + " vs " + subject.phagename + ":", textStatus, errorThrown, jqXHR.responseText);
       blastAlignmentsOutstanding = blastAlignmentsOutstanding - 1;
       alignedGenomes.remove({ "query": query.phagename, "subject": subject.phagename });
     }

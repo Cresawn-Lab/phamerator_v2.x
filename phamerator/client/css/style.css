@@ -152,8 +152,9 @@ text.horizontalAlign {
 
 #genome-map {
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: auto;
     width: 100%;
+    max-height: calc(100vh - 170px);
 }
 
 #genome-map-tabs {

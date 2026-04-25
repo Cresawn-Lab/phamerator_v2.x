@@ -771,8 +771,9 @@ function update_phages() {
       else { return 70; }
     }
   }
-
-  let tRNAGroup = phage.selectAll(".tRNAGroup")
+  var allPhages = svgMap.selectAll(".phages");
+  
+  let tRNAGroup = allPhages.selectAll(".tRNAGroup")
     .data(function (d) {
       return TRNAs.find({ PhageID: d.phageID }).fetch()
     }, d => d.GeneID)
@@ -796,7 +797,7 @@ function update_phages() {
     .attr("x", d => ((Math.abs(d.Stop - d.Start) / 2) / 10))
     .attr("y", -5);
 
-  gene = phage.selectAll(".geneGroup")
+  gene = allPhages.selectAll(".geneGroup")
     .data(function (d, i) { return d.genes || []; }, d => d.geneID)
     .enter()
     .append("g").classed('geneGroup', true);
@@ -1148,6 +1149,17 @@ function update_phages() {
 
     alignedGenomes.remove({ query: v.query, subject: v.subject });
   });
+
+  // Calculate the actual bounding box of all rendered SVG elements and adjust canvas height
+  // This perfectly prevents rotated gene labels from being clipped at the bottom of the map
+  setTimeout(function() {
+    if (svgMap && svgMap.node()) {
+      var bbox = svgMap.node().getBBox();
+      if (bbox && bbox.height > 0) {
+        svgMap.attr("height", Math.ceil(bbox.y + bbox.height + 50));
+      }
+    }
+  }, 0);
 }
 
 Template.phages.onCreated(function () {
@@ -1237,7 +1249,14 @@ blast = function (q, d) {
   if (!s1 || !s2) {
     console.error("BLAST error: missing sequence for " + (s1 ? "" : query.phagename) + (s1 || s2 ? "" : " and ") + (s2 ? "" : subject.phagename));
     blastAlignmentsOutstanding = blastAlignmentsOutstanding - 1;
-    alignedGenomes.remove({ "query": query.phagename, "subject": subject.phagename });
+    // Do not remove from alignedGenomes to prevent infinite reactive loop
+    if (blastAlignmentsOutstanding === 0) {
+      window.requestAnimationFrame(function () {
+        $(".restoring-your-work-toast").fadeOut();
+        setTimeout(function() { update_hsps(hspData); }, 0);
+        Session.set("progressbarVisibility", false);
+      });
+    }
     return;
   }
 
@@ -1264,7 +1283,14 @@ blast = function (q, d) {
     error: function (jqXHR, textStatus, errorThrown) {
       console.error("BLAST failure for " + query.phagename + " vs " + subject.phagename + ":", textStatus, errorThrown, jqXHR.responseText);
       blastAlignmentsOutstanding = blastAlignmentsOutstanding - 1;
-      alignedGenomes.remove({ "query": query.phagename, "subject": subject.phagename });
+      // Do not remove from alignedGenomes to prevent infinite reactive loop
+      if (blastAlignmentsOutstanding === 0) {
+        window.requestAnimationFrame(function () {
+          $(".restoring-your-work-toast").fadeOut();
+          setTimeout(function() { update_hsps(hspData); }, 0);
+          Session.set("progressbarVisibility", false);
+        });
+      }
     }
   });
 };
@@ -1419,29 +1445,6 @@ Template.phages.onRendered(function () {
   document.getElementById("viewMapTab").addEventListener("click", viewMapTabClicked, false);
 
   const genomeMapContainer = document.getElementById("genome-map");
-  const genomeMapScrollBar = document.getElementById("genome-map-horizontal-scrollbar");
-  const genomeMapScrollThumb = document.getElementById("genome-map-horizontal-thumb");
-
-  const updateGenomeMapScrollBar = function () {
-    if (!genomeMapContainer || !genomeMapScrollBar || !genomeMapScrollThumb) return;
-    const viewportWidth = genomeMapContainer.clientWidth;
-    const scrollWidth = genomeMapContainer.scrollWidth;
-
-    if (scrollWidth <= viewportWidth) {
-      genomeMapScrollBar.style.display = "none";
-      return;
-    }
-
-    genomeMapScrollBar.style.display = "block";
-    const trackWidth = genomeMapScrollBar.clientWidth;
-    const thumbWidth = Math.max(30, (viewportWidth / scrollWidth) * trackWidth);
-    const maxLeft = trackWidth - thumbWidth;
-    const left = (genomeMapContainer.scrollLeft / (scrollWidth - viewportWidth)) * maxLeft;
-
-    genomeMapScrollThumb.style.width = thumbWidth + "px";
-    genomeMapScrollThumb.style.left = left + "px";
-  };
-
   if (genomeMapContainer) {
     genomeMapContainer.addEventListener('scroll', function (e) {
       last_known_scroll_position = e.target.scrollLeft;
@@ -1453,43 +1456,8 @@ Template.phages.onRendered(function () {
         });
         ticking = true;
       }
-      updateGenomeMapScrollBar();
-    });
-
-    window.addEventListener('resize', updateGenomeMapScrollBar);
-  }
-
-  if (genomeMapScrollBar) {
-    genomeMapScrollBar.addEventListener('click', function (e) {
-      const rect = this.getBoundingClientRect();
-      const ratio = (e.clientX - rect.left) / rect.width;
-      genomeMapContainer.scrollLeft = ratio * (genomeMapContainer.scrollWidth - genomeMapContainer.clientWidth);
-    });
-
-    genomeMapScrollThumb.addEventListener('pointerdown', function (startEvent) {
-      startEvent.preventDefault();
-      const startX = startEvent.clientX;
-      const startScrollLeft = genomeMapContainer.scrollLeft;
-      const thumbWidth = genomeMapScrollThumb.offsetWidth;
-      const trackWidth = genomeMapScrollBar.clientWidth - thumbWidth;
-
-      const onMove = function (moveEvent) {
-        const deltaX = moveEvent.clientX - startX;
-        const ratio = deltaX / trackWidth;
-        genomeMapContainer.scrollLeft = Math.min(Math.max(0, startScrollLeft + ratio * (genomeMapContainer.scrollWidth - genomeMapContainer.clientWidth)), genomeMapContainer.scrollWidth - genomeMapContainer.clientWidth);
-      };
-
-      const onUp = function () {
-        document.removeEventListener('pointermove', onMove);
-        document.removeEventListener('pointerup', onUp);
-      };
-
-      document.addEventListener('pointermove', onMove);
-      document.addEventListener('pointerup', onUp);
     });
   }
-
-  updateGenomeMapScrollBar();
 });
 
 Template.cluster.onRendered(function () {

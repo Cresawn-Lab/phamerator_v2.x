@@ -1419,6 +1419,29 @@ Template.phages.onRendered(function () {
   document.getElementById("viewMapTab").addEventListener("click", viewMapTabClicked, false);
 
   const genomeMapContainer = document.getElementById("genome-map");
+  const genomeMapScrollBar = document.getElementById("genome-map-horizontal-scrollbar");
+  const genomeMapScrollThumb = document.getElementById("genome-map-horizontal-thumb");
+
+  const updateGenomeMapScrollBar = function () {
+    if (!genomeMapContainer || !genomeMapScrollBar || !genomeMapScrollThumb) return;
+    const viewportWidth = genomeMapContainer.clientWidth;
+    const scrollWidth = genomeMapContainer.scrollWidth;
+
+    if (scrollWidth <= viewportWidth) {
+      genomeMapScrollBar.style.display = "none";
+      return;
+    }
+
+    genomeMapScrollBar.style.display = "block";
+    const trackWidth = genomeMapScrollBar.clientWidth;
+    const thumbWidth = Math.max(30, (viewportWidth / scrollWidth) * trackWidth);
+    const maxLeft = trackWidth - thumbWidth;
+    const left = (genomeMapContainer.scrollLeft / (scrollWidth - viewportWidth)) * maxLeft;
+
+    genomeMapScrollThumb.style.width = thumbWidth + "px";
+    genomeMapScrollThumb.style.left = left + "px";
+  };
+
   if (genomeMapContainer) {
     genomeMapContainer.addEventListener('scroll', function (e) {
       last_known_scroll_position = e.target.scrollLeft;
@@ -1430,8 +1453,43 @@ Template.phages.onRendered(function () {
         });
         ticking = true;
       }
+      updateGenomeMapScrollBar();
+    });
+
+    window.addEventListener('resize', updateGenomeMapScrollBar);
+  }
+
+  if (genomeMapScrollBar) {
+    genomeMapScrollBar.addEventListener('click', function (e) {
+      const rect = this.getBoundingClientRect();
+      const ratio = (e.clientX - rect.left) / rect.width;
+      genomeMapContainer.scrollLeft = ratio * (genomeMapContainer.scrollWidth - genomeMapContainer.clientWidth);
+    });
+
+    genomeMapScrollThumb.addEventListener('pointerdown', function (startEvent) {
+      startEvent.preventDefault();
+      const startX = startEvent.clientX;
+      const startScrollLeft = genomeMapContainer.scrollLeft;
+      const thumbWidth = genomeMapScrollThumb.offsetWidth;
+      const trackWidth = genomeMapScrollBar.clientWidth - thumbWidth;
+
+      const onMove = function (moveEvent) {
+        const deltaX = moveEvent.clientX - startX;
+        const ratio = deltaX / trackWidth;
+        genomeMapContainer.scrollLeft = Math.min(Math.max(0, startScrollLeft + ratio * (genomeMapContainer.scrollWidth - genomeMapContainer.clientWidth)), genomeMapContainer.scrollWidth - genomeMapContainer.clientWidth);
+      };
+
+      const onUp = function () {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+      };
+
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
     });
   }
+
+  updateGenomeMapScrollBar();
 });
 
 Template.cluster.onRendered(function () {

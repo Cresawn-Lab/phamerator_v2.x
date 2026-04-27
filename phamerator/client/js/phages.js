@@ -9,6 +9,8 @@ import { Domains } from "/imports/api/collections";
 import Clipboard from 'clipboard';
 import d3 from 'd3';
 
+let isTransitioning = false;
+
 /**
  * Helper to parse SVG transform strings since d3.transform was removed in D3 v4
  */
@@ -82,7 +84,7 @@ function updateStickyLabels(scroll_pos) {
 adjust_skew_all = function () {
   var phages = d3.selectAll(".phages")
   phages.each(function (d) {
-    adjust_skew(this);
+    adjust_skew(null, this);
   });
 }
 
@@ -177,7 +179,7 @@ function update_hsps(hspData) {
 
   d3.selectAll(".hsp")
     .transition()
-    .duration(800)
+    .duration(1000)
     .style("opacity", function () {
       if (Session.get("showhspGroups") === true) {
         return 0.3;
@@ -227,15 +229,7 @@ function update_hsps(hspData) {
           }
         });
 
-      // Update existing HSPs synchronously
-      hsps.style("opacity", function () {
-        if (Session.get("showhspGroups") === true) {
-          return 0.3;
-        }
-        else {
-          return 0;
-        }
-      });
+      // Existing HSPs will be updated by the transition at the start of update_hsps
 
       hspsMerged
         .on("mouseover", function (event, d) {
@@ -437,22 +431,7 @@ function update_phages() {
 
   $("#preloader").fadeOut(300).hide();
 
-  svgMap.attr("height", function (d) { return (selectedGenomes.find().count() * 305) });
-
-  var draggedGenome = d3.select(this);
-  var minX = 0;
-  var maxX = 0;
-  var phages = d3.selectAll(".phages");
-  phages.each(function (d) {
-    minX = Math.min(minX, getTranslate(d3.select(this)).translate[0]);
-    maxX = Math.max(maxX, getTranslate(d3.select(this)).translate[0] + (d.genomelength / 10));
-  });
-  svgMap.attr("width", function (d) {
-    return (maxX - minX);
-  })
-    .attr("x", function (d) { return minX });
-
-
+  adjust_map_height(false);
 
   newPhages = phage.enter().append("g")
     .attr("id", function (d, i) { return "phage_" + d.selector.replace(/\./g, '_dot_').replace(/ /g, '_space_'); })
@@ -508,7 +487,7 @@ function update_phages() {
     })
 
     .attr("transform", function (d, i) {
-      if (!d) return "";
+      if (!d || isTransitioning) return d3.select(this).attr("transform");
       let selector = 'g#phage_' + d.selector.replace(/\./g, '_dot_').replace(/ /g, '_space_');
       let node = d3.select(selector).node();
       if (!node) return "";
@@ -647,8 +626,10 @@ function update_phages() {
     })
     .on("end", function (event, d) {
       dragging = null;
-      // get all genomes and then get the transformed x position of the one farthest to the left
-      update_phages();
+      // Removed immediate update_phages() to prevent jumping/jitter
+      // But ensure a stable height is set immediately
+      adjust_map_height(false);
+      
       if (event.sourceEvent.shiftKey) {
         adjust_skew_all();
       }
@@ -665,7 +646,9 @@ function update_phages() {
             d.ypos = (i * 300) + 150;
 
             return "translate(" + getTranslate(d3.select(this)).translate[0] + "," + ((i * 300) + 150) + ")";
-          });
+          })
+          .on("start", function() { isTransitioning = true; })
+          .on("end", function() { isTransitioning = false; });
 
         phagesdata = d3.selectAll(".phages").data();
         phagesdata.forEach((d, i) => { d.ypos = (i * 300) + 150; });
@@ -680,8 +663,6 @@ function update_phages() {
             if (c.sequence && d.sequence && alignedGenomes.find({ query: c.phagename, subject: d.phagename }).count() === 0) {
               blast(c, d);
             }
-            else {
-            }
           }
         });
 
@@ -694,7 +675,9 @@ function update_phages() {
 
           alignedGenomes.remove({ query: v.query, subject: v.subject });
         });
-        setTimeout(update_hsps, 1500, hspData);
+        
+        // Update HSPs after genome transition finishes (1000ms + small buffer)
+        setTimeout(update_hsps, 1100, hspData);
       }
     });
 
@@ -1261,7 +1244,9 @@ function update_phages() {
   setTimeout(function() {
     // Set the stable floor immediately
     adjust_map_height(false);
-    update_hsps(hspData);
+    if (!isTransitioning) {
+        update_hsps(hspData);
+    }
     // Defer the expensive and potentially unstable getBBox call until after transitions
     setTimeout(() => adjust_map_height(true), 1700);
   }, 0);
@@ -1359,7 +1344,6 @@ blast = function (q, d) {
       window.requestAnimationFrame(function () {
         $(".restoring-your-work-toast").fadeOut();
         setTimeout(function() { update_hsps(hspData); }, 0);
-        Session.set("progressbarVisibility", false);
       });
     }
     return;
@@ -1393,8 +1377,7 @@ blast = function (q, d) {
         window.requestAnimationFrame(function () {
           $(".restoring-your-work-toast").fadeOut();
           setTimeout(function() { update_hsps(hspData); }, 0);
-          Session.set("progressbarVisibility", false);
-        });
+          });
       }
     }
   });
@@ -1446,22 +1429,17 @@ drawBlastAlignments = function (blastAlignmentsOutstanding, json) {
 
   parseBlastResult(queryName, subjectName, blasthsps);
 
-  if (blastAlignmentsOutstanding === 0) {
-    window.requestAnimationFrame(function () {
-      $(".restoring-your-work-toast").fadeOut();
-
-      setTimeout(update_hsps(hspData), 0);
-      Session.set("progressbarVisibility", false);
-    });
-  }
+      // If we are currently transitioning genomes, don't trigger an HSP update yet
+      // The on("end") handler will trigger it at the right time.
+      if (!isTransitioning) {
+        setTimeout(() => update_hsps(hspData), 0);
+      }
   else {
 
     i = 0;
     animate();
     function animate() {
       i == 0 && requestAnimationFrame(animate);
-      Session.set("progressbarVisibility", true);
-      Session.set("progressbarState", ((phagesdata.length - blastAlignmentsOutstanding) / phagesdata.length) * 100 + "%");
       i++;
     }
   }

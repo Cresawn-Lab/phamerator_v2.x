@@ -296,14 +296,6 @@ textarea {
     box-shadow: 0 0 5px purple;
 }
 
-.progress {
-    background-color: #2196f3;
-    position: absolute;
-    top: -7px;
-    height: 65px;
-    left: 0px;
-}
-
 ul.clusterSelector {
     column-count: 4;
     column-gap: 0;

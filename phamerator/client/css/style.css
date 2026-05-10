@@ -11,6 +11,8 @@ body {
     /* Margin bottom by footer height*/
     margin-bottom: 50px;
     padding: 0px;
+    padding-top: 104px;
+    /* Banner (40px) + Navbar (64px) */
     color: #555555;
     min-width: 320px;
     font-size: 14.5px;
@@ -153,7 +155,8 @@ text.horizontalAlign {
 
 .navbar-fixed nav {
     position: fixed !important;
-    top: 0 !important;
+    top: 40px !important;
+    /* Adjusted for banner */
     z-index: 1001 !important;
 }
 
@@ -448,4 +451,64 @@ li.phageSelector {
 #login-sign-in-link,
 #login-name-link {
     color: white !important;
+}
+
+/* Notification Banner */
+.notification-banner {
+    background: #311b92;
+    color: white;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1002;
+    font-family: 'Raleway-Regular', sans-serif;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.notification-banner .banner-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification-banner .release-notes-link {
+    color: #ffcc80 !important;
+    text-decoration: underline;
+    font-weight: 600;
+    margin-left: 5px;
+    transition: color 0.2s ease;
+}
+
+.notification-banner .release-notes-link:hover {
+    color: #ffe0b2 !important;
+}
+
+@media only screen and (max-width: 600px) {
+    .notification-banner {
+        font-size: 0.8rem;
+        height: auto;
+        padding: 8px 0;
+        text-align: center;
+    }
+
+    .notification-banner .banner-content {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    body {
+        padding-top: 116px;
+        /* Banner (~60px) + Mobile Nav (56px) */
+    }
+
+    .navbar-fixed nav {
+        top: 60px !important;
+    }
 }

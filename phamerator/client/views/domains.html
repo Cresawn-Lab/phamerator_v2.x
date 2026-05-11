@@ -4,11 +4,11 @@
         <div class="input-field col s6">
             {{#if currentDataset}}
             <input value={{domainQuery}} id="domain_input" type="text" class="validate">
-            <label class="active" for="domain_input">Search Domains</label>
+            <label class="active" for="domain_input">Search Domains<i class="material-icons info-icon tooltip-right tooltip-wide" data-tooltip="Enter a domain name (e.g., HNH endonuclease) or ID to find matching phage genes.">info_outline</i></label>
             {{else}}
             <input value={{domainQuery}} id="domain_input" type="text" class="validate" disabled
                 placeholder="Please select a dataset first">
-            <label class="active" for="domain_input">Search Domains</label>
+            <label class="active" for="domain_input">Search Domains<i class="material-icons info-icon tooltip-right tooltip-wide" data-tooltip="Enter a domain name (e.g., HNH endonuclease) or ID to find matching phage genes.">info_outline</i></label>
             {{/if}}
         </div>
     </div>
@@ -17,13 +17,13 @@
         <table>
             <thead>
                 <tr>
-                    <th>Domain Name</th>
-                    <th>Domain ID</th>
-                    <th>Description</th>
-                    <th>GeneID</th>
-                    <th>Match Start</th>
-                    <th>Match End</th>
-                    <th>E Value</th>
+                    <th>Domain Name<i class="material-icons info-icon" data-tooltip="The common name or short identifier for this conserved protein domain.">info_outline</i></th>
+                    <th>Domain ID<i class="material-icons info-icon" data-tooltip="The unique accession ID (e.g., cd00085, pfam00000) from the source database.">info_outline</i></th>
+                    <th>Description<i class="material-icons info-icon" data-tooltip="A brief explanation of the domain's function or characteristics.">info_outline</i></th>
+                    <th>GeneID<i class="material-icons info-icon" data-tooltip="The specific phage gene where this domain was found.">info_outline</i></th>
+                    <th>Match Start<i class="material-icons info-icon" data-tooltip="The starting position of the domain match within the protein sequence.">info_outline</i></th>
+                    <th>Match End<i class="material-icons info-icon" data-tooltip="The ending position of the domain match within the protein sequence.">info_outline</i></th>
+                    <th>E Value<i class="material-icons info-icon" data-tooltip="Expect value: represents the number of hits expected by chance. Lower E-values (closer to 0) indicate more significant matches.">info_outline</i></th>
                 </tr>
             </thead>
 

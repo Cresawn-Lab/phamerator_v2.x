@@ -1,11 +1,11 @@
 <template name="home" style="background-color: #f5f5f5;">
     <!-- Hero Section -->
-    <div class="section hero">
-        <div class="row container">
-            <h1 class="header" style="color: #2196F3; margin-bottom: 2rem;">Phamerator.org</h1>
-            <p class="flow-text" style="font-weight: 300; margin-bottom: 2rem;">Discover and share the story of your
-                bacteriophage<i class="material-icons info-icon" data-tooltip="Compare and visualize bacteriophage genomes and annotations.">info_outline</i></p>
-            <p>
+    <div class="section hero" style="display: flex; flex-direction: column; justify-content: center; height: calc(100vh - 154px); overflow: hidden; padding: 0;">
+        <div class="row container" style="margin: 0 auto; display: flex; flex-direction: column; justify-content: center; flex: 1; padding: 1rem 1.5rem;">
+            <h1 class="header" style="color: #2196F3; margin-bottom: 1rem; margin-top: 0;">Phamerator.org</h1>
+            <p class="flow-text" style="font-weight: 300; margin-bottom: 1rem; margin-top: 0;">Discover and share the story of your
+                bacteriophage<i class="material-icons info-icon" data-tip="Compare and visualize bacteriophage genomes and annotations.">info_outline</i></p>
+            <p style="margin-top: 0; margin-bottom: 0.5rem;">
                 Phamerator.org is a comparative genomics tool designed for the study of bacteriophages.
                 Originally developed for the SEA-PHAGES program, Phamerator.org is now available to all.
                 We currently host several different data sets including the primary SEA-PHAGES data set known as
@@ -14,12 +14,12 @@
                 faculty.
                 We created Phamerator.org to help them discover and share the story of their phages.
             </p>
-            <p>
+            <p style="margin-top: 0; margin-bottom: 1rem;">
                 Phamerator.org was created by Steven Cresawn's lab in James Madison University's Center for Genome and
                 Metagenome Studies and Department of Biology, where it remains under active development.
             </p>
             <div class="cta-section"
-                style="margin-top: 4rem; display: flex; justify-content: space-evenly; flex-wrap: wrap;">
+                style="margin-top: 2rem; margin-bottom: 1rem; display: flex; justify-content: space-evenly; flex-wrap: wrap; gap: 1rem;">
                 {{#if currentUser}}
                 <a href="/phages" class="waves-effect waves-light btn-large teal" title="Begin comparing phages in the database">Get Started</a>
                 {{else}}

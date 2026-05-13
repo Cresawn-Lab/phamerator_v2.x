@@ -61,6 +61,18 @@ const TOUR_SEGMENTS = [
         element: '#viewMapTab',
         intro: 'Once you have selected two or more phages, click the "View Map" tab here to generate and explore your comparative genome map.',
         position: 'bottom'
+      },
+      {
+        element: '#genome-map',
+        title: 'Your Comparative Map',
+        intro: 'Your comparative map appears here! We\'ve automatically selected some phages and switched to this tab for you.',
+        position: 'top'
+      },
+      {
+        element: '#menu2',
+        title: 'Map Settings',
+        intro: 'Use this floating button to access map settings (like coloring and labels) or to export your map as an SVG image.',
+        position: 'left'
       }
     ]
   },
@@ -137,6 +149,55 @@ function runSegment(segmentIndex) {
       exitOnEsc: true,
       doneLabel: isLastSegment ? 'Finish' : 'Continue →',
       showStepNumbers: false
+    });
+
+    // Manually inject a bulletproof custom close button
+    intro.onchange(function() {
+      setTimeout(() => {
+        const tooltip = document.querySelector('.introjs-tooltip');
+        if (tooltip && !document.querySelector('.custom-introjs-close')) {
+          const closeBtn = document.createElement('div');
+          closeBtn.className = 'custom-introjs-close';
+          closeBtn.innerHTML = '×';
+          closeBtn.style.cssText = 'position: absolute; top: -12px; right: -12px; width: 28px; height: 28px; background: #f44336; color: white; border-radius: 50%; text-align: center; line-height: 26px; cursor: pointer; font-size: 22px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 9999999; font-family: sans-serif;';
+          closeBtn.onclick = function() { intro.exit(); };
+          tooltip.appendChild(closeBtn);
+        }
+      }, 50);
+    });
+
+    intro.onbeforechange(function(targetElement) {
+      if (targetElement && targetElement.id === 'genome-map') {
+        // Automatically select exactly 2 phages if none are selected
+        // We first uncheck any cluster checkboxes to clear the board, just in case
+        const checkedClusters = document.querySelectorAll('.clusterCheckbox:checked');
+        if (checkedClusters.length > 0) {
+          checkedClusters.forEach(cb => cb.click());
+        }
+
+        // Open the first cluster to ensure individual phage checkboxes are rendered
+        const firstHeader = document.querySelector('#cluster-list .collapsible-header');
+        if (firstHeader && !firstHeader.classList.contains('active')) {
+          firstHeader.click();
+        }
+        
+        // Wait briefly for Blaze to render the individual checkboxes
+        setTimeout(() => {
+          const phageBoxes = document.querySelectorAll('.phageCheckbox');
+          let clickedCount = 0;
+          for (let i = 0; i < phageBoxes.length; i++) {
+            if (!phageBoxes[i].checked) {
+              phageBoxes[i].click();
+              clickedCount++;
+            }
+            if (clickedCount >= 2) break;
+          }
+        }, 300);
+
+        // Switch to the View Map tab
+        const viewMapTab = document.getElementById('viewMapTab');
+        if (viewMapTab) viewMapTab.click();
+      }
     });
 
     intro.oncomplete(function () {

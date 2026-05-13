@@ -248,15 +248,15 @@ Meteor.methods({
         dataset: dataset,
         // Using $or to try matching the id against phagename, name, or phageID just in case!
         $or: [
-            { phagename: { $in: phageNames } },
-            { phageID: { $in: phageNames } },
-            { name: { $in: phageNames } }
+          { phagename: { $in: phageNames } },
+          { phageID: { $in: phageNames } },
+          { name: { $in: phageNames } }
         ]
       }, { sort: { cluster: 1, subcluster: 1 }, fields: { _id: false, phagename: 1, name: 1, phageID: 1, cluster: 1, subcluster: 1, clusterSubcluster: 1 } }).fetchAsync();
 
       console.log(`[get_clusters_by_pham] Genomes found matching those identifiers: ${phamclusters.length}`);
       if (phamclusters.length > 0) {
-          console.log(`[get_clusters_by_pham] Example matched Genome structure:`, phamclusters[0]);
+        console.log(`[get_clusters_by_pham] Example matched Genome structure:`, phamclusters[0]);
       }
 
       phamclusters.forEach(function (x) {
@@ -267,17 +267,17 @@ Meteor.methods({
         // while avoiding appending subcluster if it already contains the cluster prefix (e.g. A + A1 -> AA1)
         let clusterName = x.clusterSubcluster;
         if (!clusterName) {
-            let cl = x.cluster || "";
-            let sub = x.subcluster || "";
-            if (sub && String(sub).startsWith(cl)) {
-                clusterName = String(sub);
-            } else {
-                clusterName = cl + String(sub);
-            }
+          let cl = x.cluster || "";
+          let sub = x.subcluster || "";
+          if (sub && String(sub).startsWith(cl)) {
+            clusterName = String(sub);
+          } else {
+            clusterName = cl + String(sub);
+          }
         }
-        
+
         if (!x.cluster || x.cluster === "") {
-            clusterName = "Singletons";
+          clusterName = "Singletons";
         }
 
         let thiscluster = selectedClusterMembers.find(y => y.cluster === clusterName);
@@ -298,7 +298,7 @@ Meteor.methods({
           selectedClusterMembers[selectedClusterMembers.indexOf(thiscluster)] = thiscluster;
         }
       });
-      
+
       // Apply Phamerator's custom sorting algorithm
       selectedClusterMembers.sort(function (a, b) {
         // 1. Singletons (empty string or matching name) always first
@@ -313,7 +313,7 @@ Meteor.methods({
         // 3. Alphabetical sort for strings of the same length
         let clusterCmp = a.rawCluster.localeCompare(b.rawCluster);
         if (clusterCmp !== 0) return clusterCmp; // Only use alphabetical tie-breaker if they are different
-        
+
         // 4. Numerical sort for subclusters
         let numA = parseInt(a.rawSubcluster.toString().replace(/[^0-9]/g, ''), 10);
         let numB = parseInt(b.rawSubcluster.toString().replace(/[^0-9]/g, ''), 10);
@@ -449,7 +449,7 @@ Meteor.methods({
 
       for (const sc of subClusterNames) {
         let phages = clustersMap[c][sc].phages;
-        phages.sort((a,b) => a.phagename.localeCompare(b.phagename));
+        phages.sort((a, b) => a.phagename.localeCompare(b.phagename));
 
         clusters.push({
           name: clustersMap[c][sc].clusterDisplayName,

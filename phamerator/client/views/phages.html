@@ -160,8 +160,8 @@
   <div class="row" style="margin-bottom: 0;">
     <div id="genome-map-tabs" class="col s12" style="padding: 0;">
       <ul class="tabs" style="overflow-x: hidden !important;">
-        <li class="tab col s6 m6 l6"><a class="active" href="#phages-list">Select Phages<i class="material-icons info-icon tooltip-right" data-tooltip="Choose which phages to include in your comparative genome map." style="font-size: 1.1rem; margin-left: 4px;">info_outline</i></a></li>
-        <li class="tab col s6 m6 l6"><a id="viewMapTab" href="#genome-map">View Map<i class="material-icons info-icon tooltip-right" data-tooltip="Visualize and explore the selected phages." style="font-size: 1.1rem; margin-left: 4px;">info_outline</i></a></li>
+        <li class="tab col s6 m6 l6"><a class="active" href="#phages-list">Select Phages<i class="material-icons info-icon tooltip-right" data-tip="Choose which phages to include in your comparative genome map." style="font-size: 1.1rem; margin-left: 4px;">info_outline</i></a></li>
+        <li class="tab col s6 m6 l6"><a id="viewMapTab" href="#genome-map">View Map<i class="material-icons info-icon tooltip-right" data-tip="Visualize and explore the selected phages." style="font-size: 1.1rem; margin-left: 4px;">info_outline</i></a></li>
       </ul>
     </div>
   </div>
@@ -224,7 +224,7 @@
 
 <template name="cluster">
   <li>
-    <div class="collapsible-header">
+    <div class="collapsible-header css-tooltip" data-tip="Click to expand and browse individual phages, or use the checkbox to select the entire cluster.">
       <input type="checkbox" id="cluster-{{name}}" data-cluster="{{cluster}}" data-subcluster="{{subcluster}}"
         class="filled-in clusterCheckbox" checked="{{clusterIsChecked phages}}" />
       <label for="cluster-{{name}}" title="Phages in the same cluster share significant genetic similarity. Singletons have no close relatives in the database.">

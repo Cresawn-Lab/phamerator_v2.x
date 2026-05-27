@@ -16,7 +16,7 @@
         <ul class="left hide-on-med-and-down">
 
           {{#unless loggingIn}}
-          <li><a class="dropdown-trigger" href="#!" data-target="dropdown1">{{preferredDataset}}<i
+          <li><a class="dropdown-trigger" href="#!" data-target="dropdown1" title="Select a phage database (e.g., Actino_Draft)">{{preferredDataset}}<i
                 class="material-icons right">arrow_drop_down</i></a></li>
 
           {{#if metadata.metadata}}
@@ -38,16 +38,17 @@
               class="waves-effect waves-purple lighten-5">Home</a></li>
           {{#if currentUser}}
           <li class="{{isActiveRoute regex='domains'}}"><a href="{{pathFor 'domains'}}"
-              class="waves-effect waves-purple lighten-5">Domains</a></li>
+              class="waves-effect waves-purple lighten-5" title="Search for conserved protein domains (e.g., HNH endonuclease) across phages and view matching genes.">Domains</a></li>
           <li class="{{isActiveRoute regex='phages'}}"><a href="{{pathFor 'phages'}}"
-              class="waves-effect waves-purple lighten-5">Genome Maps</a></li>
+              class="waves-effect waves-purple lighten-5" title="Create comparative genome maps to visualize gene synteny, similarity, and annotations.">Genome Maps</a></li>
           {{/if}}
           {{#if loggedIn}}
           <li class="{{isActiveRoute regex='account'}}"><a href="{{pathFor 'account'}}"
               class="waves-effect waves-purple lighten-5">{{displayname}}</a></li>
           {{/if}}
+          <li><a href="#" class="waves-effect waves-light start-tour-btn" title="Start an interactive tour of the application">Tour</a></li>
           <li><a href="https://app.gitter.im/#/room/#phamerator_Lobby:gitter.im" target="_blank"
-              class="waves-effect waves-light"><i class="material-icons left white-text">chat_bubble</i>Chat</a>
+              class="waves-effect waves-light" title="Join the Phamerator community chat for support and discussions"><i class="material-icons left white-text">chat_bubble</i>Chat</a>
           </li>
           {{#if currentUser}}
           <li><a href="#" class="waves-effect waves-light logout-btn"><i class="material-icons left white-text">exit_to_app</i>Logout</a></li>
@@ -61,12 +62,13 @@
 
           {{#if loggedIn}}
           <li class="{{isActiveRoute regex='domains'}}"><a href="{{pathFor 'domains'}}"
-              class="waves-effect waves-purple lighten-5">Domains</a></li>
+              class="waves-effect waves-purple lighten-5" title="Search for conserved protein domains (e.g., HNH endonuclease) across phages and view matching genes.">Domains</a></li>
           <li class="{{isActiveRoute regex='phages'}}"><a href="{{pathFor 'phages'}}"
-              class="waves-effect waves-purple lighten-5">Genome Maps</a></li>
+              class="waves-effect waves-purple lighten-5" title="Create comparative genome maps to visualize gene synteny, similarity, and annotations.">Genome Maps</a></li>
           <li class="{{isActiveRoute regex='account'}}"><a href="{{pathFor 'account'}}"
               class="waves-effect waves-purple lighten-5">{{displayname}}</a></li>
           {{/if}}
+          <li><a href="#" class="waves-effect waves-light start-tour-btn">Tour</a></li>
           <li><a class="js-gitter-toggle-chat-button waves-effect waves-light btn"><i
                 class="material-icons left white-text">chat_bubble</i>Chat</a></li>
           {{#if currentUser}}
@@ -84,7 +86,7 @@
       <div class="container">
         Phamerator.org {{version}} © Steven Cresawn, Ph.D. and SEA-PHAGES 2016-{{now}}. All rights reserved.<a
           class="grey-text text-lighten-4" href="{{pathFor 'terms'}}">Terms and Policies</a>
-        <a class="grey-text text-lighten-4 right" href="https://seaphages.org">SEA-PHAGES</a>
+        <a class="grey-text text-lighten-4 right" href="https://seaphages.org" title="Science Education Alliance-Phage Hunters Advancing Genomics and Evolutionary Science">SEA-PHAGES</a>
         <div id="preloader">
           <div class="preloader-wrapper big active">
             <div class="spinner-layer spinner-yellow-only">

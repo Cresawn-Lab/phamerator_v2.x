@@ -1,4 +1,5 @@
 import { Datasets } from '/imports/api/collections.js';
+import { startTour, autoStartTour } from './tour.js';
 
 switch_dataset = function (dataset) {
   selectedGenomes.remove({});
@@ -142,10 +143,17 @@ Template.nav.onRendered(function () {
       Session.set("datasetsOwn", []);
     }
   });
+
+  // Start tour automatically if needed
+  autoStartTour();
 });
 
 Template.nav.events({
   "click #dropdown1 a": function (event, template) {
     switch_dataset(event.currentTarget.id)
   },
+  "click .start-tour-btn": function (event, template) {
+    event.preventDefault();
+    startTour();
+  }
 })

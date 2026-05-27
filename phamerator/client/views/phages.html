@@ -160,8 +160,8 @@
   <div class="row" style="margin-bottom: 0;">
     <div id="genome-map-tabs" class="col s12" style="padding: 0;">
       <ul class="tabs" style="overflow-x: hidden !important;">
-        <li class="tab col s6 m6 l6"><a class="active" href="#phages-list">Select Phages</a></li>
-        <li class="tab col s6 m6 l6"><a id="viewMapTab" href="#genome-map">View Map</a></li>
+        <li class="tab col s6 m6 l6"><a class="active" href="#phages-list">Select Phages<i class="material-icons info-icon tooltip-right" data-tip="Choose which phages to include in your comparative genome map." style="font-size: 1.1rem; margin-left: 4px;">info_outline</i></a></li>
+        <li class="tab col s6 m6 l6"><a id="viewMapTab" href="#genome-map">View Map<i class="material-icons info-icon tooltip-right" data-tip="Visualize and explore the selected phages." style="font-size: 1.1rem; margin-left: 4px;">info_outline</i></a></li>
       </ul>
     </div>
   </div>
@@ -175,22 +175,22 @@
 
       </ul>
       <div class="fixed-action-btn horizontal" style="bottom: 45px; right: 24px;">
-        <a id="menu" class="btn-floating btn-large waves-effect waves-light">
+        <a id="menu" class="btn-floating btn-large waves-effect waves-light" title="Action Menu">
           <i class="material-icons">menu</i>
         </a>
         <ul>
-          <li><a id="scroll_top" class="waves-effect waves-purple btn-floating orange ">
+          <li><a id="scroll_top" class="waves-effect waves-purple btn-floating orange " title="Scroll to Top">
               <i class="material-icons left">arrow_upward</i>up
             </a></li>
           <li><a id="collapse_all"
-              class="waves-effect waves-yellow btn-floating light-blue darken-1 {{class_if_clusters_open}}">
+              class="waves-effect waves-yellow btn-floating light-blue darken-1 {{class_if_clusters_open}}" title="Collapse All Clusters">
               <i class="material-icons left">remove</i>remove
             </a></li>
-          <li><a id="expand_all" class="waves-effect waves-yellow btn-floating light-blue {{class_if_clusters_closed}}">
+          <li><a id="expand_all" class="waves-effect waves-yellow btn-floating light-blue {{class_if_clusters_closed}}" title="Expand All Clusters">
               <i class="material-icons left">add</i>search
             </a></li>
           <li><a id="clearSelection"
-              class="waves-effect waves-yellow btn-floating purple {{class_if_genomes_selected}}">
+              class="waves-effect waves-yellow btn-floating purple {{class_if_genomes_selected}}" title="Clear Selection">
               <i class="material-icons left">clear</i>Clear Selection
             </a></li>
         </ul>
@@ -200,17 +200,17 @@
     <div id="genome-map" class="col s12">
       <svg id="svg-genome-map"></svg>
       <div class="fixed-action-btn horizontal" style="bottom: 45px; right: 24px;">
-        <a id="menu2" class="waves-effect waves-light btn-floating btn-large">
+        <a id="menu2" class="waves-effect waves-light btn-floating btn-large" title="Map Actions">
           <i class="material-icons">menu</i>
         </a>
         <ul>
           <li>
-            <button class="downloadGenomeMap waves-effect waves-yellow btn-floating purple">
+            <button class="downloadGenomeMap waves-effect waves-yellow btn-floating purple" title="Export Map to SVG">
               <i class="material-icons left">system_update_alt</i>Export Genome Map
             </button>
           </li>
           <li>
-            <button class="mapSettings waves-effect waves-purple btn-floating yellow">
+            <button class="mapSettings waves-effect waves-purple btn-floating yellow" title="Map Settings">
               <i class="material-icons left">settings</i>Settings
             </button>
           </li>
@@ -224,15 +224,15 @@
 
 <template name="cluster">
   <li>
-    <div class="collapsible-header">
+    <div class="collapsible-header css-tooltip" data-tip="Click to expand and browse individual phages, or use the checkbox to select the entire cluster.">
       <input type="checkbox" id="cluster-{{name}}" data-cluster="{{cluster}}" data-subcluster="{{subcluster}}"
         class="filled-in clusterCheckbox" checked="{{clusterIsChecked phages}}" />
-      <label for="cluster-{{name}}">
+      <label for="cluster-{{name}}" title="Phages in the same cluster share significant genetic similarity. Singletons have no close relatives in the database.">
         {{name}}
       </label>
 
       <span class="{{selectedClass}}"
-        data-badge-caption="{{dataBadgeCaption}}">{{selectedCount}}</span>
+        data-badge-caption="{{dataBadgeCaption}}" title="Number of phages selected in this group">{{selectedCount}}</span>
     </div>
     <div class="collapsible-body">
       <ul class="clusterSelector">

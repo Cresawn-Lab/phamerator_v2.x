@@ -4,7 +4,6 @@
     "clipboard": "^2.0.11",
     "colorsys": "^1.0.22",
     "d3": "^7.9.0",
-    "intro.js": "^8.3.2",
     "jquery": "^4.0.0",
     "materialize-css": "^1.0.0",
     "simpl-schema": "^3.4.7"

@@ -1,0 +1,157 @@
+/* Custom Theme for Intro.js matching Materialize CSS */
+
+.introjs-tooltip {
+  border-radius: 8px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  min-width: 450px !important;
+  max-width: 600px !important;
+  border: none !important;
+  padding: 0 !important; /* Remove padding here so we can pad inner elements properly */
+  background-color: white !important;
+}
+
+.introjs-tooltiptext {
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+  color: #333 !important;
+  padding: 20px 20px 10px 20px !important;
+  background-color: transparent !important; /* Fix for inherited blue background */
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+.introjs-tooltip-title {
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  color: #9c27b0 !important; /* Materialize purple */
+  padding: 15px 20px 10px 20px !important;
+  border-bottom: 1px solid #eee;
+  margin: 0 !important;
+  background-color: transparent !important;
+}
+
+/* Bullet pagination fix */
+.introjs-bullets {
+  padding: 10px 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.introjs-bullets ul {
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.introjs-bullets ul li {
+  margin: 0 6px !important;
+}
+.introjs-bullets ul li a {
+  background: #bdbdbd !important;
+  transition: all 0.3s ease;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  display: block !important;
+}
+.introjs-bullets ul li a.active {
+  background: #9c27b0 !important;
+  width: 12px !important;
+  height: 12px !important;
+}
+
+/* Progress bar fix */
+.introjs-progress {
+  height: 8px !important;
+  border-radius: 4px !important;
+  background-color: #e0e0e0 !important;
+  margin: 10px 20px 20px 20px !important;
+  overflow: hidden !important;
+}
+.introjs-progressbar {
+  height: 100% !important;
+  background-color: #00bcd4 !important; /* Materialize cyan */
+}
+
+/* Buttons container fix */
+.introjs-tooltipbuttons {
+  border-top: 1px solid #eee !important;
+  padding: 15px 20px !important;
+  overflow: auto !important; /* clear floats */
+  display: block !important;
+}
+
+.introjs-button {
+  border-radius: 4px !important;
+  text-shadow: none !important;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2) !important;
+  border: none !important;
+  background-color: #9c27b0 !important; /* Materialize purple */
+  color: white !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  transition: background-color .2s ease-out;
+  display: inline-block !important;
+  margin: 0 !important;
+}
+
+.introjs-button:hover,
+.introjs-button:focus,
+.introjs-button:active {
+  background-color: #7b1fa2 !important; /* Materialize purple darken-2 */
+  color: white !important;
+  box-shadow: 0 3px 3px 0 rgba(0,0,0,0.14), 0 1px 7px 0 rgba(0,0,0,0.12), 0 3px 1px -1px rgba(0,0,0,0.2) !important;
+}
+
+.introjs-button.introjs-disabled {
+  background-color: #e0e0e0 !important;
+  color: #9e9e9e !important;
+  box-shadow: none !important;
+  cursor: default !important;
+}
+
+.introjs-prevbutton { float: left !important; }
+.introjs-nextbutton, .introjs-donebutton { float: right !important; }
+.introjs-skipbutton {
+  position: absolute !important;
+  top: 10px !important;
+  right: 15px !important;
+  float: none !important;
+  background: transparent !important;
+  color: #9e9e9e !important;
+  box-shadow: none !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-width: 24px !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  display: block !important;
+  z-index: 9999 !important;
+  cursor: pointer !important;
+}
+
+.introjs-skipbutton:hover,
+.introjs-skipbutton:focus,
+.introjs-skipbutton:active {
+  background: transparent !important;
+  color: #f44336 !important; /* Materialize red */
+  box-shadow: none !important;
+}
+
+/* Arrows fix */
+.introjs-arrow.top { border-bottom-color: #fff !important; }
+.introjs-arrow.bottom { border-top-color: #fff !important; }
+.introjs-arrow.left { border-right-color: #fff !important; }
+.introjs-arrow.right { border-left-color: #fff !important; }
+
+.introjs-helperLayer {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 0px 5000px !important;
+  border-radius: 4px !important;
+}

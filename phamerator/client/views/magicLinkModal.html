@@ -3,51 +3,53 @@
     <div class="modal-content">
       <h4>Sign In / Register</h4>
       {{#if codeSent}}
-        <p>We sent a 6-digit verification code to <strong>{{email}}</strong>.</p>
-        <div class="row">
-          <form class="col s12" id="verify-code-form">
-            <div class="row">
-              <div class="input-field col s12">
-                <i class="material-icons prefix">lock</i>
-                <input id="verify_code" type="text" maxlength="6" style="text-align: center; letter-spacing: 8px; font-size: 1.5rem; font-weight: bold;" required>
-                <label for="verify_code">6-Digit Code</label>
-              </div>
+      <p>We sent a 6-digit verification code to <strong>{{email}}</strong>.</p>
+      <div class="row">
+        <form class="col s12" id="verify-code-form">
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">lock</i>
+              <input id="verify_code" type="text" maxlength="6"
+                style="text-align: center; letter-spacing: 8px; font-size: 1.5rem; font-weight: bold;" required>
+              <label for="verify_code">6-Digit Code</label>
             </div>
-            <div class="row">
-              <div class="col s12 center-align">
-                <button class="btn waves-effect waves-light purple" type="submit">
-                  Verify Code
-                  <i class="material-icons right">check</i>
-                </button>
-              </div>
+          </div>
+          <div class="row">
+            <div class="col s12 center-align">
+              <button class="btn waves-effect waves-light purple" type="submit">
+                Verify Code
+                <i class="material-icons right">check</i>
+              </button>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
+      </div>
       {{else}}
-        <p>Enter your email address to receive a login code or magic link. No password required!</p>
-        <div class="row">
-          <form class="col s12" id="magic-link-form">
-            <div class="row">
-              <div class="input-field col s12">
-                <i class="material-icons prefix">email</i>
-                <input id="magic_email" type="email" class="validate" required>
-                <label for="magic_email">Email</label>
-              </div>
+      <p>Enter your email address to receive a login code or magic link. No password required!</p>
+      <div class="row">
+        <form class="col s12" id="magic-link-form">
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">email</i>
+              <input id="magic_email" type="email" class="validate" required>
+              <label for="magic_email">Email</label>
             </div>
-            <div class="row">
-              <div class="col s12 center-align" style="display: flex; justify-content: center; gap: 10px;">
-                <button class="btn waves-effect waves-light purple" type="submit" style="text-transform: none;">
-                  Email Login Code
-                  <i class="material-icons right">vpn_key</i>
-                </button>
-                <button class="btn-flat waves-effect purple-text" id="btn-magic-link" type="button" style="text-transform: none; border: 1px solid purple;">
-                  Send Magic Link
-                  <i class="material-icons right">send</i>
-                </button>
-              </div>
+          </div>
+          <div class="row">
+            <div class="col s12 center-align" style="display: flex; justify-content: center; gap: 10px;">
+              <button class="btn waves-effect waves-light purple" type="submit" style="text-transform: none;">
+                Email Login Code
+                <i class="material-icons right">vpn_key</i>
+              </button>
+              <button class="btn-flat waves-effect purple-text" id="btn-magic-link" type="button"
+                style="text-transform: none; border: 1px solid purple;">
+                Send Magic Link
+                <i class="material-icons right">send</i>
+              </button>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
+      </div>
       {{/if}}
     </div>
     <div class="modal-footer">

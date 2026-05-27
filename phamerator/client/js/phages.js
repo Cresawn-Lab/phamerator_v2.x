@@ -1349,12 +1349,8 @@ blast = function (q, d) {
     return;
   }
 
-  // Use local blast-wrapper on port 8080 if running on localhost, otherwise use production proxy path
-  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    myURL = "http://localhost:8080";
-  } else {
-    myURL = "/blastalign";
-  }
+  // Always use the production proxy path, as Caddy handles /blastalign on all environments
+  myURL = "/blastalign";
 
   console.log("Attempting BLAST alignment between " + query.phagename + " and " + subject.phagename);
 

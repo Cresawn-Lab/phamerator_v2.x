@@ -1,26 +1,30 @@
 # Stage 1: Build the Meteor app
 FROM node:20-bookworm AS builder
 
-# Switch to the non-root node user early
-USER node
-
-# Install Meteor locally to the node user's home directory
+# Install Meteor (running as root in the builder stage is standard and fixes path/permission issues)
 RUN curl "https://install.meteor.com/?release=3.4" | sh
-ENV PATH="/home/node/.meteor:${PATH}"
+
+# Copy the meteor installation from root to the node user and fix ownership
+RUN cp -r /root/.meteor /home/node/.meteor && \
+    chown -R node:node /home/node/.meteor
 
 # Set working directory (Docker will automatically create this directory)
 WORKDIR /app
 
-# Copy package files ensuring correct ownership
-COPY --chown=node:node package*.json ./
+# Copy package files
+COPY package*.json ./
 
-# Install npm dependencies for building (leaving off --production here is correct)
-RUN meteor npm install
+# Install dependencies (Meteor 3 uses standard npm)
+RUN npm install
 
-# Copy the rest of the app source code ensuring correct ownership
-COPY --chown=node:node . .
+# Copy the rest of the app source code
+COPY . .
+RUN chown -R node:node /app
 
-# Build the Meteor app into a local directory that the node user can write to
+# Switch to the non-root node user
+USER node
+
+# Build the Meteor app
 RUN meteor build --directory /app/build --architecture os.linux.aarch64
 
 # Stage 2: Create the production image

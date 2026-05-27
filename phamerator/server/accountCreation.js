@@ -69,7 +69,9 @@ Meteor.methods({
 
     if (!user) {
       // Create user if they don't exist
-      const userId = await Accounts.createUserAsync({ email: email });
+      const userId = await Accounts.insertUserDoc({}, {
+        emails: [{ address: email, verified: false }]
+      });
       user = await Meteor.users.findOneAsync(userId);
     }
 

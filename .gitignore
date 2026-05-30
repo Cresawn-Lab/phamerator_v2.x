@@ -3,3 +3,4 @@ phamerator/package-lock.json
 .DS_Store
 .gitignore
 dump_recovery/
+.env*

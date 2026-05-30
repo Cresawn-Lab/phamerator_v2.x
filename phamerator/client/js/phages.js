@@ -1333,11 +1333,8 @@ blast = function (q, d) {
   var subject = d;
   alignedGenomes.update({ "query": query.phagename, "subject": subject.phagename }, { "query": query.phagename, "subject": subject.phagename }, { upsert: true });
 
-  var s1 = query.sequence;
-  var s2 = subject.sequence;
-
-  if (!s1 || !s2) {
-    console.error("BLAST error: missing sequence for " + (s1 ? "" : query.phagename) + (s1 || s2 ? "" : " and ") + (s2 ? "" : subject.phagename));
+  if (!query.phageID || !subject.phageID) {
+    console.error("BLAST error: missing phageID for " + query.phagename + " or " + subject.phagename);
     blastAlignmentsOutstanding = blastAlignmentsOutstanding - 1;
     // Do not remove from alignedGenomes to prevent infinite reactive loop
     if (blastAlignmentsOutstanding === 0) {
@@ -1358,12 +1355,13 @@ blast = function (q, d) {
     type: "POST",
     method: "POST",
     url: myURL,
-    data: { seq1: s1, seq2: s2, name1: query.phagename, name2: subject.phagename },
+    data: JSON.stringify({ query: query.phageID, subject: subject.phageID, dataset: Session.get('currentDataset') }),
+    contentType: 'application/json',
     dataType: 'json',
     jsonp: false,
     success: function (data) {
       blastAlignmentsOutstanding = blastAlignmentsOutstanding - 1;
-      drawBlastAlignments(blastAlignmentsOutstanding, data);
+      drawBlastAlignments(blastAlignmentsOutstanding, data, query.phagename, subject.phagename);
     },
     error: function (jqXHR, textStatus, errorThrown) {
       console.error("BLAST failure for " + query.phagename + " vs " + subject.phagename + ":", textStatus, errorThrown, jqXHR.responseText);
@@ -1379,9 +1377,9 @@ blast = function (q, d) {
   });
 };
 
-drawBlastAlignments = function (blastAlignmentsOutstanding, json) {
+drawBlastAlignments = function (blastAlignmentsOutstanding, json, queryName, subjectName) {
 
-  var parseBlastResult = function (queryName, subjectName, hspsArray) {
+  var parseBlastResult = function (queryName, subjectName, alignmentsArray) {
     if (queryName === "" || subjectName === "") { return; }
 
     // If the user deselected either genome while the BLAST alignment was fetching,
@@ -1391,39 +1389,30 @@ drawBlastAlignments = function (blastAlignmentsOutstanding, json) {
     }
 
     var genome_pair_hsps = [];
-    hspsArray.forEach(function (value, index, myArray) {
-      var hspCoordinates = Array();
-      hspCoordinates.push({ x: value.query_from / 10, y: 0, evalue: value.evalue, identity: value.identity, align_len: value.align_len });
-      hspCoordinates.push({ x: value.query_to / 10, y: 0 });
-      hspCoordinates.push({ x: value.hit_to / 10, y: 270 });
-      hspCoordinates.push({ x: value.hit_from / 10, y: 270 });
-      genome_pair_hsps.push(hspCoordinates);
-    });
-    genome_pair_hsps.sort(function (a, b) {
-      return a[0].align_len - b[0].align_len;
-    });
+    if (Array.isArray(alignmentsArray)) {
+      alignmentsArray.forEach(function (value, index, myArray) {
+        var isFlipped = value.queryPhageID !== queryName;
+        
+        var qStart = isFlipped ? value.targetStart : value.queryStart;
+        var qEnd = isFlipped ? value.targetEnd : value.queryEnd;
+        var tStart = isFlipped ? value.queryStart : value.targetStart;
+        var tEnd = isFlipped ? value.queryEnd : value.targetEnd;
+
+        var hspCoordinates = Array();
+        hspCoordinates.push({ x: qStart / 10, y: 0, evalue: value.eValue, identity: value.identity, align_len: value.alignLen });
+        hspCoordinates.push({ x: qEnd / 10, y: 0 });
+        hspCoordinates.push({ x: tEnd / 10, y: 270 });
+        hspCoordinates.push({ x: tStart / 10, y: 270 });
+        genome_pair_hsps.push(hspCoordinates);
+      });
+      genome_pair_hsps.sort(function (a, b) {
+        return a[0].align_len - b[0].align_len;
+      });
+    }
     hspData.push({ queryName: queryName, subjectName: subjectName, genome_pair_hsps: genome_pair_hsps });
   };
 
-  var blasthsps = [];
-  var queryName = "";
-  var subjectName = "";
-
-  if (json &&
-    json.BlastOutput2 &&
-    json.BlastOutput2.report &&
-    json.BlastOutput2.report.results &&
-    json.BlastOutput2.report.results.bl2seq[0] &&
-    json.BlastOutput2.report.results.bl2seq[0].hits[0] &&
-    json.BlastOutput2.report.results.bl2seq[0].hits[0].hsps) {
-    blasthsps = json.BlastOutput2.report.results.bl2seq[0].hits[0].hsps;
-    queryName = json.BlastOutput2.report.results.bl2seq[0].query_title;
-    subjectName = json.BlastOutput2.report.results.bl2seq[0].hits[0].description[0].title;
-  }
-  else {
-  }
-
-  parseBlastResult(queryName, subjectName, blasthsps);
+  parseBlastResult(queryName, subjectName, json);
 
       // If we are currently transitioning genomes, don't trigger an HSP update yet
       // The on("end") handler will trigger it at the right time.

@@ -12,9 +12,12 @@ getAutocompleteUsers = function () {
   users = Meteor.users.find({ 'profile.includeInDirectory': true }).fetch()
   autoCompleteUsers = {}
   users.forEach(user => {
+    if (!user.emails || user.emails.length === 0) return; // Skip users without emails
+    
     var email = user.emails[0].address;
-
-    var key = user.name + " (" + email + ")";
+    var name = user.name || (user.profile && user.profile.name) || user.username || "Unknown";
+    
+    var key = name + " (" + email + ")";
     autoCompleteUsers[key] = null;
   })
   return autoCompleteUsers;

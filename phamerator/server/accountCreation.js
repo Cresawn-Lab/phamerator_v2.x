@@ -37,6 +37,12 @@ Accounts.onCreateUser(async function (options, user) {
     }
   }
 
+  // Ensure the role exists using V4 API
+  try {
+    await Roles.createRoleAsync('view', { unlessExists: true });
+  } catch (err) {
+    if (err.code !== 11000) console.warn("Role creation warning:", err.message);
+  }
   // Assign default roles using V4 API
   await Roles.addUsersToRolesAsync(user._id, ['view'], 'Actino_Draft');
 

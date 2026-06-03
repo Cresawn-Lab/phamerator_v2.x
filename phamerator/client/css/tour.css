@@ -117,23 +117,7 @@
 .introjs-prevbutton { float: left !important; }
 .introjs-nextbutton, .introjs-donebutton { float: right !important; }
 .introjs-skipbutton {
-  position: absolute !important;
-  top: 10px !important;
-  right: 15px !important;
-  float: none !important;
-  background: transparent !important;
-  color: #9e9e9e !important;
-  box-shadow: none !important;
-  font-size: 24px !important;
-  line-height: 1 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  min-width: 24px !important;
-  text-align: center !important;
-  text-decoration: none !important;
-  display: block !important;
-  z-index: 9999 !important;
-  cursor: pointer !important;
+  display: none !important;
 }
 
 .introjs-skipbutton:hover,

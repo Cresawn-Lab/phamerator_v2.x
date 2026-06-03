@@ -147,6 +147,7 @@ function runSegment(segmentIndex) {
       showBullets: true,
       exitOnOverlayClick: false,
       exitOnEsc: true,
+      showSkipButton: false,
       doneLabel: isLastSegment ? 'Finish' : 'Continue →',
       showStepNumbers: false
     });

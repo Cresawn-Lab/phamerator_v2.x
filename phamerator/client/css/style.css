@@ -173,7 +173,7 @@ text.horizontalAlign {
     overflow-y: scroll;
     overflow-anchor: none;
     width: 100%;
-    max-height: calc(100vh - 162px);
+    max-height: calc(100vh - 202px);
 }
 
 #genome-map svg {

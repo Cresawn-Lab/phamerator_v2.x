@@ -144,8 +144,8 @@ Template.nav.onRendered(function () {
     }
   });
 
-  // Start tour automatically if needed
-  autoStartTour();
+  // Tour should not start automatically
+  // autoStartTour();
 });
 
 Template.nav.events({

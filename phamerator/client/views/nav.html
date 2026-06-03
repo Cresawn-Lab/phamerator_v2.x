@@ -45,7 +45,6 @@
           {{#if loggedIn}}
           <li class="{{isActiveRoute regex='account'}}"><a href="{{pathFor 'account'}}"
               class="waves-effect waves-purple lighten-5">{{displayname}}</a></li>
-          {{/if}}
           <li><a href="#" class="waves-effect waves-light start-tour-btn" title="Start an interactive tour of the application">Tour</a></li>
 
           {{#if currentUser}}
@@ -65,7 +64,6 @@
               class="waves-effect waves-purple lighten-5" title="Create comparative genome maps to visualize gene synteny, similarity, and annotations.">Genome Maps</a></li>
           <li class="{{isActiveRoute regex='account'}}"><a href="{{pathFor 'account'}}"
               class="waves-effect waves-purple lighten-5">{{displayname}}</a></li>
-          {{/if}}
           <li><a href="#" class="waves-effect waves-light start-tour-btn">Tour</a></li>
 
           {{#if currentUser}}

@@ -183,10 +183,14 @@ text.horizontalAlign {
 #genome-map-tabs {
     position: -webkit-sticky;
     position: sticky;
-    top: 64px;
+    top: 104px;
+    /* Banner (40px) + Navbar (64px) */
     z-index: 99;
     background-color: #ffffff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    float: none !important;
+    width: 100% !important;
+    clear: both;
 }
 
 #genome-map-tabs .tabs {
@@ -514,6 +518,11 @@ li.phageSelector {
 
     .navbar-fixed nav {
         top: 60px !important;
+    }
+
+    #genome-map-tabs {
+        top: 116px;
+        /* Banner (~60px) + Mobile Nav (56px) */
     }
 }
 

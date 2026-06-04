@@ -1361,7 +1361,7 @@ blast = function (q, d) {
     jsonp: false,
     success: function (data) {
       blastAlignmentsOutstanding = blastAlignmentsOutstanding - 1;
-      drawBlastAlignments(blastAlignmentsOutstanding, data, query.phagename, subject.phagename);
+      drawBlastAlignments(blastAlignmentsOutstanding, data, query, subject);
     },
     error: function (jqXHR, textStatus, errorThrown) {
       console.error("BLAST failure for " + query.phagename + " vs " + subject.phagename + ":", textStatus, errorThrown, jqXHR.responseText);
@@ -1377,9 +1377,12 @@ blast = function (q, d) {
   });
 };
 
-drawBlastAlignments = function (blastAlignmentsOutstanding, json, queryName, subjectName) {
+drawBlastAlignments = function (blastAlignmentsOutstanding, json, query, subject) {
 
-  var parseBlastResult = function (queryName, subjectName, alignmentsArray) {
+  var parseBlastResult = function (query, subject, alignmentsArray) {
+    var queryName = query && query.phagename ? query.phagename : "";
+    var subjectName = subject && subject.phagename ? subject.phagename : "";
+
     if (queryName === "" || subjectName === "") { return; }
 
     // If the user deselected either genome while the BLAST alignment was fetching,
@@ -1391,7 +1394,7 @@ drawBlastAlignments = function (blastAlignmentsOutstanding, json, queryName, sub
     var genome_pair_hsps = [];
     if (Array.isArray(alignmentsArray)) {
       alignmentsArray.forEach(function (value, index, myArray) {
-        var isFlipped = value.queryPhageID !== queryName;
+        var isFlipped = (value.queryPhageID === subject.phageID) || (value.queryPhageID === subjectName);
         
         var qStart = isFlipped ? value.targetStart : value.queryStart;
         var qEnd = isFlipped ? value.targetEnd : value.queryEnd;
@@ -1412,7 +1415,7 @@ drawBlastAlignments = function (blastAlignmentsOutstanding, json, queryName, sub
     hspData.push({ queryName: queryName, subjectName: subjectName, genome_pair_hsps: genome_pair_hsps });
   };
 
-  parseBlastResult(queryName, subjectName, json);
+  parseBlastResult(query, subject, json);
 
       // If we are currently transitioning genomes, don't trigger an HSP update yet
       // The on("end") handler will trigger it at the right time.

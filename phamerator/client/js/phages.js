@@ -1137,13 +1137,13 @@ function update_phages() {
     .attr("x", function (d) { return (Math.abs(d.stop - d.start) / 2) / 10; })
     .attr("y", function (d) {
       if (d.direction == "forward") {
-        if (d.stop - d.start < 500) {
+        if (Math.abs(d.stop - d.start) < 500) {
           return -65;
         }
         else { return -45; }
       }
       else if (d.direction == "reverse") {
-        if (d.stop - d.start < 500) {
+        if (Math.abs(d.stop - d.start) < 500) {
           return 125;
         }
         else { return 85; }

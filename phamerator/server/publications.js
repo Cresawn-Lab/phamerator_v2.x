@@ -84,17 +84,33 @@ Meteor.publishComposite("datasets", {
     return Meteor.users.find({ _id: this.userId });
   },
   children: [{
-    find: async function () {
-      if (!this.userId) {
+    find: async function (user) {
+      if (!user) {
         return this.ready();
       }
 
       const scopes = await Roles.getScopesForUserAsync(this.userId, "view");
+      
+      const queryOrConditions = [{ public: true }];
+
+      if (scopes && scopes.length > 0) {
+        queryOrConditions.push({ name: { $in: scopes } });
+      }
+
+      if (user.username) {
+        queryOrConditions.push({ owner: user.username });
+      }
+
+      if (user.emails && Array.isArray(user.emails)) {
+        user.emails.forEach(e => {
+          if (e && e.address) {
+            queryOrConditions.push({ owner: e.address });
+          }
+        });
+      }
+
       return Datasets.find({
-        $or: [
-          { public: true },
-          { name: { $in: scopes } }
-        ]
+        $or: queryOrConditions
       });
     }
   }]

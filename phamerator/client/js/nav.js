@@ -13,26 +13,7 @@ switch_dataset = function (dataset) {
     Meteor.call("updatePreferredDataset", dataset);
   }
   usersThatCanView = getUsersThatCanView()
-  Tracker.autorun(() => {
-    autoCompleteUsers = getAutocompleteUsers()
 
-    $('input.autocomplete').autocomplete({
-      data: autoCompleteUsers,
-      limit: 20, // The max amount of results that can be shown at once. Default: Infinity.
-      onAutocomplete: function (val) {
-        var regExp = /\(([^)]+)\)/;
-        var email = regExp.exec(val)[1];
-        var id = Meteor.users.findOne({ "emails.0.address": email })._id
-        var currentDataset = Session.get('currentDataset');
-
-        Meteor.call("addUserToRole", id, 'view', currentDataset, (error, result) => {
-          getUsersThatCanView();
-          $('input#autocomplete-input.autocomplete')[0].value = "";
-        })
-      },
-      minLength: 1, // The minimum length of the input for the autocomplete to start. Default: 1.
-    });
-  })
 
   genomesWithSeqHandlers.map(handler => handler.stop())
   genomesWithSeqHandlers = [];

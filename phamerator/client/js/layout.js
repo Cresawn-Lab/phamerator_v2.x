@@ -25,8 +25,6 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
 
-let globalSubscriptionHandles = [];
-
 // Add an autorun to handle logging out while on protected routes, and clean up global subscriptions
 Meteor.startup(() => {
   Tracker.autorun(() => {
@@ -41,27 +39,26 @@ Meteor.startup(() => {
     }
 
     if (userId) {
-      // User is logged in, start global subscriptions if not already started
-      if (globalSubscriptionHandles.length === 0) {
-        globalSubscriptionHandles.push(Meteor.subscribe('allUsers'));
-        globalSubscriptionHandles.push(Meteor.subscribe('fullname'));
-        globalSubscriptionHandles.push(Meteor.subscribe('featureDiscovery', function () {
-          const user = Meteor.user();
-          if (user && user.profile && user.profile.includeInDirectory == null) {
-            M.toast({ html: 'Please review your<a href="account">account settings</a>', displayLength: 5000 });
-          }
-          if (user && user.featureDiscovery == null) {
-            Session.set("geneTranslation", true);
-          }
-          else if (user && user.featureDiscovery && user.featureDiscovery.geneTranslation == null) {
-            Session.set("geneTranslation", true);
-          }
-          else if (user && user.featureDiscovery) {
-            geneTranslation = user.featureDiscovery.geneTranslation;
-            Session.set("geneTranslation", geneTranslation);
-          }
-        }));
-      }
+      // User is logged in, start global subscriptions
+      // (Tracker.autorun will automatically stop these if this block is no longer reached, e.g., when userId becomes null)
+      Meteor.subscribe('allUsers');
+      Meteor.subscribe('fullname');
+      Meteor.subscribe('featureDiscovery', function () {
+        const user = Meteor.user();
+        if (user && user.profile && user.profile.includeInDirectory == null) {
+          M.toast({ html: 'Please review your<a href="account">account settings</a>', displayLength: 5000 });
+        }
+        if (user && user.featureDiscovery == null) {
+          Session.set("geneTranslation", true);
+        }
+        else if (user && user.featureDiscovery && user.featureDiscovery.geneTranslation == null) {
+          Session.set("geneTranslation", true);
+        }
+        else if (user && user.featureDiscovery) {
+          geneTranslation = user.featureDiscovery.geneTranslation;
+          Session.set("geneTranslation", geneTranslation);
+        }
+      });
     } else if (!isLoggingIn) {
       // User is logged out
       Session.set("currentDataset", undefined);
@@ -69,12 +66,6 @@ Meteor.startup(() => {
       if (currentRoute === 'phages' || currentRoute === 'domains' || currentRoute === 'account') {
         FlowRouter.go('/');
       }
-
-      // Stop all global subscriptions
-      globalSubscriptionHandles.forEach(handle => {
-        if (handle && handle.stop) handle.stop();
-      });
-      globalSubscriptionHandles = [];
 
       // Stop any active genome handlers gracefully using standard global var syntax
       if (typeof genomesWithSeqHandle !== 'undefined' && genomesWithSeqHandle && genomesWithSeqHandle.stop) {

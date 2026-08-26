@@ -1,4 +1,4 @@
-/* Custom Theme for Intro.js matching Materialize CSS */
+/* Custom Theme for Intro.js matching Phamerator Official JMU Palette */
 
 .introjs-tooltip {
   border-radius: 8px !important;
@@ -24,7 +24,7 @@
 .introjs-tooltip-title {
   font-size: 18px !important;
   font-weight: 500 !important;
-  color: #9c27b0 !important; /* Materialize purple */
+  color: #450084 !important; /* Official JMU purple */
   padding: 15px 20px 10px 20px !important;
   border-bottom: 1px solid #eee;
   margin: 0 !important;
@@ -57,7 +57,7 @@
   display: block !important;
 }
 .introjs-bullets ul li a.active {
-  background: #9c27b0 !important;
+  background: #450084 !important;
   width: 12px !important;
   height: 12px !important;
 }
@@ -72,7 +72,7 @@
 }
 .introjs-progressbar {
   height: 100% !important;
-  background-color: #00bcd4 !important; /* Materialize cyan */
+  background-color: #CBB677 !important; /* Official JMU gold */
 }
 
 /* Buttons container fix */
@@ -88,7 +88,7 @@
   text-shadow: none !important;
   box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2) !important;
   border: none !important;
-  background-color: #9c27b0 !important; /* Materialize purple */
+  background-color: #450084 !important; /* Official JMU purple */
   color: white !important;
   font-weight: 500 !important;
   padding: 8px 16px !important;
@@ -102,7 +102,7 @@
 .introjs-button:hover,
 .introjs-button:focus,
 .introjs-button:active {
-  background-color: #7b1fa2 !important; /* Materialize purple darken-2 */
+  background-color: #350066 !important; /* JMU purple dark */
   color: white !important;
   box-shadow: 0 3px 3px 0 rgba(0,0,0,0.14), 0 1px 7px 0 rgba(0,0,0,0.12), 0 3px 1px -1px rgba(0,0,0,0.2) !important;
 }
@@ -124,7 +124,7 @@
 .introjs-skipbutton:focus,
 .introjs-skipbutton:active {
   background: transparent !important;
-  color: #f44336 !important; /* Materialize red */
+  color: #f44336 !important;
   box-shadow: none !important;
 }
 

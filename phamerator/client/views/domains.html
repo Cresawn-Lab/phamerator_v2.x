@@ -1,57 +1,56 @@
 <template name="domains">
-
-    <div class="row">
-        <div class="input-field col s6">
-            {{#if currentDataset}}
-            <input value={{domainQuery}} id="domain_input" type="text" class="validate">
-            <label class="active" for="domain_input">Search Domains<i
-                    class="material-icons info-icon tooltip-right tooltip-wide"
-                    data-tip="Enter a domain name (e.g., HNH endonuclease) or ID to find matching phage genes.">info_outline</i></label>
-            {{else}}
-            <input value={{domainQuery}} id="domain_input" type="text" class="validate" disabled
-                placeholder="Please select a dataset first">
-            <label class="active" for="domain_input">Search Domains<i
-                    class="material-icons info-icon tooltip-right tooltip-wide"
-                    data-tip="Enter a domain name (e.g., HNH endonuclease) or ID to find matching phage genes.">info_outline</i></label>
-            {{/if}}
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12 col-md-6 mb-3">
+                <label class="form-label" for="domain_input">Search Domains<i
+                        class="material-icons info-icon tooltip-right tooltip-wide align-middle ms-1"
+                        data-tip="Enter a domain name (e.g., HNH endonuclease) or ID to find matching phage genes.">info_outline</i></label>
+                {{#if currentDataset}}
+                <input value={{domainQuery}} id="domain_input" type="text" class="form-control">
+                {{else}}
+                <input value={{domainQuery}} id="domain_input" type="text" class="form-control" disabled
+                    placeholder="Please select a dataset first">
+                {{/if}}
+            </div>
         </div>
-    </div>
 
-    <div class="row">
-        <table>
-            <thead>
-                <tr>
-                    <th>Domain Name<i class="material-icons info-icon"
-                            data-tip="The common name or short identifier for this conserved protein domain.">info_outline</i></th>
-                    <th>Domain ID<i class="material-icons info-icon"
-                            data-tip="The unique accession ID (e.g., cd00085, pfam00000) from the source database.">info_outline</i></th>
-                    <th>Description<i class="material-icons info-icon"
-                            data-tip="A brief explanation of the domain's function or characteristics.">info_outline</i></th>
-                    <th>GeneID<i class="material-icons info-icon"
-                            data-tip="The specific phage gene where this domain was found.">info_outline</i></th>
-                    <th>Match Start<i class="material-icons info-icon"
-                            data-tip="The starting position of the domain match within the protein sequence.">info_outline</i></th>
-                    <th>Match End<i class="material-icons info-icon"
-                            data-tip="The ending position of the domain match within the protein sequence.">info_outline</i></th>
-                    <th>E Value<i class="material-icons info-icon"
-                            data-tip="Expect value: represents the number of hits expected by chance. Lower E-values (closer to 0) indicate more significant matches.">info_outline</i></th>
-                </tr>
-            </thead>
+        <div class="row">
+            <div class="col-12 table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Domain Name<i class="material-icons info-icon align-middle ms-1"
+                                    data-tip="The common name or short identifier for this conserved protein domain.">info_outline</i></th>
+                            <th>Domain ID<i class="material-icons info-icon align-middle ms-1"
+                                    data-tip="The unique accession ID (e.g., cd00085, pfam00000) from the source database.">info_outline</i></th>
+                            <th>Description<i class="material-icons info-icon align-middle ms-1"
+                                    data-tip="A brief explanation of the domain's function or characteristics.">info_outline</i></th>
+                            <th>GeneID<i class="material-icons info-icon align-middle ms-1"
+                                    data-tip="The specific phage gene where this domain was found.">info_outline</i></th>
+                            <th>Match Start<i class="material-icons info-icon align-middle ms-1"
+                                    data-tip="The starting position of the domain match within the protein sequence.">info_outline</i></th>
+                            <th>Match End<i class="material-icons info-icon align-middle ms-1"
+                                    data-tip="The ending position of the domain match within the protein sequence.">info_outline</i></th>
+                            <th>E Value<i class="material-icons info-icon align-middle ms-1"
+                                    data-tip="Expect value: represents the number of hits expected by chance. Lower E-values (closer to 0) indicate more significant matches.">info_outline</i></th>
+                        </tr>
+                    </thead>
 
-            <tbody>
-                {{#each match in domainMatches}}
-                <tr>
-                    <td>{{match.domainname}}</td>
-                    <td>{{match.DomainID}}</td>
-                    <td>{{match.description}}</td>
-                    <td>{{match.geneID}}</td>
-                    <td>{{match.query_start}}</td>
-                    <td>{{match.query_end}}</td>
-                    <td>{{match.expect}}</td>
-                </tr>
-                {{/each}}
-
-            </tbody>
-        </table>
+                    <tbody>
+                        {{#each match in domainMatches}}
+                        <tr>
+                            <td>{{match.domainname}}</td>
+                            <td>{{match.DomainID}}</td>
+                            <td>{{match.description}}</td>
+                            <td>{{match.geneID}}</td>
+                            <td>{{match.query_start}}</td>
+                            <td>{{match.query_end}}</td>
+                            <td>{{match.domexpect}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </template>

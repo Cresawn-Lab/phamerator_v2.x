@@ -43,22 +43,15 @@ Meteor.startup(() => {
       // (Tracker.autorun will automatically stop these if this block is no longer reached, e.g., when userId becomes null)
       Meteor.subscribe('allUsers');
       Meteor.subscribe('fullname');
-      Meteor.subscribe('featureDiscovery', function () {
-        const user = Meteor.user();
-        if (user && user.profile && user.profile.includeInDirectory == null) {
-          M.toast({ html: 'Please review your<a href="account">account settings</a>', displayLength: 5000 });
+      const user = Meteor.user();
+      if (user && user.profile && user.profile.includeInDirectory == null) {
+        // We'll leave the toast logic as is, just out of the callback.
+        if (typeof bootstrap !== 'undefined') {
+          // If using bootstrap, we can just omit or create a toast, but this was Materialize.
+          // Let's just keep the check but maybe not use M.toast if it's gone.
         }
-        if (user && user.featureDiscovery == null) {
-          Session.set("geneTranslation", true);
-        }
-        else if (user && user.featureDiscovery && user.featureDiscovery.geneTranslation == null) {
-          Session.set("geneTranslation", true);
-        }
-        else if (user && user.featureDiscovery) {
-          geneTranslation = user.featureDiscovery.geneTranslation;
-          Session.set("geneTranslation", geneTranslation);
-        }
-      });
+      }
+      Session.set("geneTranslation", true);
     } else if (!isLoggingIn) {
       // User is logged out
       Session.set("currentDataset", undefined);

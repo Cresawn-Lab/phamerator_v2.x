@@ -13,13 +13,13 @@ Template.magicLinkModal.onCreated(function () {
 
 Template.magicLinkModal.onRendered(function () {
   const template = this;
-  const elems = document.querySelectorAll('#magicLinkModal');
-  M.Modal.init(elems, {
-    onCloseEnd: function () {
+  const modalEl = document.getElementById('magicLinkModal');
+  if (modalEl) {
+    modalEl.addEventListener('hidden.bs.modal', function () {
       template.state.set('codeSent', false);
       template.state.set('email', '');
-    }
-  });
+    });
+  }
 });
 
 Template.magicLinkModal.helpers({
@@ -69,9 +69,11 @@ Template.magicLinkModal.events({
         M.toast({ html: 'Check your email for the login link!', classes: 'green', displayLength: 6000 });
         
         // Close the modal and clear the form
-        var modalInstance = M.Modal.getInstance(document.getElementById('magicLinkModal'));
-        if (modalInstance) {
-          modalInstance.close();
+        if (typeof bootstrap !== 'undefined') {
+          var modalInstance = bootstrap.Modal.getInstance(document.getElementById('magicLinkModal'));
+          if (modalInstance) {
+            modalInstance.hide();
+          }
         }
         template.find('#magic-link-form').reset();
       }
@@ -95,9 +97,11 @@ Template.magicLinkModal.events({
             M.toast({ html: 'Successfully signed in!', classes: 'green' });
             
             // Close the modal and clear the form state
-            var modalInstance = M.Modal.getInstance(document.getElementById('magicLinkModal'));
-            if (modalInstance) {
-              modalInstance.close();
+            if (typeof bootstrap !== 'undefined') {
+              var modalInstance = bootstrap.Modal.getInstance(document.getElementById('magicLinkModal'));
+              if (modalInstance) {
+                modalInstance.hide();
+              }
             }
             template.state.set('codeSent', false);
             template.state.set('email', '');

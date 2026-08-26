@@ -4,3 +4,4 @@ phamerator/package-lock.json
 .gitignore
 dump_recovery/
 .env*
+node_modules/

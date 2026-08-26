@@ -19,14 +19,14 @@ function adjust_map_height(useBBox = false) {
   if (typeof svgMap !== 'undefined' && svgMap && svgMap.node()) {
     // Calculate a safe minimum height based on the number of genomes
     var genomeCount = selectedGenomes.find().count();
-    var minHeight = (genomeCount * 300) + 200;
+    var minHeight = (genomeCount * 300) + 80;
 
     var newHeight = minHeight;
 
     if (useBBox) {
       var bbox = svgMap.node().getBBox();
       if (bbox && bbox.height > 0) {
-        var contentHeight = Math.ceil(bbox.y + bbox.height + 100);
+        var contentHeight = Math.ceil(bbox.y + bbox.height + 40);
         newHeight = Math.max(minHeight, contentHeight);
       }
     }
@@ -35,6 +35,33 @@ function adjust_map_height(useBBox = false) {
     var currentHeight = +svgMap.attr("height") || 0;
     if (Math.abs(newHeight - currentHeight) > 10) {
         svgMap.attr("height", newHeight);
+    }
+  }
+}
+
+// Function to adjust SVG width dynamically so horizontally shifted genomes remain fully visible and scrollable
+function adjust_map_width() {
+  if (typeof svgMap !== 'undefined' && svgMap && svgMap.node()) {
+    var maxX = 0;
+    var mapGroupX = 0;
+    var mapGroupEl = d3.select("#mapGroup");
+    if (!mapGroupEl.empty() && mapGroupEl.node()) {
+      mapGroupX = getTranslate(mapGroupEl).translate[0] || 0;
+    }
+
+    d3.selectAll(".phages").each(function (d) {
+      if (d && d.genomelength) {
+        var tx = getTranslate(d3.select(this)).translate[0] || 0;
+        var totalX = tx + mapGroupX;
+        maxX = Math.max(maxX, totalX + (d.genomelength / 10));
+      }
+    });
+
+    // Add just 10px buffer to prevent the rightmost ruler tick/border from being cut off
+    var neededWidth = Math.ceil(maxX + 10);
+    var currentWidth = +svgMap.attr("width") || 0;
+    if (Math.abs(neededWidth - currentWidth) > 5) {
+      svgMap.attr("width", neededWidth);
     }
   }
 }
@@ -74,40 +101,27 @@ let ticking = false;
 
 function updateStickyLabels(scroll_pos) {
   // Pin the phage name labels to the left as the user scrolls horizontally
-  d3.selectAll('text.phagename').attr('transform', function () {
-    return 'translate(' + scroll_pos + ', -120)';
+  d3.selectAll('.phages').each(function () {
+    var phageGroup = d3.select(this);
+    var t = getTranslate(phageGroup).translate[0] || 0;
+    var localX = Math.max(0, scroll_pos - t);
+    phageGroup.select('text.phagename').attr('transform', 'translate(' + localX + ', -120)');
   });
 }
 
 // This listener is now moved to the specific map container in onRendered for horizontal stickiness
 
 adjust_skew_all = function () {
-  var phages = d3.selectAll(".phages")
+  var phages = d3.selectAll(".phages");
   phages.each(function (d) {
     adjust_skew(null, this);
   });
+  adjust_map_width();
 }
 
 var blastAlignmentsOutstanding = 0;
 
 function viewMapTabClicked() {
-
-  Meteor.subscribe('featureDiscovery', function () {
-    var user = Meteor.user();
-    if (user && user.featureDiscovery && user.featureDiscovery.length > 0) {
-      var featureKey = user.featureDiscovery[0];
-
-      if (typeof features !== 'undefined' && features[featureKey] != null) {
-        Session.set("newFeatureTitle", features[featureKey].title);
-        Session.set("newFeatureBody", features[featureKey].body);
-        Session.set("newFeatureDismiss", features.dismiss);
-      }
-    }
-  });
-
-  if (Session.get("newFeature") === true) {
-    $('.tap-target').tapTarget('open');
-  }
 }
 
 function reSort() {
@@ -437,18 +451,7 @@ function update_phages() {
     .attr("id", function (d, i) { return "phage_" + d.selector.replace(/\./g, '_dot_').replace(/ /g, '_space_'); })
     .classed("phages", true);
 
-  var minX = 0;
-  var maxX = 0;
-  var phages = d3.selectAll(".phages");
-  phages.each(function (d) {
-    minX = Math.min(minX, getTranslate(d3.select(this)).translate[0]);
-    maxX = Math.max(maxX, getTranslate(d3.select(this)).translate[0] + (d.genomelength / 10));
-  });
-
-  svgMap.attr("width", function (d) {
-    return (maxX - minX);
-  })
-    .attr("x", function (d) { return minX });
+  adjust_map_width();
   svgMap.selectAll(".phages")
     .sort(function (a, b) {
       if (!a || !b) return 0;
@@ -569,6 +572,7 @@ function update_phages() {
           // move the genome along the x axis
           return "translate(" + event.x + "," + getTranslate(d3.select(genome)).translate[1] + ")";
         });
+      adjust_map_width();
     }
 
     // if there is an hspGroup below this genome...
@@ -615,6 +619,7 @@ function update_phages() {
 
       if (event.sourceEvent.shiftKey) {
         adjust_skew(event, dragging);
+        adjust_map_width();
       }
       else {
         // vertical dragging
@@ -627,8 +632,9 @@ function update_phages() {
     .on("end", function (event, d) {
       dragging = null;
       // Removed immediate update_phages() to prevent jumping/jitter
-      // But ensure a stable height is set immediately
+      // But ensure a stable height and width are set immediately
       adjust_map_height(false);
+      adjust_map_width();
       
       if (event.sourceEvent.shiftKey) {
         adjust_skew_all();
@@ -906,6 +912,7 @@ function update_phages() {
 
   gene.select("rect.generect")
     .on("click", function (event, d) {
+      var selectedGeneColorRect = d3.select(this);
       var dataset = Session.get("currentDataset");
       // Initialize the dialog to empty strings and arrays, rather than showing old data while waiting for new
       selectedDomains = [];
@@ -966,23 +973,16 @@ function update_phages() {
           .attr("transform", function (d, i) { return "translate(" + (((d.query_start - 1) / phamAALength) * 600) + "," + 5 + ")"; })
           .on("mouseover", function (event, d) {
             d3.select(this).style("stroke", "black").style("stroke-width", "2");
-            d3.select("#" + d.domainname + ".collapsible-header").style("font-weight", "bold")
+            d3.select("#heading-" + d.domainname + " button").style("font-weight", "bold");
           })
           .on("mouseout", function (event, d) {
             d3.select(this).style("stroke", "black").style("stroke-width", "1");
-            d3.select("div#" + d.domainname + ".collapsible-header").style("font-weight", "normal")
+            d3.select("#heading-" + d.domainname + " button").style("font-weight", "normal");
           })
           .on("click", function (event, d) {
-            d3.select("li#" + d.domainname).classed("active", !d3.select("li#" + d.domainname).classed("active"));
-            if (d3.select("div#" + d.domainname).attr("class") === "active collapsible-header") {
-              d3.select("div#" + d.domainname).classed("active collapsible-header", false);
-              d3.select("div#" + d.domainname).classed("collapsible-header", true);
-              d3.select("div#" + d.domainname + ".collapsible-body").style("display", "none")
-            }
-            else {
-              d3.select("div#" + d.domainname).classed("collapsible-header", false);
-              d3.select("div#" + d.domainname).classed("active collapsible-header", true);
-              d3.select("div#" + d.domainname + ".collapsible-body").style("display", "block")
+            const collapseEl = document.getElementById("collapse-" + d.domainname);
+            if (collapseEl && typeof bootstrap !== 'undefined') {
+              bootstrap.Collapse.getOrCreateInstance(collapseEl).toggle();
             }
           });
       });
@@ -1026,23 +1026,16 @@ function update_phages() {
           .attr("transform", function (d, i) { return "translate(" + (((d.query_start - 1) / phamAALength) * 600) + "," + 5 + ")"; })
           .on("mouseover", function (event, d) {
             d3.select(this).style("stroke", "black").style("stroke-width", "2");
-            d3.select("#tm-domain-" + d._id._str + ".collapsible-header").style("font-weight", "bold")
+            d3.select("#heading-tm-" + d._id._str + " button").style("font-weight", "bold");
           })
           .on("mouseout", function (event, d) {
             d3.select(this).style("stroke", "black").style("stroke-width", "1");
-            d3.select("div#tm-domain-" + d._id._str + ".collapsible-header").style("font-weight", "normal")
+            d3.select("#heading-tm-" + d._id._str + " button").style("font-weight", "normal");
           })
           .on("click", function (event, d) {
-            d3.select("li#tm-domain-" + d._id._str).classed("active", !d3.select("li#tm-domain-" + d._id._str).classed("active"));
-            if (d3.select("div#tm-domain-" + d._id._str).attr("class") === "active collapsible-header") {
-              d3.select("div#tm-domain-" + d._id._str).classed("active collapsible-header", false);
-              d3.select("div#tm-domain-" + d._id._str).classed("collapsible-header", true);
-              d3.select("div#tm-domain-" + d._id._str + ".collapsible-body").style("display", "none")
-            }
-            else {
-              d3.select("div#tm-domain-" + d._id._str).classed("collapsible-header", false);
-              d3.select("div#tm-domain-" + d._id._str).classed("active collapsible-header", true);
-              d3.select("div#tm-domain-" + d._id._str + ".collapsible-body").style("display", "block")
+            const collapseEl = document.getElementById("collapse-tm-" + d._id._str);
+            if (collapseEl && typeof bootstrap !== 'undefined') {
+              bootstrap.Collapse.getOrCreateInstance(collapseEl).toggle();
             }
           });
       });
@@ -1077,12 +1070,25 @@ function update_phages() {
       }
 
       var onModalClose = function () {
-        d3.selectAll("g.domainVis").remove();
-      };
-
-      $('ul.tabs').tabs();
-      $('#geneData').modal('open');
-      $('#geneData')[0].M_Modal.options.complete = onModalClose;
+        svgMap.selectAll(".geneGroup").transition().style("opacity", 1);
+        if (selectedGeneColorRect) {
+          selectedGeneColorRect.attr("stroke-width", "1");
+          selectedGeneColorRect.attr("stroke", "white");
+        }
+      }
+      
+      if (typeof bootstrap !== 'undefined') {
+        const modalEl = document.getElementById('geneData');
+        if (modalEl) {
+          const modalObj = bootstrap.Modal.getOrCreateInstance(modalEl);
+          
+          // Remove old listener to prevent duplicates
+          modalEl.removeEventListener('hidden.bs.modal', onModalClose);
+          modalEl.addEventListener('hidden.bs.modal', onModalClose, { once: true });
+          
+          modalObj.show();
+        }
+      }
 
     })
     .attr("height", function (d) { return 30; })
@@ -1435,11 +1441,6 @@ drawBlastAlignments = function (blastAlignmentsOutstanding, json, query, subject
 
 Template.phages.onDestroyed(function () {
   Session.set('expandAllClusters', false);
-  $(document).ready(function () {
-    $('#mapSettings').remove();
-    $('#geneData').remove();
-  });
-
 });
 
 Template.phages.onRendered(function () {
@@ -1449,15 +1450,7 @@ Template.phages.onRendered(function () {
   })
   $("#preloader").fadeOut(300).hide();
   $(document).ready(function () {
-    $('ul.tabs').tabs();
-
-    $('#mapSettings').modal();
-    $('#geneData').modal();
-    $('#geneData').modal();
-
-    // Initialize FAB once on render
-    $('.fixed-action-btn').floatingActionButton({ direction: 'left' });
-
+    // Bootstrap natively handles modals, tabs, and collapses via data attributes.
     // Watch for data loading to update button state
     Tracker.autorun(function () {
       Session.get('clusters'); // Dependency
@@ -1466,14 +1459,9 @@ Template.phages.onRendered(function () {
       });
     });
 
-    $('.collapsible').collapsible({
-      accordion: false, // A setting that changes the collapsible behavior to expandable instead of the default accordion style
-      onOpenEnd: function () {
-        updateCollapsibleState();
-      },
-      onCloseEnd: function () {
-        updateCollapsibleState();
-      }
+    // Listen to Bootstrap collapse events to update state
+    $('#cluster-list').on('shown.bs.collapse hidden.bs.collapse', function () {
+      updateCollapsibleState();
     });
     $(document).on("keydown", function (event) {
       if (event.which === 16) {
@@ -1561,15 +1549,7 @@ Template.phages.onRendered(function () {
 });
 
 Template.cluster.onRendered(function () {
-  $('.collapsible').collapsible({
-    accordion: false, // A setting that changes the collapsible behavior to expandable instead of the default accordion style
-    onOpenEnd: function () {
-      updateCollapsibleState();
-    },
-    onCloseEnd: function () {
-      updateCollapsibleState();
-    }
-  });
+  // Bootstrap collapse is handled via data attributes
 
   $('li').find('.dont-collapse').unbind('click.collapse');
   $('li').find('.dont-collapse').on('click.collapse', function (e) {
@@ -1579,8 +1559,8 @@ Template.cluster.onRendered(function () {
 });
 
 updateCollapsibleState = function () {
-  var total = $('#cluster-list > li').length;
-  var active = $('#cluster-list > li.active').length;
+  var total = $('#cluster-list .accordion-item').length;
+  var active = $('#cluster-list .accordion-collapse.show').length;
   Session.set('anyClustersOpen', active > 0);
   Session.set('anyClustersClosed', active < total);
 };
@@ -1601,14 +1581,7 @@ Template.phages.helpers({
     })
       .sort((a, b) => a.DomainID - b.DomainID)
   },
-  newFeature: function () {
-    const user = Meteor.user();
-    if (user && user.featureDiscovery) {
-      if (user.featureDiscovery.length > 0) {
-        return "pulse";
-      }
-    }
-  },
+
   geneTranslation: function () { return Session.get('geneTranslation'); },
   phamAbundanceFD: function () { return Session.get('phamAbundanceFD'); },
   selectedGenomes: selectedGenomes,
@@ -1842,8 +1815,12 @@ Template.phages.events({
 
   "click .mapSettings": function (event, template) {
     event.preventDefault();
-
-    $('#mapSettings').modal('open');
+    if (typeof bootstrap !== 'undefined') {
+      const mapSettingsEl = document.getElementById('mapSettings');
+      if (mapSettingsEl) {
+        bootstrap.Modal.getOrCreateInstance(mapSettingsEl).show();
+      }
+    }
   },
 
   "change #functionLabelsSwitch": function (event, template) {
@@ -1923,8 +1900,6 @@ Template.phages.events({
   },
 
   "click #clearSelection": function (event, template) {
-    var instance = M.FloatingActionButton.getInstance($('.fixed-action-btn')[0]);
-    if (instance) instance.close();
     if (session_tRNAsHandler) {
       session_tRNAsHandler.stop();
     }
@@ -1936,49 +1911,28 @@ Template.phages.events({
     hspData = [];
     var dataset = Session.get('currentDataset');
 
-
     svgMap.selectAll(".hspGroup").remove();
   },
   "click #expand_all": function (event, template) {
-    var instance = M.FloatingActionButton.getInstance($('.fixed-action-btn')[0]);
-    if (instance) instance.close();
-
     Session.set('expandAllClusters', true);
 
-    $("#cluster-list > li").addClass("active");
-    $("#cluster-list .collapsible-header").addClass("active");
-    $("#cluster-list .collapsible-body").show();
-    $("#cluster-list").collapsible('destroy');
-    $("#cluster-list").collapsible({
-      accordion: false,
-      onOpenEnd: function () { updateCollapsibleState(); },
-      onCloseEnd: function () { updateCollapsibleState(); }
-    });
-    // Session.set("clustersExpanded", true); // handled by updateCollapsibleState
+    // Bootstrap: remove 'collapsed' from buttons, add 'show' to collapse targets
+    $("#cluster-list .accordion-button").removeClass("collapsed").attr("aria-expanded", "true");
+    $("#cluster-list .accordion-collapse").addClass("show");
+    
     updateCollapsibleState();
   },
   "click #scroll_top": function (event, template) {
-    var instance = M.FloatingActionButton.getInstance($('.fixed-action-btn')[0]);
-    if (instance) instance.close();
     $("html, body").animate({ scrollTop: 0 }, "slow");
   },
 
   "click #collapse_all": function (event, template) {
-    var instance = M.FloatingActionButton.getInstance($('.fixed-action-btn')[0]);
-    if (instance) instance.close();
-
     Session.set('expandAllClusters', false);
 
-    $("#cluster-list > li").removeClass("active");
-    $("#cluster-list .collapsible-header").removeClass("active");
-    $("#cluster-list .collapsible-body").hide();
-    $("#cluster-list").collapsible('destroy');
-    $("#cluster-list").collapsible({
-      accordion: false,
-      onOpenEnd: function () { updateCollapsibleState(); },
-      onCloseEnd: function () { updateCollapsibleState(); }
-    });
-    // Session.set("clustersExpanded", false); // handled by updateCollapsibleState
+    // Bootstrap: add 'collapsed' to buttons, remove 'show' from collapse targets
+    $("#cluster-list .accordion-button").addClass("collapsed").attr("aria-expanded", "false");
+    $("#cluster-list .accordion-collapse").removeClass("show");
+    
     updateCollapsibleState();
 
     $("html, body").animate({ scrollTop: 0 }, "slow");
@@ -2003,19 +1957,12 @@ Template.registerHelper('phageIsChecked', function (input) {
 });
 
 Template.cluster.onCreated(function() {
-  this.renderPhages = new ReactiveVar(false);
 });
 
 Template.cluster.events({
-  'click .collapsible-header': function(event, template) {
-    template.renderPhages.set(true);
-  }
 });
 
 Template.cluster.helpers({
-  renderPhages: function() {
-    return Template.instance().renderPhages.get() || Session.get('expandAllClusters');
-  },
   selectedCount: function () {
     // 'this' is the cluster object from the #each loop
     const cluster = this.cluster;

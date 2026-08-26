@@ -1,28 +1,28 @@
 <template name="infoDatasetModal">
-  <div id="infoDataset" class="modal modal-fixed-footer">
-    <div class="modal-content">
-      <div class="row">
-        <div class="col s12 m12 l12">
-          <div class="card-panel white grey-text text-darken-1">
-            <h5 style="margin-left: 0px">{{currentDataset}} version {{metadata.metadata.version}} was released on
-              {{metadata.metadata.date}}.
-            </h5>
-
-            Primary contact: <a href="{{metadata.metadata.owner.url}}"
-              target="_blank">{{metadata.metadata.owner.name}}</a>
+  <div class="modal fade" id="infoDataset" tabindex="-1" aria-labelledby="infoDatasetLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="infoDatasetLabel">Dataset Information</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-dark">
+          <h5>{{currentDataset}} version {{metadata.metadata.version}} was released on {{metadata.metadata.date}}.</h5>
+          <p class="mb-2">
+            Primary contact: <a href="{{metadata.metadata.owner.url}}" target="_blank">{{metadata.metadata.owner.name}}</a>
             ({{metadata.metadata.owner.email}})
-            <p>{{metadata.metadata.description}}</p>
-            <ul>
-              {{#each url in resources}}
-              <li><a href="{{url}}" target="_blank">{{url}}</a></li>
-              {{/each}}
-            </ul>
-          </div>
+          </p>
+          <p>{{metadata.metadata.description}}</p>
+          <ul>
+            {{#each url in resources}}
+            <li><a href="{{url}}" target="_blank">{{url}}</a></li>
+            {{/each}}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
-    </div>
-    <div class="modal-footer">
-      <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
     </div>
   </div>
 </template>

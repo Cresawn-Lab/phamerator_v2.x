@@ -1,43 +1,36 @@
 <template name="newDatabase">
-  <div class="section white black-text text-lighten-3">
-
-    <div class = "row">
-       <form class = "col s12">
-         <div class="row">
-           <h3>Add a Database</h3>
-         </div>
-         <div class="row">
-           <div class="input-field col s6">
-             <input id="database_name_input" type="text" class="validate">
-             <label for="database_name_input">Database Name</label>
-           </div>
-           <div class="input-field col s6">
-             <input id="share_with" type="text" class="validate">
-             <label for="share_with">Share with</label>
-           </div>
-
-         </div>
-         <div class = "row">
-           <div class = "file-field input-field">
-           <div class = "btn">
-             <span>upload a file</span>
-             <input type = "file" />
-           </div>
-
-           <div class = "file-path-wrapper">
-             <input class = "file-path validate" type = "text"
-              placeholder = "Upload a .sql file from PhamDB" />
-           </div>
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <form class="col-12 col-md-10 col-lg-8 bg-white p-4 rounded shadow-sm">
+        <h3 class="mb-4 text-primary">Add a Database</h3>
+        
+        <div class="row mb-3">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <div class="form-floating">
+              <input type="text" class="form-control" id="database_name_input" placeholder="Database Name">
+              <label for="database_name_input">Database Name</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-floating">
+              <input type="text" class="form-control" id="share_with" placeholder="Share with">
+              <label for="share_with">Share with</label>
+            </div>
           </div>
         </div>
-        <div class="row center">
-          <button class="btn waves-effect waves-light" type="submit" name="action">Submit
-            <i class="material-icons right">send</i>
+
+        <div class="mb-4">
+          <label for="formFile" class="form-label">Upload a .sql file from PhamDB</label>
+          <input class="form-control" type="file" id="formFile">
+        </div>
+
+        <div class="text-center">
+          <button class="btn btn-primary btn-lg" type="submit" name="action">
+            Submit
+            <i class="material-icons align-text-bottom ms-1">send</i>
           </button>
         </div>
       </form>
     </div>
-
   </div>
-
 </template>

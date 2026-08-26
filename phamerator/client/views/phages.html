@@ -1,247 +1,234 @@
 <template name="phages">
   {{> mapSettingsModal}}
-  {{#if newFeature}}
-  {{> featureDiscovery}}
-  {{/if}}
 
-  <div id="geneData" class="modal modal-fixed-footer">
-    <div class="modal-content">
-      <h5>{{selectedGeneTitle}}</h5>
-      <ul class="tabs" style="overflow-x: hidden !important; display: flex;">
-        <li class="tab" style="flex-grow: 1;"><a href="#dna-seq" style="padding: 0 5px; font-size: 12px;">DNA</a></li>
-        <li class="tab" style="flex-grow: 1;"><a href="#protein-seq"
-            style="padding: 0 5px; font-size: 12px;">Protein</a></li>
-        <li class="tab" style="flex-grow: 1;"><a href="#domains" style="padding: 0 5px; font-size: 12px;">Domains</a>
-        </li>
-        {{#if schemaVersionMin11}}
-        <li class="tab" style="flex-grow: 1;"><a href="#transmembrane-domains"
-            style="padding: 0 5px; font-size: 12px;">TM Domains</a></li>
-        {{/if}}
-        <li class="tab" style="flex-grow: 1;"><a href="#pham-clusters"
-            style="padding: 0 5px; font-size: 12px;">Clusters</a></li>
-        <li class="tab" style="flex-grow: 1;"><a href="#notes" style="padding: 0 5px; font-size: 12px;">Function</a>
-        </li>
-      </ul>
-
-      <div id="dna-seq">
-        <div
-          style="position: absolute; top: 115px; bottom: 24px; left: 24px; right: 24px; display: flex; flex-direction: column;">
-          <textarea readonly id="gene_dna_seq" class="sequence-view">{{selectedGene}}</textarea>
-          <div>
-            <button id="copy-dna-button" class="waves-effect waves-green btn btn-copy-link"
-              data-clipboard-target="#gene_dna_seq">Copy to Clipboard</button>
-          </div>
+  <div class="modal fade" id="geneData" tabindex="-1" aria-labelledby="geneDataLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content" style="height: 80vh;">
+        <div class="modal-header">
+          <h5 class="modal-title" id="geneDataLabel">{{selectedGeneTitle}}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-      </div>
+        <div class="modal-body p-0 d-flex flex-column">
+          <ul class="nav nav-tabs nav-justified" id="geneDataTabs" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active px-1" style="font-size: 13px;" data-bs-toggle="tab" data-bs-target="#dna-seq" type="button" role="tab">DNA</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link px-1" style="font-size: 13px;" data-bs-toggle="tab" data-bs-target="#protein-seq" type="button" role="tab">Protein</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link px-1" style="font-size: 13px;" data-bs-toggle="tab" data-bs-target="#domains" type="button" role="tab">Domains</button></li>
+            {{#if schemaVersionMin11}}
+            <li class="nav-item" role="presentation"><button class="nav-link px-1" style="font-size: 13px;" data-bs-toggle="tab" data-bs-target="#transmembrane-domains" type="button" role="tab">TM Domains</button></li>
+            {{/if}}
+            <li class="nav-item" role="presentation"><button class="nav-link px-1" style="font-size: 13px;" data-bs-toggle="tab" data-bs-target="#pham-clusters" type="button" role="tab">Clusters</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link px-1" style="font-size: 13px;" data-bs-toggle="tab" data-bs-target="#notes" type="button" role="tab">Function</button></li>
+          </ul>
 
-      <div id="protein-seq">
-        <div
-          style="position: absolute; top: 115px; bottom: 24px; left: 24px; right: 24px; display: flex; flex-direction: column;">
-          <textarea readonly id="gene_protein_seq" class="sequence-view">{{selectedProtein}}</textarea>
-          <div>
-            <button id="copy-protein-button" class="waves-effect waves-green btn btn-copy-link"
-              data-clipboard-target="#gene_protein_seq">Copy to Clipboard</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="domains">
-        <p>These domains were detected in NCBI's Conserved Domain Database (CDD) using <a
-            href="https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd_help.shtml#RPSBWhat" target="_blank">RPS-BLAST</a>.</p>
-        <svg id="svgDomain"></svg>
-        <ul class="collapsible" data-collapsible="expandable">
-          {{ #each domain in selectedDomains}}
-          <li id={{domain.domainname}}>
-            <div class="collapsible-header" id={{domain.domainname}}>{{domain.domainname}}</div>
-            <div class="collapsible-body" id={{domain.domainname}}>
-              <ul>
-                <li>
-                  <a href={{domain.domainLink}} target="_blank"><i class="material-icons">insert_link</i></a>
-                </li>
-                <li>
-                  {{domain.description}}
-
-                </li>
-                <br />
-                <li><u>
-                    Protein Alignment Data:
-                  </u></li>
-                <li>
-                  Query Start (Amino Acid Position): {{domain.query_start}}
-                </li>
-                <li>
-                  Query End (Amino Acid Position): {{domain.query_end}}
-                </li>
-                <li>
-                  E-Value: {{domain.expect}}
-                </li>
-              </ul>
+          <div class="tab-content flex-grow-1 position-relative p-3" style="overflow-y: auto;">
+            <div class="tab-pane fade show active h-100" id="dna-seq" role="tabpanel">
+              <div class="d-flex flex-column h-100">
+                <textarea readonly id="gene_dna_seq" class="form-control flex-grow-1 mb-2 font-monospace" style="resize: none;">{{selectedGene}}</textarea>
+                <div>
+                  <button id="copy-dna-button" class="btn btn-outline-success btn-copy-link" data-clipboard-target="#gene_dna_seq">Copy to Clipboard</button>
+                </div>
+              </div>
             </div>
-          </li>
-          {{/each}}
-        </ul>
-      </div>
 
-      {{#if schemaVersionMin11}}
-      <div id="transmembrane-domains">
-        <p>These domains were detected using <a href="https://biolib.com/DTU/DeepTMHMM/" target="_blank">DeepTMHMM</a>.
-          Click the blue rectangles in the diagram or the <em>domain match</em> labels below to learn more.
-        </p>
-
-        <svg id="svgTMDomain"></svg>
-        <ul class="collapsible" data-collapsible="expandable">
-          {{ #each domain in selectedTMDomains}}
-          <li id="tm-domain-{{domain._id._str}}">
-            <div class="collapsible-header" id="tm-domain-{{domain._id._str}}">
-              domain match</div>
-            <div class="collapsible-body" id="tm-domain-{{domain._id._str}}">
-              <ul>
-                <br />
-                <li><u>
-                    {{domain.source}}
-                  </u></li>
-                <li>
-                  Query Start (Amino Acid Position): {{domain.query_start}}
-                </li>
-                <li>
-                  Query End (Amino Acid Position): {{domain.query_end}}
-                </li>
-                <li>
-                  Type: {{domain.type}}
-                </li>
-              </ul>
+            <div class="tab-pane fade h-100" id="protein-seq" role="tabpanel">
+              <div class="d-flex flex-column h-100">
+                <textarea readonly id="gene_protein_seq" class="form-control flex-grow-1 mb-2 font-monospace" style="resize: none;">{{selectedProtein}}</textarea>
+                <div>
+                  <button id="copy-protein-button" class="btn btn-outline-success btn-copy-link" data-clipboard-target="#gene_protein_seq">Copy to Clipboard</button>
+                </div>
+              </div>
             </div>
-          </li>
-          {{/each}}
-        </ul>
 
-        {{#unless selectedTMDomains.length}}
-        <div class="row" style="margin-top: 20px;">
-          <div class="col s12 center-align grey-text">
-            <i class="material-icons" style="font-size: 3rem;">info_outline</i>
-            <p>No transmembrane domains were detected for this gene.</p>
-          </div>
-        </div>
-        {{/unless}}
-      </div>
-      {{/if}}
-
-      <div id="pham-clusters">
-        <p>These clusters each contain a phage whose genome encodes a member of pham {{selectedPham}}. Select a
-          cluster to
-          see these phages.</p>
-        <ul class="collapsible" data-collapsible="expandable">
-          {{ #each c in selectedClusters}}
-          <li>
-            <div class="collapsible-header">{{c.cluster}}</div>
-            <div class="collapsible-body">
-              <ul>
-                {{#each p in c.phages}}
-                <li>{{p}}</li>
+            <div class="tab-pane fade" id="domains" role="tabpanel">
+              <p>These domains were detected in NCBI's Conserved Domain Database (CDD) using <a href="https://www.ncbi.nlm.nih.gov/Structure/cdd/cdd_help.shtml#RPSBWhat" target="_blank">RPS-BLAST</a>.</p>
+              <svg id="svgDomain" class="w-100" style="min-height: 50px;"></svg>
+              <div class="accordion mt-3" id="domainsAccordion">
+                {{#each domain in selectedDomains}}
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="heading-{{domain.domainname}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{domain.domainname}}" aria-expanded="false" aria-controls="collapse-{{domain.domainname}}">
+                      {{domain.domainname}}
+                    </button>
+                  </h2>
+                  <div id="collapse-{{domain.domainname}}" class="accordion-collapse collapse" aria-labelledby="heading-{{domain.domainname}}" data-bs-parent="#domainsAccordion">
+                    <div class="accordion-body">
+                      <ul class="list-unstyled">
+                        <li><a href={{domain.domainLink}} target="_blank"><i class="material-icons align-middle">insert_link</i></a></li>
+                        <li class="mb-2">{{domain.description}}</li>
+                        <li><strong>Protein Alignment Data:</strong></li>
+                        <li>Query Start (Amino Acid Position): {{domain.query_start}}</li>
+                        <li>Query End (Amino Acid Position): {{domain.query_end}}</li>
+                        <li>E-Value: {{domain.expect}}</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
                 {{/each}}
-              </ul>
+              </div>
             </div>
-          </li>
 
-          {{/each}}
-        </ul>
-      </div>
-      <div id="notes">
-        <p id="notes">{{selectedGeneNotes}}</p>
-      </div>
-    </div>
+            {{#if schemaVersionMin11}}
+            <div class="tab-pane fade" id="transmembrane-domains" role="tabpanel">
+              <p>These domains were detected using <a href="https://biolib.com/DTU/DeepTMHMM/" target="_blank">DeepTMHMM</a>. Click the blue rectangles in the diagram or the <em>domain match</em> labels below to learn more.</p>
+              <svg id="svgTMDomain" class="w-100" style="min-height: 50px;"></svg>
+              <div class="accordion mt-3" id="tmDomainsAccordion">
+                {{#each domain in selectedTMDomains}}
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="heading-tm-{{domain._id._str}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-tm-{{domain._id._str}}" aria-expanded="false" aria-controls="collapse-tm-{{domain._id._str}}">
+                      domain match
+                    </button>
+                  </h2>
+                  <div id="collapse-tm-{{domain._id._str}}" class="accordion-collapse collapse" aria-labelledby="heading-tm-{{domain._id._str}}" data-bs-parent="#tmDomainsAccordion">
+                    <div class="accordion-body">
+                      <ul class="list-unstyled">
+                        <li class="mb-2"><strong>{{domain.source}}</strong></li>
+                        <li>Query Start (Amino Acid Position): {{domain.query_start}}</li>
+                        <li>Query End (Amino Acid Position): {{domain.query_end}}</li>
+                        <li>Type: {{domain.type}}</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                {{/each}}
+              </div>
 
-    <div class="modal-footer">
-      <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+              {{#unless selectedTMDomains.length}}
+              <div class="text-center text-muted mt-4">
+                <i class="material-icons" style="font-size: 3rem;">info_outline</i>
+                <p>No transmembrane domains were detected for this gene.</p>
+              </div>
+              {{/unless}}
+            </div>
+            {{/if}}
+
+            <div class="tab-pane fade" id="pham-clusters" role="tabpanel">
+              <p>These clusters each contain a phage whose genome encodes a member of pham {{selectedPham}}. Select a cluster to see these phages.</p>
+              <div class="accordion" id="clustersAccordion">
+                {{#each c in selectedClusters}}
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="heading-cluster-{{c.cluster}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-cluster-{{c.cluster}}" aria-expanded="false" aria-controls="collapse-cluster-{{c.cluster}}">
+                      {{c.cluster}}
+                    </button>
+                  </h2>
+                  <div id="collapse-cluster-{{c.cluster}}" class="accordion-collapse collapse" aria-labelledby="heading-cluster-{{c.cluster}}" data-bs-parent="#clustersAccordion">
+                    <div class="accordion-body">
+                      <ul class="list-unstyled mb-0">
+                        {{#each p in c.phages}}
+                        <li>{{p}}</li>
+                        {{/each}}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                {{/each}}
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="notes" role="tabpanel">
+              <p id="notes">{{selectedGeneNotes}}</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="row" style="margin-bottom: 0;">
-    <div id="genome-map-tabs" class="col s12" style="padding: 0;">
-      <ul class="tabs" style="overflow-x: hidden !important;">
-        <li class="tab col s6 m6 l6"><a class="active" href="#phages-list">Select Phages<i class="material-icons info-icon tooltip-right" data-tip="Choose which phages to include in your comparative genome map." style="font-size: 1.1rem; margin-left: 4px;">info_outline</i></a></li>
-        <li class="tab col s6 m6 l6"><a id="viewMapTab" href="#genome-map">View Map<i class="material-icons info-icon tooltip-right" data-tip="Visualize and explore the selected phages." style="font-size: 1.1rem; margin-left: 4px;">info_outline</i></a></li>
+  <div id="genome-map-tabs" class="row m-0">
+    <div class="col-12 p-0">
+      <ul class="nav nav-tabs nav-justified bg-light" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active fw-bold text-purple py-3" id="phages-list-tab" data-bs-toggle="tab" data-bs-target="#phages-list" type="button" role="tab">
+            Select Phages<i class="material-icons info-icon tooltip-right align-middle ms-1" data-tip="Choose which phages to include in your comparative genome map." style="font-size: 1.1rem;">info_outline</i>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link fw-bold text-purple py-3" id="viewMapTab" data-bs-toggle="tab" data-bs-target="#genome-map" type="button" role="tab">
+            View Map<i class="material-icons info-icon tooltip-right align-middle ms-1" data-tip="Visualize and explore the selected phages." style="font-size: 1.1rem;">info_outline</i>
+          </button>
+        </li>
       </ul>
     </div>
+  </div>
 
-    <div id="phages-list" class="col s12">
-      <ul id="cluster-list" class="collapsible" data-collapsible="expandable">
-        {{#each clusters}}
-        {{> cluster}}
-        {{/each}}
-
-      </ul>
-      <div class="fixed-action-btn horizontal" style="bottom: 45px; right: 24px;">
-        <a id="menu" class="btn-floating btn-large waves-effect waves-light" title="Action Menu">
-          <i class="material-icons">menu</i>
-        </a>
-        <ul>
-          <li><a id="scroll_top" class="waves-effect waves-purple btn-floating orange " title="Scroll to Top">
-              <i class="material-icons left">arrow_upward</i>up
-            </a></li>
-          <li><a id="collapse_all"
-              class="waves-effect waves-yellow btn-floating light-blue darken-1 {{class_if_clusters_open}}" title="Collapse All Clusters">
-              <i class="material-icons left">remove</i>remove
-            </a></li>
-          <li><a id="expand_all" class="waves-effect waves-yellow btn-floating light-blue {{class_if_clusters_closed}}" title="Expand All Clusters">
-              <i class="material-icons left">add</i>search
-            </a></li>
-          <li><a id="clearSelection"
-              class="waves-effect waves-yellow btn-floating purple {{class_if_genomes_selected}}" title="Clear Selection">
-              <i class="material-icons left">clear</i>Clear Selection
-            </a></li>
-        </ul>
+  <div class="tab-content" id="genome-map-content">
+    <div class="tab-pane fade show active" id="phages-list" role="tabpanel">
+      <div class="col-12">
+        <div class="accordion" id="cluster-list">
+          {{#each clusters}}
+          {{> cluster}}
+          {{/each}}
+        </div>
+        
+        <div class="position-fixed dropup" style="bottom: 65px; right: 24px; z-index: 1030;">
+          <button class="btn btn-teal rounded-circle shadow-lg d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Action Menu">
+            <i class="material-icons text-white">menu</i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end mb-2 shadow border-0">
+            <li><a class="dropdown-item d-flex align-items-center py-2" id="scroll_top" href="#"><i class="material-icons me-3 text-warning">arrow_upward</i>Scroll to Top</a></li>
+            <li><a class="dropdown-item d-flex align-items-center py-2" id="collapse_all" href="#"><i class="material-icons me-3 text-info">remove</i>Collapse All Clusters</a></li>
+            <li><a class="dropdown-item d-flex align-items-center py-2" id="expand_all" href="#"><i class="material-icons me-3 text-primary">add</i>Expand All Clusters</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item d-flex align-items-center py-2" id="clearSelection" href="#"><i class="material-icons me-3 text-danger">clear</i>Clear Selection</a></li>
+          </ul>
+        </div>
       </div>
     </div>
 
-    <div id="genome-map" class="col s12">
+    <div class="tab-pane fade" id="genome-map" role="tabpanel">
       <svg id="svg-genome-map"></svg>
-      <div class="fixed-action-btn horizontal" style="bottom: 45px; right: 24px;">
-        <a id="menu2" class="waves-effect waves-light btn-floating btn-large" title="Map Actions">
-          <i class="material-icons">menu</i>
-        </a>
-        <ul>
+      
+      <div class="position-fixed dropup" style="bottom: 65px; right: 24px; z-index: 1030;">
+        <button class="btn btn-primary rounded-circle shadow-lg d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Map Actions">
+          <i class="material-icons text-white">menu</i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end mb-2 shadow border-0">
           <li>
-            <button class="downloadGenomeMap waves-effect waves-yellow btn-floating purple" title="Export Map to SVG">
-              <i class="material-icons left">system_update_alt</i>Export Genome Map
-            </button>
+            <a class="dropdown-item d-flex align-items-center py-2 downloadGenomeMap" href="#" title="Export Map to SVG">
+              <i class="material-icons me-3 text-purple">system_update_alt</i>Export Genome Map
+            </a>
           </li>
           <li>
-            <button class="mapSettings waves-effect waves-purple btn-floating yellow" title="Map Settings">
-              <i class="material-icons left">settings</i>Settings
-            </button>
+            <a class="dropdown-item d-flex align-items-center py-2 mapSettings" href="#" title="Map Settings" data-bs-toggle="modal" data-bs-target="#mapSettingsModal">
+              <i class="material-icons me-3 text-warning">settings</i>Settings
+            </a>
           </li>
         </ul>
       </div>
-
-
     </div>
   </div>
 </template>
 
 <template name="cluster">
-  <li>
-    <div class="collapsible-header css-tooltip" data-tip="Click to expand and browse individual phages, or use the checkbox to select the entire cluster.">
-      <input type="checkbox" id="cluster-{{name}}" data-cluster="{{cluster}}" data-subcluster="{{subcluster}}"
-        class="filled-in clusterCheckbox" checked="{{clusterIsChecked phages}}" />
-      <label for="cluster-{{name}}" title="Phages in the same cluster share significant genetic similarity. Singletons have no close relatives in the database.">
-        {{name}}
-      </label>
-
-      <span class="{{selectedClass}}"
-        data-badge-caption="{{dataBadgeCaption}}" title="Number of phages selected in this group">{{selectedCount}}</span>
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="heading-{{name}}">
+      <button class="accordion-button collapsed d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{name}}" aria-expanded="false" aria-controls="collapse-{{name}}">
+        <div class="form-check m-0 d-flex align-items-center flex-grow-1" onclick="event.stopPropagation();">
+          <input class="form-check-input clusterCheckbox me-2 mt-0" type="checkbox" id="cluster-{{name}}" data-cluster="{{cluster}}" data-subcluster="{{subcluster}}" checked="{{clusterIsChecked phages}}" style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
+          <label class="form-check-label mb-0" for="cluster-{{name}}" title="Phages in the same cluster share significant genetic similarity. Singletons have no close relatives in the database." style="cursor: pointer;">
+            {{name}}
+          </label>
+        </div>
+        <span class="badge {{selectedClass}} rounded-pill ms-3" title="Number of phages selected in this group">{{selectedCount}}</span>
+      </button>
+    </h2>
+    <div id="collapse-{{name}}" class="accordion-collapse collapse" aria-labelledby="heading-{{name}}" data-bs-parent="#cluster-list">
+      <div class="accordion-body p-0">
+        <ul class="list-group list-group-flush clusterSelector d-block mb-0" style="column-count: 4; column-gap: 0;">
+          {{#each p in phages}}
+          <li class="list-group-item phageSelector py-2 border-0 border-bottom d-inline-block w-100">
+            <div class="form-check m-0 d-flex align-items-center">
+              <input class="form-check-input phageCheckbox me-2 mt-0" type="checkbox" id="{{p.phagename}}" checked="{{phageIsChecked p.phagename}}" style="cursor: pointer;">
+              <label class="form-check-label mb-0" for="{{p.phagename}}" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{p.phagename}}</label>
+            </div>
+          </li>
+          {{/each}}
+        </ul>
+      </div>
     </div>
-    <div class="collapsible-body">
-      <ul class="clusterSelector">
-        {{#if renderPhages}}
-        {{#each p in phages}}
-        <li class="phageSelector">
-          <input type="checkbox" id="{{p.phagename}}" class="filled-in phageCheckbox" checked="{{phageIsChecked p.phagename}}" />
-          <label for="{{p.phagename}}">{{p.phagename}}</label>
-        </li>
-        {{/each}}
-        {{/if}}
-      </ul>
-    </div>
-  </li>
+  </div>
 </template>

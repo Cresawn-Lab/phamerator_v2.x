@@ -1,7 +1,7 @@
 <template name="datasetDropdown">
-  <ul id="dropdown1" class="dropdown-content">
+  <ul class="dropdown-menu dropdown-menu-dark bg-purple">
     {{#each dataset in datasets}}
-    <li><a href="#!" id="{{dataset.name}}">{{dataset.name}}&nbsp;(version {{dataset.version}})</a></li>
+    <li><a class="dropdown-item" href="#" id="{{dataset.name}}">{{dataset.name}}&nbsp;(version {{dataset.version}})</a></li>
     {{/each}}
   </ul>
 </template>

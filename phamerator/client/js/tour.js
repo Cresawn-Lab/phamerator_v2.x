@@ -177,8 +177,8 @@ function runSegment(segmentIndex) {
         }
 
         // Open the first cluster to ensure individual phage checkboxes are rendered
-        const firstHeader = document.querySelector('#cluster-list .collapsible-header');
-        if (firstHeader && !firstHeader.classList.contains('active')) {
+        const firstHeader = document.querySelector('#cluster-list .accordion-button');
+        if (firstHeader && firstHeader.classList.contains('collapsed')) {
           firstHeader.click();
         }
         

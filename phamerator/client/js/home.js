@@ -39,8 +39,7 @@ Template.home.onRendered(function () {
   })
 
   $(document).ready(function () {
-    var elems = document.querySelectorAll('.parallax');
-    M.Parallax.init(elems);
+    // Parallax effect is handled via CSS in Bootstrap 5 version
   });
   $("html, body").animate({ scrollTop: 0 }, "slow");
 });
@@ -60,11 +59,9 @@ Template.home.events({
     event.preventDefault();
     // Programmatically open the new Magic Link Modal
     var modalElement = document.getElementById('magicLinkModal');
-    if (modalElement) {
-      var instance = M.Modal.getInstance(modalElement);
-      if (instance) {
-        instance.open();
-      }
+    if (modalElement && typeof bootstrap !== 'undefined') {
+      var modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+      modal.show();
     }
   }
 });

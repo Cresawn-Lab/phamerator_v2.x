@@ -1,35 +1,46 @@
 <template name="editDatasetModal">
-  <div id="editDataset" class="modal modal-fixed-footer">
-    <div class="modal-content">
-      <h4>{{currentDataset}} settings</h4>
-      <p>You're the owner of this data set, so you can share it with whomever you like! Any users that you add below can
-        view (but not edit or share) your data.</p>
-      <div class="row">
-        <div class="col s12 m12 l12">
-          <div class="card-panel white grey-text text-darken-1">
-            <ul>
-              <li>
-                <div class="input-field">
-                  <input type="text" id="autocomplete-input" class="autocomplete" autocomplete="off">
-                  <label for="autocomplete-input">search by name or email</label>
-                </div>
-              </li>
-              <li>
-                <div class="chip teal white-text">{{owner.name}}</div>
-              </li>
-              {{#each user in usersThatCanView}}
-              <li>
-                <div class="chip" data-id="{{user._id}}">{{user.name}}<i class="close material-icons">close</i>
-                </div>
-              </li>
-              {{/each}}
-            </ul>
+  <div class="modal fade" id="editDataset" tabindex="-1" aria-labelledby="editDatasetLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editDatasetLabel">{{currentDataset}} settings</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>You're the owner of this data set, so you can share it with whomever you like! Any users that you add below can view (but not edit or share) your data.</p>
+          <div class="card mb-3">
+            <div class="card-body bg-light text-secondary">
+              <ul class="list-unstyled mb-0">
+                <li class="mb-3">
+                  <div class="form-floating position-relative">
+                    <input type="text" id="autocomplete-input" class="form-control" autocomplete="off" placeholder="search by name or email" list="user-datalist">
+                    <label for="autocomplete-input">search by name or email</label>
+                    <datalist id="user-datalist">
+                      {{#each userOption in autocompleteUsersList}}
+                        <option value="{{userOption}}"></option>
+                      {{/each}}
+                    </datalist>
+                  </div>
+                </li>
+                <li class="mb-2">
+                  <span class="badge bg-success text-white rounded-pill px-3 py-2 fs-6">{{owner.name}}</span>
+                </li>
+                {{#each user in usersThatCanView}}
+                <li class="d-inline-block me-2 mb-2">
+                  <span class="badge bg-secondary text-white rounded-pill px-3 py-2 fs-6 d-flex align-items-center" data-id="{{user._id}}">
+                    {{user.name}}
+                    <i class="close material-icons ms-2" style="font-size: 16px; cursor: pointer;">close</i>
+                  </span>
+                </li>
+                {{/each}}
+              </ul>
+            </div>
           </div>
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
       </div>
-    </div>
-    <div class="modal-footer">
-      <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
     </div>
   </div>
 </template>

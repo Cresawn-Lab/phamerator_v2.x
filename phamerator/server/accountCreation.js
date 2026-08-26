@@ -122,7 +122,6 @@ Accounts.onCreateUser(async function (options, user) {
   // Assigns first and last names to the newly created user object
   if (!user._id) user._id = Random.id();
 
-  user.featureDiscovery = ['geneTranslation', 'phamMembersByCluster', 'phamAbundance', 'geneNotes'];
   user.newTermsAndPolicies = true;
   if (!user.name) {
     if (options.profile && options.profile.name) {

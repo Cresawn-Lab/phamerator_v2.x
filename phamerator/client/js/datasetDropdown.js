@@ -31,22 +31,26 @@ Template.datasetDropdown.onRendered(function () {
   });
 
   waitForEl("#editDataset", function () {
-    M.Modal.init(document.getElementById('editDataset'), {
-      onOpenStart: function (modal, trigger) {
-        $('#editDataset .modal-content').animate({ scrollTop: 0 }, "fast");
-      },
-      onCloseEnd: function () {
-        $('input#autocomplete-input.autocomplete')[0].value = "";
-      }
-    });
+    const editModal = document.getElementById('editDataset');
+    if (editModal) {
+      editModal.addEventListener('show.bs.modal', function () {
+        getUsersThatCanView();
+        $('#editDataset .modal-body').animate({ scrollTop: 0 }, "fast");
+      });
+      editModal.addEventListener('hidden.bs.modal', function () {
+        const input = document.getElementById('autocomplete-input');
+        if (input) input.value = "";
+      });
+    }
   });
 
   waitForEl("#infoDataset", function () {
-    M.Modal.init(document.getElementById('infoDataset'), {
-      onOpenStart: function (modal, trigger) {
-        $('#infoDataset .modal-content').animate({ scrollTop: 0 }, "fast");
-      }
-    });
+    const infoModal = document.getElementById('infoDataset');
+    if (infoModal) {
+      infoModal.addEventListener('show.bs.modal', function () {
+        $('#infoDataset .modal-body').animate({ scrollTop: 0 }, "fast");
+      });
+    }
   });
 });
 

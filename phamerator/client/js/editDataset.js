@@ -24,46 +24,49 @@ getAutocompleteUsers = function () {
 }
 
 Template.editDatasetModal.onRendered(function () {
-  this.autorun(() => {
-    const autoCompleteUsers = getAutocompleteUsers();
-    const el = document.getElementById('autocomplete-input');
-    if (!el) return;
+  getUsersThatCanView();
+  const el = document.getElementById('autocomplete-input');
+  if (el) {
+    el.addEventListener('input', function(e) {
+      const val = e.target.value;
+      const regExp = /\(([^)]+)\)$/;
+      const match = regExp.exec(val);
+      if (!match) return;
+      
+      const email = match[1];
+      const user = Meteor.users.findOne({ "emails.0.address": email });
+      if (!user) return;
+      
+      const id = user._id;
+      const currentDataset = Session.get('currentDataset');
 
-    const instance = M.Autocomplete.getInstance(el);
-    if (instance) {
-      instance.updateData(autoCompleteUsers);
-    } else {
-      $(el).autocomplete({
-        data: autoCompleteUsers,
-        limit: 20, // The max amount of results that can be shown at once. Default: Infinity.
-        onAutocomplete: function (val) {
-          const regExp = /\(([^)]+)\)$/;
-          const match = regExp.exec(val);
-          if (!match) return;
-          const email = match[1];
-          const user = Meteor.users.findOne({ "emails.0.address": email });
-          if (!user) return;
-          const id = user._id;
-          const currentDataset = Session.get('currentDataset');
-
-          Meteor.call("addUserToRole", id, 'view', currentDataset, (error, result) => {
-            if (!error) {
-              getUsersThatCanView();
-              el.value = "";
-            }
-          });
-        },
-        minLength: 1, // The minimum length of the input for the autocomplete to start. Default: 1.
+      Meteor.call("addUserToRole", id, 'view', currentDataset, (error, result) => {
+        if (!error) {
+          getUsersThatCanView();
+          el.value = "";
+          // Remove focus to prevent datalist from staying open
+          el.blur();
+        }
       });
-    }
-  });
+    });
+  }
 });
 
 Template.editDatasetModal.onDestroyed(function () {
-  $("#editDataset").remove();
-})
+});
 
 Template.editDatasetModal.helpers({
+  autocompleteUsersList: function () {
+    const users = Meteor.users.find({ 'profile.includeInDirectory': true }).fetch();
+    const list = [];
+    users.forEach(user => {
+      if (!user.emails || user.emails.length === 0) return;
+      const email = user.emails[0].address;
+      const name = user.name || (user.profile && user.profile.name) || user.username || "Unknown";
+      list.push(name + " (" + email + ")");
+    });
+    return list;
+  },
   usersThatCanView: function () {
 
     var users = Session.get("usersThatCanView");
@@ -87,11 +90,16 @@ Template.editDatasetModal.helpers({
 })
 
 Template.editDatasetModal.events({
-  "click div.chip > i": function (e, template) {
-    var id = e.target.parentNode.dataset.id;
+  "click .badge .close, click .badge i": function (e, template) {
+    const badge = e.currentTarget.closest('.badge') || e.target.closest('.badge');
+    const id = badge ? badge.dataset.id : null;
+    if (!id) return;
+
     // Call a meteor method to remove this user from the role
     Meteor.call("removeUserFromRole", id, 'view', Session.get("currentDataset"), (error, result) => {
-      getUsersThatCanView();
+      if (!error) {
+        getUsersThatCanView();
+      }
     });
   }
 });

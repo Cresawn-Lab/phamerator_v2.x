@@ -1,11 +1,11 @@
 <template name="home" style="background-color: #f5f5f5;">
     <!-- Hero Section -->
-    <div class="section hero" style="display: flex; flex-direction: column; justify-content: center; height: calc(100vh - 154px); overflow: hidden; padding: 0;">
-        <div class="row container" style="margin: 0 auto; display: flex; flex-direction: column; justify-content: center; flex: 1; padding: 1rem 1.5rem;">
-            <h1 class="header" style="color: #2196F3; margin-bottom: 1rem; margin-top: 0;">Phamerator.org</h1>
-            <p class="flow-text" style="font-weight: 300; margin-bottom: 1rem; margin-top: 0;">Discover and share the story of your
-                bacteriophage<i class="material-icons info-icon" data-tip="Compare and visualize bacteriophage genomes and annotations.">info_outline</i></p>
-            <p style="margin-top: 0; margin-bottom: 0.5rem;">
+    <div class="section hero d-flex flex-column justify-content-center overflow-hidden p-0" style="height: calc(100vh - 154px);">
+        <div class="row container mx-auto d-flex flex-column justify-content-center flex-grow-1 px-4 py-3">
+            <h1 class="header text-primary mb-3 mt-0">Phamerator.org</h1>
+            <p class="lead fw-light mb-3 mt-0">Discover and share the story of your
+                bacteriophage<i class="material-icons info-icon align-middle ms-1" data-tip="Compare and visualize bacteriophage genomes and annotations.">info_outline</i></p>
+            <p class="mt-0 mb-2">
                 Phamerator.org is a comparative genomics tool designed for the study of bacteriophages.
                 Originally developed for the SEA-PHAGES program, Phamerator.org is now available to all.
                 We currently host several different data sets including the primary SEA-PHAGES data set known as
@@ -14,20 +14,18 @@
                 faculty.
                 We created Phamerator.org to help them discover and share the story of their phages.
             </p>
-            <p style="margin-top: 0; margin-bottom: 1rem;">
+            <p class="mt-0 mb-3">
                 Phamerator.org was created by Steven Cresawn's lab in James Madison University's Center for Genome and
                 Metagenome Studies and Department of Biology, where it remains under active development.
             </p>
-            <div class="cta-section"
-                style="margin-top: 2rem; margin-bottom: 1rem; display: flex; justify-content: space-evenly; flex-wrap: wrap; gap: 1rem;">
+            <div class="cta-section d-flex justify-content-center flex-wrap gap-4 mt-4 mb-3">
                 {{#if currentUser}}
-                <a href="/phages" class="waves-effect waves-light btn-large teal" title="Begin comparing phages in the database">Get Started</a>
+                <a href="/phages" class="btn btn-info btn-lg text-white px-4" title="Begin comparing phages in the database">Get Started</a>
                 {{else}}
-                <a id="trigger-login" class="waves-effect waves-light btn-large teal" title="Login to access full features">Sign In to Get Started</a>
+                <a href="#" id="trigger-login" class="btn btn-info btn-lg text-white px-4" data-bs-toggle="modal" data-bs-target="#magicLinkModal" title="Login to access full features">Sign In to Get Started</a>
                 {{/if}}
-                <a href="/cresawnlab" class="waves-effect waves btn-large white black-text" title="Read about the development team">Learn More</a>
-                <a href="mailto:info@phamerator.org" class="waves-effect waves btn-large purple white-text" title="Send us an email for support or inquiries">Contact
-                    Us</a>
+                <a href="/cresawnlab" class="btn btn-light btn-lg text-dark border px-4" title="Read about the development team">Learn More</a>
+                <a href="mailto:info@phamerator.org" class="btn btn-purple btn-lg text-white px-4" title="Send us an email for support or inquiries">Contact Us</a>
             </div>
         </div>
     </div>

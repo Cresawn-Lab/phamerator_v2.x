@@ -103,21 +103,7 @@ Template.nav.onRendered(function () {
 
       // Defer initialization to ensure Blaze has rendered the new DOM elements
       Meteor.defer(() => {
-        const dropdowns = document.querySelectorAll('.dropdown-trigger');
-        if (dropdowns.length > 0) {
-          M.Dropdown.init(dropdowns, {
-            constrainWidth: false,
-            coverTrigger: false
-          });
-        }
-
-        const sidenavs = document.querySelectorAll('.sidenav');
-        if (sidenavs.length > 0) {
-          M.Sidenav.init(sidenavs, {
-            edge: 'left',
-            draggable: true
-          });
-        }
+        // Bootstrap initializes dropdowns and collapses automatically via data attributes
       });
     } else if (!userId) {
       Session.set("datasetsView", []);
@@ -130,7 +116,7 @@ Template.nav.onRendered(function () {
 });
 
 Template.nav.events({
-  "click #dropdown1 a": function (event, template) {
+  "click .dropdown-item": function (event, template) {
     switch_dataset(event.currentTarget.id)
   },
   "click .start-tour-btn": function (event, template) {

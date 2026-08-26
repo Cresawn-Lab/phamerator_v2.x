@@ -151,20 +151,7 @@ Meteor.methods({
       }
     }
   },
-  "updateFeatureDiscovery": async function (featureName) {
 
-    // initialize selectedData.featureDiscovery if it doesn't exist
-    await Meteor.users.updateAsync({ _id: Meteor.userId(), 'featureDiscovery': { $exists: false } }, { $set: { 'featureDiscovery': [] } });
-    const userDoc = await Meteor.users.findOneAsync({ _id: Meteor.userId() }, { fields: { "featureDiscovery": 1 } });
-    features = userDoc.featureDiscovery;
-
-    // no features left to mark as seen by the user
-    if (features.length === 0) {
-      return;
-    }
-    features.shift();
-    await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "featureDiscovery": features } });
-  },
   "updateNewTermsAndPolicies": async function () {
 
     // initialize selectedData.featureDiscovery if it doesn't exist

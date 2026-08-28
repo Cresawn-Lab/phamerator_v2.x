@@ -10,8 +10,9 @@ import { Proteins } from "../imports/api/collections";
 // publish just genome names and clusters
 
 Meteor.publish("allUsers", function () {
+  if (!this.userId) return this.ready();
   return Meteor.users.find({ 'profile.includeInDirectory': true }, { fields: { name: 1, emails: 1, roles: 1, username: 1, profile: 1 } });
-})
+});
 
 
 
@@ -76,6 +77,7 @@ Meteor.publish("genomesWithSeq", async function (dataset, selectedGenomes) {
 });
 
 Meteor.publish("proteinSeq", function (phagename) {
+  if (!phagename) return this.ready();
   return Proteins.find({ "phagename": phagename });
 });
 

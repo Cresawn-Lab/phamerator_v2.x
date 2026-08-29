@@ -1517,35 +1517,6 @@ Template.phages.onRendered(function () {
       }
     });
   }
-
-  // Mouse-following styled tooltip for .css-tooltip[data-tip] elements
-  (function() {
-    var el = document.getElementById('css-tooltip-el');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'css-tooltip-el';
-      document.body.appendChild(el);
-    }
-    document.addEventListener('mouseover', function(e) {
-      var target = e.target.closest('.css-tooltip[data-tip]');
-      if (target) {
-        el.textContent = target.getAttribute('data-tip');
-        el.style.display = 'block';
-      }
-    });
-    document.addEventListener('mousemove', function(e) {
-      if (el.style.display === 'block') {
-        el.style.left = (e.clientX + 15) + 'px';
-        el.style.top = (e.clientY - (el.offsetHeight / 2)) + 'px';
-      }
-    });
-    document.addEventListener('mouseout', function(e) {
-      var target = e.target.closest('.css-tooltip[data-tip]');
-      if (target) {
-        el.style.display = 'none';
-      }
-    });
-  })();
 });
 
 Template.cluster.onRendered(function () {

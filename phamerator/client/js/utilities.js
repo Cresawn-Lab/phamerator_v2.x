@@ -57,3 +57,79 @@ window.showToast = function(options) {
 
 window.M = window.M || {};
 window.M.toast = window.showToast;
+
+// Global mouse-following tooltip for elements with [data-tip]
+Meteor.startup(function () {
+  let tooltipEl = null;
+
+  function getTooltipEl() {
+    if (!tooltipEl || !document.body.contains(tooltipEl)) {
+      tooltipEl = document.getElementById('css-tooltip-el');
+      if (!tooltipEl) {
+        tooltipEl = document.createElement('div');
+        tooltipEl.id = 'css-tooltip-el';
+        document.body.appendChild(tooltipEl);
+      }
+    }
+    return tooltipEl;
+  }
+
+  document.addEventListener('mouseover', function (e) {
+    const target = e.target.closest && e.target.closest('[data-tip]');
+    if (target) {
+      const tipText = target.getAttribute('data-tip');
+      if (tipText) {
+        const el = getTooltipEl();
+        el.textContent = tipText;
+        el.style.display = 'block';
+      }
+    }
+  });
+
+  document.addEventListener('mousemove', function (e) {
+    const el = document.getElementById('css-tooltip-el');
+    if (el && el.style.display === 'block') {
+      const tooltipWidth = el.offsetWidth || 200;
+      const tooltipHeight = el.offsetHeight || 40;
+      let x = e.clientX + 15;
+      let y = e.clientY - (tooltipHeight / 2);
+
+      // Boundary checks to stay within viewport
+      if (x + tooltipWidth > window.innerWidth - 10) {
+        x = e.clientX - tooltipWidth - 15;
+      }
+      if (x < 10) {
+        x = 10;
+      }
+      if (y + tooltipHeight > window.innerHeight - 10) {
+        y = window.innerHeight - tooltipHeight - 10;
+      }
+      if (y < 10) {
+        y = 10;
+      }
+
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+    }
+  });
+
+  document.addEventListener('mouseout', function (e) {
+    const target = e.target.closest && e.target.closest('[data-tip]');
+    if (target) {
+      if (e.relatedTarget && target.contains(e.relatedTarget)) {
+        return;
+      }
+      const el = document.getElementById('css-tooltip-el');
+      if (el) {
+        el.style.display = 'none';
+      }
+    }
+  });
+
+  window.addEventListener('scroll', function () {
+    const el = document.getElementById('css-tooltip-el');
+    if (el && el.style.display === 'block') {
+      el.style.display = 'none';
+    }
+  }, { passive: true });
+});

@@ -2,7 +2,7 @@
 FROM node:20-bookworm AS builder
 
 # Install Meteor (running as root in the builder stage is standard and fixes path/permission issues)
-RUN curl "https://install.meteor.com/?release=3.4" | sh
+RUN curl https://install.meteor.com/ | sh
 
 # Copy the meteor installation from root to the node user and fix ownership
 RUN cp -r /root/.meteor /home/node/.meteor && \

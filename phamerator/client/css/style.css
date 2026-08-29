@@ -440,6 +440,32 @@ li.phageSelector {
     min-width: 250px;
 }
 
+/* Dataset Selector Dropdown Scrolling */
+.dataset-dropdown-menu {
+    max-height: calc(100vh - 80px);
+    max-height: calc(100dvh - 80px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.dataset-dropdown-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dataset-dropdown-menu::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.dataset-dropdown-menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.dataset-dropdown-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
 /* Make accounts-ui email/login text white in the purple navbar */
 #login-buttons .login-link-text,
 #login-sign-in-link,

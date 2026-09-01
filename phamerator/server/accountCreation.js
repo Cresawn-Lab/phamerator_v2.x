@@ -75,6 +75,15 @@ Meteor.methods({
       user = await Meteor.users.findOneAsync(userId);
     }
 
+    const existingCode = user.services?.loginCodes?.phamerator_v2_5;
+    if (existingCode?.expiresAt && new Date() < existingCode.expiresAt) {
+      const timeRemainingMs = existingCode.expiresAt.getTime() - Date.now();
+      const codeAgeSeconds = (10 * 60 * 1000 - timeRemainingMs) / 1000;
+      if (codeAgeSeconds < 60) {
+        throw new Meteor.Error("too-many-requests", "Please wait a minute before requesting another code.");
+      }
+    }
+
     // Generate random 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes

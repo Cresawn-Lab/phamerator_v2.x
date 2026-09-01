@@ -1,56 +1,50 @@
 # Stage 1: Build the Meteor app
 FROM node:20-bookworm AS builder
 
-# Install Meteor (running as root in the builder stage is standard and fixes path/permission issues)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3 make g++ git curl bash && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Meteor
 RUN curl https://install.meteor.com/ | sh
 
 # Copy the meteor installation from root to the node user and fix ownership
 RUN cp -r /root/.meteor /home/node/.meteor && \
     chown -R node:node /home/node/.meteor
 
-# Set working directory (Docker will automatically create this directory)
 WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies (Meteor 3 uses standard npm)
-RUN npm install
-
-# Copy the rest of the app source code
 COPY . .
 RUN chown -R node:node /app
 
 # Switch to the non-root node user
 USER node
 
-# Build the Meteor app
-RUN meteor build --directory /app/build --architecture os.linux.aarch64
+# Build the application
+RUN npm install --omit=dev --no-audit --no-fund
+RUN meteor build --directory /home/node/build --server-only
 
 # Stage 2: Create the production image
-FROM node:20-alpine
+FROM node:20-bookworm
 
-# Set the working directory to where the built app will live
 WORKDIR /app
 
 # Copy the built app "bundle" from the builder stage maintaining permissions
-COPY --chown=node:node --from=builder /app/build/bundle ./
+COPY --chown=node:node --from=builder /home/node/build/bundle ./
+
+# Switch to the non-root "node" user
+USER node
 
 # Install server-specific dependencies for the built Meteor app securely
 WORKDIR /app/programs/server
-RUN npm install --production
+RUN npm install --omit=dev --no-audit --no-fund
 
 WORKDIR /app
 
-# Switch to the non-root "node" user (built into the official Node images)
-USER node
-
-# Expose the default port
 EXPOSE 9000
 
-# Set default environment variables
 ENV PORT=9000
-# NOTE: You MUST provide MONGO_URL and ROOT_URL at runtime.
 
-# Start the application
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:' + (process.env.PORT || 9000) + '/', (res) => process.exit(res.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))"
+
 CMD ["node", "main.js"]

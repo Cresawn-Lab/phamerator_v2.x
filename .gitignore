@@ -1,7 +1,11 @@
 phamerator/node_modules/
+phamerator/.meteor/local/
 phamerator/package-lock.json
 .DS_Store
 .gitignore
 dump_recovery/
 .env*
 node_modules/
+*.log
+.vscode/
+.idea/

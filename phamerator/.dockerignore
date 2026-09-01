@@ -1,3 +1,10 @@
-node_modules
-.meteor/local
+.git/
+.meteor/local/
+node_modules/
+.DS_Store
 .env*
+*.log
+.vscode/
+.idea/
+build/
+

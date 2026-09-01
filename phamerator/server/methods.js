@@ -6,8 +6,22 @@ import { Phams } from "/imports/api/collections";
 import { Domains } from "/imports/api/collections";
 import { Genes } from "/imports/api/collections";
 import { Proteins } from "/imports/api/collections";
+import { Roles } from 'meteor/alanning:roles';
 import { check, Match } from "meteor/check";
 import crypto from 'crypto';
+
+/**
+ * Check if the user is authorized to view data for a specific dataset
+ * (either marked public: true or user has 'view' scope in alanning:roles).
+ */
+async function canViewDataset(userId, dataset) {
+  if (!dataset) return false;
+  const d = await Datasets.findOneAsync({ name: dataset, public: true });
+  if (d) return true;
+  if (!userId) return false;
+  const scopes = await Roles.getScopesForUserAsync(userId, "view");
+  return scopes.includes(dataset);
+}
 
 Meteor.methods({
   "generateApiKey": async function () {
@@ -52,10 +66,11 @@ Meteor.methods({
     const isOwner = await Roles.userIsInRoleAsync(this.userId, 'owner', group);
     if (!isOwner) throw new Meteor.Error('403', 'Not authorized: You must be an owner of this dataset.');
 
-    await Roles.addUsersToRolesAsync(user, role, group);
-    var key = "selectedData." + group;
-    var projection = { key: { genomeMaps: [] } }
-    await Meteor.users.updateAsync({ _id: user }, { $set: projection })
+    const targetUserId = typeof user === 'object' ? user._id : user;
+    await Roles.addUsersToRolesAsync(targetUserId, role, group);
+    const key = `selectedData.${group}`;
+    const projection = { [key]: { genomeMaps: [] } };
+    await Meteor.users.updateAsync({ _id: targetUserId }, { $set: projection });
   },
   "removeUserFromRole": async function (user, role, group) {
     check(user, Match.OneOf(String, Object));
@@ -65,8 +80,9 @@ Meteor.methods({
     const isOwner = await Roles.userIsInRoleAsync(this.userId, 'owner', group);
     if (!isOwner) throw new Meteor.Error('403', 'Not authorized: You must be an owner of this dataset.');
 
-    await Roles.removeUsersFromRolesAsync(user, role, group);
-    await Meteor.users.updateAsync({ _id: user }, { $set: { "preferredDataset": "" } })
+    const targetUserId = typeof user === 'object' ? user._id : user;
+    await Roles.removeUsersFromRolesAsync(targetUserId, role, group);
+    await Meteor.users.updateAsync({ _id: targetUserId }, { $set: { "preferredDataset": "" } });
   },
   "getUsersInRole": async function (role, group) {
     check(role, String);
@@ -79,8 +95,9 @@ Meteor.methods({
     return await cursor.fetchAsync();
   },
   "getDatasetsIView": async function () {
-    if (!Meteor.userId()) return [];
-    const scopes = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
+    const userId = this.userId || Meteor.userId();
+    if (!userId) return [];
+    const scopes = await Roles.getScopesForUserAsync(userId, "view");
 
     // Fetch all public datasets
     const publicDatasets = await Datasets.find({ public: true }, { fields: { name: 1 } }).fetchAsync();
@@ -90,24 +107,17 @@ Meteor.methods({
     return [...new Set([...scopes, ...publicNames])];
   },
   "getDatasetsIOwn": async function () {
-    return await Roles.getScopesForUserAsync(Meteor.userId(), "owner")
+    const userId = this.userId || Meteor.userId();
+    if (!userId) return [];
+    return await Roles.getScopesForUserAsync(userId, "owner");
   },
   "updatePreferredDataset": async function (dataset) {
     check(dataset, String);
-    if (!Meteor.userId()) return;
+    const userId = this.userId || Meteor.userId();
+    if (!userId) return;
 
-    // Is the dataset explicitly in their view scopes?
-    let groups = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
-    if (groups.includes(dataset)) {
-      await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "preferredDataset": dataset } });
-      return;
-    }
-
-    // Is the dataset marked as globally public?
-    const d = await Datasets.findOneAsync({ name: dataset, public: true });
-    if (d) {
-      await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "preferredDataset": dataset } });
-      return;
+    if (await canViewDataset(userId, dataset)) {
+      await Meteor.users.upsertAsync({ _id: userId }, { $set: { "preferredDataset": dataset } });
     }
   },
 
@@ -115,33 +125,34 @@ Meteor.methods({
     check(dataset, String);
     check(phagename, String);
     check(addGenome, Match.Maybe(Boolean));
-    if (!Meteor.userId()) return;
+    const userId = this.userId || Meteor.userId();
+    if (!userId) return;
 
-    const userDoc = await Meteor.users.findOneAsync({ _id: Meteor.userId() }, { fields: { selectedData: 1 } });
+    const userDoc = await Meteor.users.findOneAsync({ _id: userId }, { fields: { selectedData: 1 } });
     let selectedData = userDoc?.selectedData || {};
     if (!selectedData[dataset]) {
       selectedData[dataset] = { genomeMaps: [] };
-      await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { selectedData: selectedData } });
+      await Meteor.users.upsertAsync({ _id: userId }, { $set: { selectedData: selectedData } });
     }
-    const userDoc2 = await Meteor.users.findOneAsync({ _id: Meteor.userId() }, { fields: { selectedData: 1 } });
+    const userDoc2 = await Meteor.users.findOneAsync({ _id: userId }, { fields: { selectedData: 1 } });
     let genomeMaps = userDoc2?.selectedData?.[dataset]?.genomeMaps || [];
 
     if (phagename === "") {
       selectedData[dataset] = { genomeMaps: [] };
-      await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { selectedData: selectedData } });
+      await Meteor.users.upsertAsync({ _id: userId }, { $set: { selectedData: selectedData } });
     }
 
     else if (addGenome === true && genomeMaps.indexOf(phagename) === -1) {
       genomeMaps.push(phagename);
       selectedData[dataset] = { genomeMaps: genomeMaps };
-      await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { selectedData: selectedData } });
+      await Meteor.users.upsertAsync({ _id: userId }, { $set: { selectedData: selectedData } });
     }
     else if (addGenome === false) {
       var index = genomeMaps.indexOf(phagename);
       if (index > -1) {
         genomeMaps.splice(index, 1);
         selectedData[dataset] = { genomeMaps: genomeMaps };
-        await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { selectedData: selectedData } });
+        await Meteor.users.upsertAsync({ _id: userId }, { $set: { selectedData: selectedData } });
       }
     }
   },
@@ -149,23 +160,20 @@ Meteor.methods({
     check(dataset, String);
     check(subcluster, Match.OneOf(String, Number));
     check(addFavorite, Boolean);
-    if (!Meteor.userId()) return;
+    const userId = this.userId || Meteor.userId();
+    if (!userId) return;
 
-    // initialize selectedData.subclusterFavorites if it doesn't exist
-    await Meteor.users.updateAsync({ _id: Meteor.userId(), 'selectedData.dataset.subclusterFavorites': { $exists: false } }, { $set: { 'selectedData.dataset.subclusterFavorites': [] } });
-    const userDoc = await Meteor.users.findOneAsync({ _id: Meteor.userId() }, { fields: { "selectedData.dataset.subclusterFavorites": 1 } });
-    let favorites = userDoc?.selectedData?.dataset?.subclusterFavorites || [];
+    const path = `selectedData.${dataset}.subclusterFavorites`;
+    const userDoc = await Meteor.users.findOneAsync({ _id: userId }, { fields: { [path]: 1 } });
+    let favorites = userDoc?.selectedData?.[dataset]?.subclusterFavorites || [];
 
-    if (addFavorite === true && favorites.indexOf(subcluster) === -1) {
+    if (addFavorite === true && !favorites.includes(subcluster)) {
       favorites.push(subcluster);
-      await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "selectedData.dataset.subclusterFavorites": favorites } });
+      await Meteor.users.updateAsync({ _id: userId }, { $set: { [path]: favorites } });
     }
-    else if (addFavorite === false && favorites.indexOf(subcluster) !== -1) {
-      var index = favorites.indexOf(subcluster);
-      if (index > -1) {
-        favorites.splice(index, 1);
-        await Meteor.users.upsertAsync({ _id: Meteor.userId() }, { $set: { "selectedData.dataset.subclusterFavorites": favorites } });
-      }
+    else if (addFavorite === false && favorites.includes(subcluster)) {
+      favorites = favorites.filter(f => f !== subcluster);
+      await Meteor.users.updateAsync({ _id: userId }, { $set: { [path]: favorites } });
     }
   },
 
@@ -183,18 +191,8 @@ Meteor.methods({
 
   "getphams": async function (currentDataset) {
     check(currentDataset, String);
-    if (!Meteor.userId()) return [];
-
-    let allowed = false;
-    const scopes = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
-    if (scopes.includes(currentDataset)) {
-      allowed = true;
-    } else {
-      const d = await Datasets.findOneAsync({ name: currentDataset, public: true });
-      if (d) allowed = true;
-    }
-
-    if (!allowed) return [];
+    const userId = this.userId || Meteor.userId();
+    if (!await canViewDataset(userId, currentDataset)) return [];
 
     let phams = await Phams.find({ dataset: currentDataset }).fetchAsync();
 
@@ -223,6 +221,9 @@ Meteor.methods({
   "get_clusters_by_pham": async function (dataset, phamname) {
     check(dataset, String);
     check(phamname, Match.OneOf(String, Number));
+
+    const userId = this.userId || Meteor.userId();
+    if (!await canViewDataset(userId, dataset)) return [];
 
     let selectedClusterMembers = []; //array of objects of form {cluster: "A1", phages: ['L5', 'D29', ...]}
 
@@ -344,49 +345,63 @@ Meteor.methods({
   "get_genes_by_domain": async function (domainID, dataset) {
     check(domainID, String);
     check(dataset, String);
-    return await Domains.find({ dataset: dataset, DomainID: domainID }).fetchAsync()
+    const userId = this.userId || Meteor.userId();
+    if (!await canViewDataset(userId, dataset)) return [];
+    return await Domains.find({ dataset: dataset, DomainID: domainID }).fetchAsync();
   },
 
   "get_tRNAs_by_phage": async function (PhageID, dataset) {
     check(PhageID, String);
     check(dataset, String);
-    let tRNAs = await TRNAs.find({ dataset: dataset, PhageID: PhageID }).fetchAsync()
+    const userId = this.userId || Meteor.userId();
+    if (!await canViewDataset(userId, dataset)) return [];
+    let tRNAs = await TRNAs.find({ dataset: dataset, PhageID: PhageID }).fetchAsync();
     return tRNAs;
   },
 
   "get_all_domains_by_query": async function (domainDescription, dataset) {
     check(domainDescription, String);
     check(dataset, String);
-    return await Domains.find({ description: new RegExp(domainDescription), dataset: dataset }, { sort: { geneID: 1 } }).fetchAsync()
+    const userId = this.userId || Meteor.userId();
+    if (!await canViewDataset(userId, dataset)) return [];
+    const safeRegex = new RegExp(domainDescription.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    return await Domains.find({ description: safeRegex, dataset: dataset }, { sort: { geneID: 1 } }).fetchAsync();
   },
 
   "get_domains_by_query": async function (domainDescription, dataset) {
     check(domainDescription, String);
     check(dataset, String);
+    const userId = this.userId || Meteor.userId();
+    if (!await canViewDataset(userId, dataset)) return [];
+    const safeRegex = new RegExp(domainDescription.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     // get all the DomainIDs whose description matches the query
-    const domainIDs = await Domains.rawCollection().distinct('DomainID', { description: new RegExp(domainDescription), dataset: dataset });
+    const domainIDs = await Domains.rawCollection().distinct('DomainID', { description: safeRegex, dataset: dataset });
 
     const domains = await Promise.all(domainIDs.map(async (domainID) => {
-      const d = await Domains.findOneAsync({ DomainID: domainID, dataset: dataset }, { domainID: true, description: true })
-      return d
+      const d = await Domains.findOneAsync({ DomainID: domainID, dataset: dataset }, { domainID: true, description: true });
+      return d;
     }));
 
-    return domains
+    return domains;
   },
 
   "get_domains_by_gene": async function (geneID, dataset) {
     check(geneID, String);
     check(dataset, String);
+    const userId = this.userId || Meteor.userId();
+    if (!await canViewDataset(userId, dataset)) return [];
     let domains = await Domains.find({ geneID: geneID, dataset: dataset }).fetchAsync();
     domains.forEach(function (d) {
       d.domainLink = "https://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=" + d.DomainID;
-    })
+    });
     return domains;
   },
 
   "get_tm_domains_by_gene": async function (geneID, dataset) {
     check(geneID, String);
     check(dataset, String);
+    const userId = this.userId || Meteor.userId();
+    if (!await canViewDataset(userId, dataset)) return [];
     let tmdomains = await TMDomains.find({ geneID: geneID, dataset: dataset }).fetchAsync();
     return tmdomains;
   },
@@ -399,6 +414,8 @@ Meteor.methods({
   "get_number_of_domains": async function (geneID, dataset) {
     check(geneID, String);
     check(dataset, String);
+    const userId = this.userId || Meteor.userId();
+    if (!await canViewDataset(userId, dataset)) return { "geneID": geneID, "domainsCount": 0 };
     const domainsCount = await Domains.find({ geneID: geneID, dataset: dataset }).countAsync();
     return { "geneID": geneID, "domainsCount": domainsCount };
   },
@@ -412,18 +429,8 @@ Meteor.methods({
 
   "getclusters": async function (currentDataset) {
     check(currentDataset, String);
-    if (!Meteor.userId()) return [];
-
-    let allowed = false;
-    const scopes = await Roles.getScopesForUserAsync(Meteor.userId(), "view");
-    if (scopes.includes(currentDataset)) {
-      allowed = true;
-    } else {
-      const d = await Datasets.findOneAsync({ name: currentDataset, public: true });
-      if (d) allowed = true;
-    }
-
-    if (!allowed) return [];
+    const userId = this.userId || Meteor.userId();
+    if (!await canViewDataset(userId, currentDataset)) return [];
 
     // Optimize: Single query to retrieve all required phage metadata instantly
     const allPhages = await Genomes.find(

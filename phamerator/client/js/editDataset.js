@@ -1,5 +1,9 @@
 getUsersThatCanView = function () {
   var activeDataset = Session.get("currentDataset");
+  if (!activeDataset) {
+    Session.set("usersThatCanView", []);
+    return [];
+  }
   Meteor.call("getUsersInRole", 'view', activeDataset, function (error, users) {
     if (!error) {
       Session.set("usersThatCanView", users);
@@ -39,6 +43,7 @@ Template.editDatasetModal.onRendered(function () {
       
       const id = user._id;
       const currentDataset = Session.get('currentDataset');
+      if (!currentDataset) return;
 
       Meteor.call("addUserToRole", id, 'view', currentDataset, (error, result) => {
         if (!error) {
@@ -95,8 +100,11 @@ Template.editDatasetModal.events({
     const id = badge ? badge.dataset.id : null;
     if (!id) return;
 
+    const currentDataset = Session.get("currentDataset");
+    if (!currentDataset) return;
+
     // Call a meteor method to remove this user from the role
-    Meteor.call("removeUserFromRole", id, 'view', Session.get("currentDataset"), (error, result) => {
+    Meteor.call("removeUserFromRole", id, 'view', currentDataset, (error, result) => {
       if (!error) {
         getUsersThatCanView();
       }

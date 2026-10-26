@@ -13,6 +13,7 @@ on:
 permissions:
   contents: read
   packages: write
+  security-events: write
 
 jobs:
   build-and-publish:
@@ -65,21 +66,38 @@ jobs:
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
 
-      # Step 2: Run Trivy container security scanner
-      - name: Run Trivy security vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.36.0
+      # Step 2: Run Trivy container security scans (SARIF + Table)
+      - name: Generate Trivy SARIF report
+        run: |
+          trivy image \
+            --format sarif \
+            --output trivy-results.sarif \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --pkg-types os,library \
+            phamerator:test
+
+      - name: Generate Trivy Table report
+        run: |
+          trivy image \
+            --format table \
+            --output trivy-results.txt \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --pkg-types os,library \
+            phamerator:test || true
+
+      - name: Upload SARIF report to GitHub Security Tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('trivy-results.sarif') != ''
+        continue-on-error: true
         with:
-          image-ref: 'phamerator:test'
-          format: 'table'
-          output: 'trivy-results.txt'
-          exit-code: '0' # Set to '1' if you want pipeline failure upon detected High/Critical CVEs
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-          skip-setup-trivy: true
+          sarif_file: 'trivy-results.sarif'
+          category: 'phamerator-v2.5'
 
       # Step 3: Publish scan report to Actions Summary & console
       - name: Publish security scan report to GitHub Actions summary
+        if: always()
         run: |
           if [ -s trivy-results.txt ]; then
             echo "::group::Trivy Security Report"
@@ -101,6 +119,18 @@ jobs:
             echo "### 🛡️ Trivy Container Security Scan Report" >> $GITHUB_STEP_SUMMARY
             echo "✅ **Clean scan:** No unfixed HIGH or CRITICAL vulnerabilities detected in container." >> $GITHUB_STEP_SUMMARY
           fi
+
+      # Step 4: Enforce CRITICAL vulnerability gate (fails if unfixed CRITICAL CVEs exist)
+      - name: Enforce CRITICAL vulnerability gate
+        run: |
+          echo "Verifying no unfixed CRITICAL vulnerabilities in phamerator..."
+          trivy image \
+            --exit-code 1 \
+            --severity CRITICAL \
+            --ignore-unfixed \
+            --pkg-types os,library \
+            --quiet \
+            phamerator:test
 
       # Step 4: Push verified image to GHCR (skipped on pull requests)
       - name: Push verified container image to GHCR

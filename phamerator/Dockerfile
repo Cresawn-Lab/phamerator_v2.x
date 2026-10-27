@@ -41,7 +41,6 @@ COPY --chown=node:node --from=builder /home/node/build/bundle ./
 WORKDIR /app/programs/server
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 make g++ \
-    && npm pkg set 'overrides.proxy-addr'='^2.0.8' \
     && npm install --omit=dev --no-audit --no-fund \
     && apt-get purge -y python3 make g++ \
     && apt-get autoremove -y \

@@ -8,8 +8,5 @@
     "intro.js": "^8.3.2",
     "jquery": "^4.0.0",
     "simpl-schema": "^3.4.7"
-  },
-  "overrides": {
-    "proxy-addr": "^2.0.8"
   }
 }

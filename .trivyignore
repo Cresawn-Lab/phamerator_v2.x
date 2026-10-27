@@ -1,0 +1,5 @@
+# Temporary suppression until Meteor bumps 'webapp' with proxy-addr >= 2.0.8
+# CVE-2026-90711 (CRITICAL in proxy-addr bundled by Meteor 3.5.3 webapp core package)
+# Context: An IP-spoofing flaw when trusted proxy subnets use IPv4-mapped IPv6 notation.
+# Not exploitable in our setup: applications run behind Caddy with standard IPv4 reverse proxying.
+CVE-2026-90711

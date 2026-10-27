@@ -74,6 +74,7 @@ jobs:
             --output trivy-results.sarif \
             --severity CRITICAL,HIGH \
             --ignore-unfixed \
+            --ignorefile .trivyignore \
             --pkg-types os,library \
             phamerator:test
 
@@ -84,6 +85,7 @@ jobs:
             --output trivy-results.txt \
             --severity CRITICAL,HIGH \
             --ignore-unfixed \
+            --ignorefile .trivyignore \
             --pkg-types os,library \
             phamerator:test || true
 
@@ -128,6 +130,7 @@ jobs:
             --exit-code 1 \
             --severity CRITICAL \
             --ignore-unfixed \
+            --ignorefile .trivyignore \
             --pkg-types os,library \
             --quiet \
             phamerator:test

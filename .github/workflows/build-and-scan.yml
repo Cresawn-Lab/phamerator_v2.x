@@ -147,3 +147,31 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
+
+  deploy:
+    name: Deploy to Production
+    needs: build-and-publish
+    runs-on: self-hosted
+    # Only deploy on direct push to v2.5, master, or main, or manual dispatch, not on PRs or scheduled scans
+    if: ((github.ref == 'refs/heads/v2.5' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Pull latest image and recreate container
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -d "/home/ubuntu/Applications/phamerator.git" ]; then
+            echo "Fetching latest changes on server..."
+            cd /home/ubuntu/Applications/phamerator.git
+            git fetch https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git ${{ github.ref_name }} || true
+            git reset --hard FETCH_HEAD || true
+          fi
+
+          echo "Pulling latest verified phamerator_v2.5 image from GHCR..."
+          cd /home/ubuntu/Applications/config
+          docker compose pull phamerator_v2.5
+
+          echo "Restarting phamerator_v2.5 container..."
+          docker compose up -d phamerator_v2.5
+
+          echo "Deployment successful!"
